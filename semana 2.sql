@@ -360,9 +360,9 @@ from(
 	FROM runner_orders) subquery) subquery2
     group by runner_id;
 
-
 -- C. Ingredient Optimisation
 -- What are the standard ingredients for each pizza?
+CREATE VIEW pizza_toppings_view AS
 SELECT 
     subquery.pizza_ID, 
     pn.pizza_name,
