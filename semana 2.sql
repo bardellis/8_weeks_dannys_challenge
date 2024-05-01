@@ -433,6 +433,21 @@ JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id;
 -- Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
 -- For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"
 -- What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
+----- pizza_name as pizza, pt.topping_name as topping
+----- count(*) as quantity  
+
+select pizza, topping, sum(ingredient) as request
+from (select order_id, exclusions, extras, pizza_name as pizza, pt.topping_id as topping_id, pt.topping_name as topping,
+case 
+when exclusions = pt.topping_id then "0"
+when extras = pt.topping_id then "2"
+else "1" 
+end as ingredient  
+from customer_orders as co
+join pizza_toppings_view as pv on co.pizza_id=pv.pizza_ID
+join pizza_toppings as pt on pv.Topping_id=pt.topping_id) as subquery
+group by pizza, topping
+order by request desc;
 
 
 -- D. Pricing and Ratings
