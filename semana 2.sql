@@ -449,10 +449,57 @@ join pizza_toppings as pt on pv.Topping_id=pt.topping_id) as subquery
 group by pizza, topping
 order by request desc;
 
-
 -- D. Pricing and Ratings
 -- If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+SELECT 
+    pizza_name, 
+    SUM(price) AS total_price
+FROM 
+    (SELECT 
+        co.order_id,
+        pn.pizza_name, 
+        CASE 
+            WHEN co.pizza_id = 1 THEN 12
+            WHEN co.pizza_id = 2 THEN 10
+        END AS price 
+    FROM 
+        customer_orders AS co
+    JOIN 
+        runner_orders AS ro ON co.order_id = ro.order_id
+    JOIN 
+        pizza_names AS pn ON co.pizza_id = pn.pizza_id) AS subquery
+GROUP BY 
+    pizza_name;
+
 -- What if there was an additional $1 charge for any pizza extras?
+SELECT 
+    pizza_name, 
+    SUM(price) AS total_price,
+    sum(charge) as extra_charge,
+    sum(charge+price) as total
+FROM 
+    (SELECT 
+        co.order_id,
+        pn.pizza_name, 
+        CASE 
+            WHEN co.pizza_id = 1 THEN 12
+            WHEN co.pizza_id = 2 THEN 10
+        END AS price,
+        case
+            when co.extras is not null then 1
+			else 0
+        end as charge
+    FROM 
+        customer_orders AS co
+    JOIN 
+        runner_orders AS ro ON co.order_id = ro.order_id
+    JOIN 
+        pizza_names AS pn ON co.pizza_id = pn.pizza_id) AS subquery
+GROUP BY 
+    pizza_name;
+
+select * from customer_orders;
+
 -- Add cheese is $1 extra
 -- The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
 -- Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
@@ -468,6 +515,7 @@ order by request desc;
 -- Total number of pizzas
 -- If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled 
 -- how much money does Pizza Runner have left over after these deliveries?
+
 
 
 -- E. Bonus Questions
