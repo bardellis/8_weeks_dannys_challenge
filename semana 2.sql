@@ -498,10 +498,62 @@ FROM
 GROUP BY 
     pizza_name;
 
-select * from customer_orders;
+select * from pizza_toppings;
 
 -- Add cheese is $1 extra
--- The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
+SELECT 
+    pizza_name, 
+    SUM(price) AS total_price,
+    sum(extras) as extra_charge,
+    sum(extras+price) as total
+FROM 
+    (SELECT 
+        co.order_id,
+        pn.pizza_name, 
+        CASE 
+            WHEN co.pizza_id = 1 THEN 12
+            WHEN co.pizza_id = 2 THEN 10
+        END AS price,
+        case
+            when co.extras = 1 then 1
+			else 0
+        end as extras
+    FROM 
+        customer_orders AS co
+    JOIN 
+        runner_orders AS ro ON co.order_id = ro.order_id
+    JOIN 
+        pizza_names AS pn ON co.pizza_id = pn.pizza_id) AS subquery
+GROUP BY 
+    pizza_name;
+
+-- The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset 
+-- generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
+CREATE TABLE RunnerRatings (
+    rating_id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL,
+    runner_id INT NOT NULL,
+    customer_rating INT NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+    FOREIGN KEY (runner_id) REFERENCES Runners(runner_id)
+);
+
+INSERT INTO runner_ratings (rating_id, order_id, runner_id, customer_rating) VALUES
+(1, 1, 101, 5),
+(2, 2, 101, 4),
+(3, 3, 102, 3),
+(4, 4, 103, 5),
+(5, 5, 104, 2),
+(6, 6, 101, 4),
+(7, 7, 105, 5),
+(8, 8, 102, 3),
+(9, 9, 103, 5),
+(10, 10, 104, 4);
+
+delete from runner_ratings;
+select * from runner_ratings;
+select * from customer_orders;
+
 -- Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
 -- customer_id
 -- order_id
@@ -513,6 +565,11 @@ select * from customer_orders;
 -- Delivery duration
 -- Average speed
 -- Total number of pizzas
+select co.customer_id, co.order_id, ro.runner_id, rr.customer_rating, co.order_time, ro.pickup_time, ro.duration, count(*) as quantity from customer_orders as co
+join runner_ratings as rr on co.order_id=rr.order_id
+join runner_orders as ro on co.order_id=ro.order_id
+group by co.customer_id, co.order_id, ro.runner_id, rr.customer_rating, co.order_time, ro.pickup_time, ro.duration;
+
 -- If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled 
 -- how much money does Pizza Runner have left over after these deliveries?
 
