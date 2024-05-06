@@ -435,7 +435,6 @@ JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id;
 -- What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
 ----- pizza_name as pizza, pt.topping_name as topping
 ----- count(*) as quantity  
-
 select pizza, topping, sum(ingredient) as request
 from (select order_id, exclusions, extras, pizza_name as pizza, pt.topping_id as topping_id, pt.topping_name as topping,
 case 
@@ -563,18 +562,111 @@ select * from customer_orders;
 -- pickup_time
 -- Time between order and pickup
 -- Delivery duration
--- Average speed
--- Total number of pizzas
-select co.customer_id, co.order_id, ro.runner_id, rr.customer_rating, co.order_time, ro.pickup_time, ro.duration, count(*) as quantity from customer_orders as co
+select 
+co.customer_id,
+co.order_id, 
+ro.runner_id, 
+rr.customer_rating, 
+co.order_time, 
+ro.pickup_time, 
+CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2)) as distance,
+CAST(SUBSTRING_INDEX(ro.duration, ' ', 1) AS DECIMAL (10, 2)) as duration,
+CAST((distance/duration*60) AS DECIMAL (10, 2)) as speed_kmh,
+count(*) as quantity 
+-- avg(CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2))/cast(SUBSTRING_INDEX(ro.duration, ' ', 1) AS DECIMAL (10, 2))) AS distance_km 
+from customer_orders as co
 join runner_ratings as rr on co.order_id=rr.order_id
 join runner_orders as ro on co.order_id=ro.order_id
-group by co.customer_id, co.order_id, ro.runner_id, rr.customer_rating, co.order_time, ro.pickup_time, ro.duration;
+where pickup_time is not null
+group by co.customer_id, co.order_id, ro.runner_id, rr.customer_rating, co.order_time, ro.pickup_time, ro.duration, distance;
+
+-- Average speed
+-- Total number of pizzas
+SELECT 
+AVG(speed_kmh) AS avg_speed_kmh,
+SUM(quantity) AS total_quantity
+FROM (
+    SELECT 
+    co.customer_id,
+    co.order_id, 
+    ro.runner_id, 
+    rr.customer_rating, 
+    co.order_time, 
+    ro.pickup_time, 
+    CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2)) AS distance,
+    CAST(SUBSTRING_INDEX(ro.duration, ' ', 1) AS DECIMAL(10, 2)) AS duration,
+    CAST((distance/duration*60) AS DECIMAL(10, 2)) AS speed_kmh,
+    COUNT(*) AS quantity 
+    FROM 
+    customer_orders AS co
+    JOIN 
+    runner_ratings AS rr ON co.order_id = rr.order_id
+    JOIN 
+    runner_orders AS ro ON co.order_id = ro.order_id
+    WHERE 
+    ro.pickup_time IS NOT NULL
+    GROUP BY 
+    co.customer_id, 
+    co.order_id, 
+    ro.runner_id, 
+    rr.customer_rating, 
+    co.order_time, 
+    ro.pickup_time, 
+    ro.duration, 
+    distance
+) AS subquery;
 
 -- If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled 
 -- how much money does Pizza Runner have left over after these deliveries?
-
+select sum(price) as price, sum(delivery) as delivery, sum(price+delivery) as total
+from (
+	select co.*, 
+	case when pizza_id=1 then 12
+	else 10
+	end as price,
+	case when pickup_time is not null then 0.30
+	else 0.00
+	end as delivery 
+	from customer_orders as co
+	join runner_orders as ro on co.order_id=ro.order_id
+    ) as subquery;
 
 
 -- E. Bonus Questions
 -- If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen 
 -- if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
+INSERT INTO pizza_recipes
+  (pizza_id, toppings)
+VALUES
+  (3, '1, 2, 3, 4, 5, 6, 8, 10, 7, 9, 11, 12');
+
+insert into pizza_names
+	(pizza_id, pizza_name)
+VALUES
+	(3, 'Supreme');
+
+CREATE VIEW pizza_toppings_view_supreme AS
+SELECT 
+    subquery.pizza_ID, 
+    pn.pizza_name,
+    subquery.Topping_id, 
+    pt.topping_name 
+FROM 
+    (SELECT
+        pr.Pizza_ID, 
+        CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(pr.Toppings, ',', n.n), ',', -1) AS UNSIGNED) AS Topping_id
+    FROM
+        pizza_recipes pr
+    INNER JOIN
+        (SELECT 1 AS n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12) AS n
+        ON CHAR_LENGTH(pr.Toppings) - CHAR_LENGTH(REPLACE(pr.Toppings, ',', '')) >= n.n - 1
+    ORDER BY
+        pr.Pizza_ID, Topping_id) AS subquery
+JOIN 
+    pizza_toppings AS pt ON subquery.Topping_id = pt.Topping_id
+JOIN 
+    pizza_names AS pn ON subquery.pizza_ID = pn.pizza_ID
+ORDER BY 
+    pizza_name;
+    
+SELECT * FROM pizza_toppings_view_supreme;
