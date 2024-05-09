@@ -1,5 +1,6 @@
 CREATE SCHEMA foodie_fi;
 SET search_path = foodie_fi;
+Use foodie_fi;
 
 CREATE TABLE plans (
   plan_id INTEGER,
@@ -16,7 +17,7 @@ VALUES
   ('3', 'pro annual', '199'),
   ('4', 'churn', null);
 
-
+select * from plans;
 
 CREATE TABLE subscriptions (
   customer_id INTEGER,
@@ -2678,13 +2679,50 @@ VALUES
   ('1000', '2', '2020-03-26'),
   ('1000', '4', '2020-06-04');
   
+  select * from subscriptions;
+  
 -- Case Study Questions
 -- This case study is split into an initial data understanding question before diving straight into data analysis questions before finishing with 1 single extension challenge.
-
 -- A. Customer Journey
 -- Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
+select *, 
+case when s.plan_id=0 then 1
+else 0 end as trial,
+case when s.plan_id=1 then 1
+else 0 end as basic_monthly,
+case when s.plan_id=2 then 1
+else 0 end as pro_monthly,
+case when s.plan_id=3 then 1
+else 0 end as pro_annual,
+case when s.plan_id=4 then 1
+else 0 end as churn
+from subscriptions as s
+join plans as p on s.plan_id=p.plan_id;
 
+
+Use foodie_fi;
 -- Try to keep it as short as possible - you may also want to run some sort of join to make your explanations a bit easier!
+SELECT 
+    subquery.plan_name,
+    subquery.price,
+    COUNT(subquery.customer_id) as customers,
+    SUM(subquery.trial) AS trials,
+    SUM(subquery.basic_monthly) AS basics,
+    SUM(subquery.pro_monthly) AS monthly,
+    SUM(subquery.pro_annual) AS annual,
+    SUM(subquery.churn) AS churn
+FROM (
+	select customer_id, s.plan_id, plan_name, price, 
+	case when s.plan_id=0 then 1 else 0 end as trial,
+	case when s.plan_id=1 then 1 else 0 end as basic_monthly,
+	case when s.plan_id=2 then 1 else 0 end as pro_monthly,
+	case when s.plan_id=3 then 1 else 0 end as pro_annual,
+	case when s.plan_id=4 then 1 else 0 end as churn
+	from subscriptions as s
+	join plans as p on s.plan_id=p.plan_id) AS subquery
+group by subquery.plan_name,subquery.price;
+
+select plan_name from plans;
 
 -- B. Data Analysis Questions
 -- How many customers has Foodie-Fi ever had?
