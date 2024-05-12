@@ -2726,9 +2726,39 @@ select plan_name from plans;
 
 -- B. Data Analysis Questions
 -- How many customers has Foodie-Fi ever had?
+SELECT COUNT(DISTINCT customer_id) AS customers
+FROM subscriptions;
+
 -- What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
+SELECT DATE_FORMAT(start_date, '%Y-%m-01') AS month_start,
+       COUNT(*) AS trial_count
+FROM subscriptions
+GROUP BY DATE_FORMAT(start_date, '%Y-%m-01')
+ORDER BY trial_count desc;
+
+Use foodie_fi;
+
 -- What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
+select p.plan_name as plans, count(p.plan_id) as events
+from subscriptions as s
+join plans as p on s.plan_id=p.plan_id
+where start_date >= 2021-01-01
+group by plans;
+
 -- What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
+-- select sum(churn) as churn,count(s.plan_id) as totals, plan_name 
+-- from(
+SELECT
+    COUNT(CASE WHEN churn = 1 THEN 1 END) AS churned_customers_count,
+    ROUND(COUNT(CASE WHEN churn = 1 THEN 1 END) * 100.0 / COUNT(*), 1) AS churned_customers_percentage
+FROM (
+    SELECT p.plan_id AS plan_id,
+           p.plan_name AS plan_name,
+           CASE WHEN p.plan_name = 'churn' THEN 1 ELSE 0 END AS churn
+    FROM subscriptions AS s
+    JOIN plans AS p ON s.plan_id = p.plan_id
+) AS subquery;
+
 -- How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
 -- What is the number and percentage of customer plans after their initial free trial?
 -- What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
