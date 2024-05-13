@@ -2760,7 +2760,72 @@ FROM (
 ) AS subquery;
 
 -- How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
+
+select 
+sum(churned) as churned, 
+count(*) as all_customers, 
+round(sum(churned)/count(*),2)*100 as percentage
+from
+(select 
+customer_id, 
+trial_date, 
+basic_monthly_date, 
+pro_monthly_date,
+pro_annual_date,  
+churn_date,
+case when churn_date <> 0 and pro_monthly_date=0 and pro_annual_date=0 and basic_monthly_date=0 then 1 else 0 end as churned
+from
+(select 
+customer_id, 
+max(trial_date) as trial_date, 
+max(basic_monthly_date) as basic_monthly_date, 
+max(pro_monthly_date) as pro_monthly_date,
+max(pro_annual_date) as pro_annual_date,  
+max(churn_date) as churn_date
+	from (select customer_id,
+		case when s.plan_id=0 then start_date else 0 end as trial_date,
+		case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
+		case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
+		case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
+		case when s.plan_id=4 then start_date else 0 end as churn_date
+		FROM subscriptions AS s
+		JOIN plans AS p ON s.plan_id = p.plan_id) as subquery
+		-- where churn_date > 0
+	group by customer_id) as subquery2) as subquery3;
+
 -- What is the number and percentage of customer plans after their initial free trial?
+
+SELECT 
+    SUM(plan_after_trial) AS plan_after_trial, 
+    COUNT(*) AS all_customers, 
+    ROUND(SUM(plan_after_trial) / COUNT(*), 2) * 100 AS percentage
+FROM
+    (select 
+customer_id, 
+trial_date, 
+basic_monthly_date, 
+pro_monthly_date,
+pro_annual_date,  
+churn_date,
+case when basic_monthly_date<>0 or pro_monthly_date<>0 or pro_annual_date<>0 then 1 else 0 end as plan_after_trial
+from (select 
+customer_id, 
+max(trial_date) as trial_date, 
+max(basic_monthly_date) as basic_monthly_date, 
+max(pro_monthly_date) as pro_monthly_date,
+max(pro_annual_date) as pro_annual_date,  
+max(churn_date) as churn_date
+	from (select customer_id,
+		case when s.plan_id=0 then start_date else 0 end as trial_date,
+		case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
+		case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
+		case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
+		case when s.plan_id=4 then start_date else 0 end as churn_date
+		FROM subscriptions AS s
+		JOIN plans AS p ON s.plan_id = p.plan_id) as subquery
+		-- where churn_date > 0
+	group by customer_id) as subquery2) as subquery3;
+
 -- What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
 -- How many customers have upgraded to an annual plan in 2020?
 -- How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
