@@ -2827,6 +2827,15 @@ max(churn_date) as churn_date
 	group by customer_id) as subquery2) as subquery3;
 
 -- What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+select plan_name, count(*) 
+from(
+	select start_date, plan_name, s.plan_id 
+	fROM subscriptions AS s
+	JOIN plans AS p ON s.plan_id = p.plan_id
+	where start_date <= '2020-12-31'
+order by start_date desc) as subquery
+group by plan_name;
+
 -- How many customers have upgraded to an annual plan in 2020?
 -- How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
 -- Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
