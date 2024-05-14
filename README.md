@@ -14,3 +14,6 @@ In this lab, you will be using the [Sakila](https://dev.mysql.com/doc/sakila/en/
 6. List each film and the number of actors who are listed for that film.
 7. Using the tables `payment` and `customer` and the JOIN command, list the total paid by each customer. List the customers alphabetically by last name.
 8. List the titles of films per `category`.
+
+
+-
