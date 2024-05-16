@@ -2794,7 +2794,6 @@ max(churn_date) as churn_date
 	group by customer_id) as subquery2) as subquery3;
 
 -- What is the number and percentage of customer plans after their initial free trial?
-
 SELECT 
     SUM(plan_after_trial) AS plan_after_trial, 
     COUNT(*) AS all_customers, 
@@ -2837,7 +2836,27 @@ order by start_date desc) as subquery
 group by plan_name;
 
 -- How many customers have upgraded to an annual plan in 2020?
+select count(*) as pro_annual_2020 from (select plan_name, start_date, customer_id
+fROM subscriptions AS s
+JOIN plans AS p ON s.plan_id = p.plan_id
+where start_date >= '2020-01-01' and start_date <'2021-01-01' and plan_name = 'pro annual') subquery;
+
 -- How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
+select round(avg(days_to_annual),2) as average_days_to_annual
+from( 
+	select customer_id, trial, annual, DATEDIFF(annual, trial) AS days_to_annual from
+	(select customer_id, max(trial_date) as trial, max(basic_monthly_date) as monthly, max(pro_monthly_date) as monthly_pro, max(pro_annual_date) as annual, max(churn_date) as churn
+		from (select customer_id,
+		case when s.plan_id=0 then start_date else 0 end as trial_date,
+		case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
+		case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
+		case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
+		case when s.plan_id=4 then start_date else 0 end as churn_date
+		FROM subscriptions AS s
+		JOIN plans AS p ON s.plan_id = p.plan_id) as subquery 
+	group by customer_id) subquery2
+where annual <> 0) subquery3;
+
 -- Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
 -- How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
 -- C. Challenge Payment Question
