@@ -3202,6 +3202,45 @@ group by n_month
 with rollup;
 
 -- What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
+-- churn/trial mes a mes sobre el resto 
+
+select
+    subquery4.*,
+    (trials + churns + paid_subscriptions) AS Totals,
+    round((trials / (trials + churns + paid_subscriptions)*100),2) AS 'trials/totals',
+    round((churns / (trials + churns + paid_subscriptions)*100),2) AS 'churns/totals',
+    round((paid_subscriptions / (trials + churns + paid_subscriptions)*100),2) AS 'paid_subs/totals'
+from(
+select 
+case when grouping(subquery3.n_month)=1 then 'Total' else subquery3.n_month END AS n_month,
+count(customer) as customer,
+sum(trial) as trials,
+sum(churn) as churns,
+sum(paid_subscr) as paid_subscriptions
+from(
+select subquery2.*
+from (
+select 
+subquery.*,
+case when subquery.plan=0 then 1 else 0 end as trial,
+case when subquery.plan=4 then 1 else 0 end as churn,
+case when subquery.plan>0 and subquery.plan<4 then 1 else 0 end as paid_subscr
+from(
+SELECT s.customer_id as customer,
+s.plan_id as plan,
+since, to_date, DATE_FORMAT(since, '%m') as n_month,
+price
+FROM subscriptions AS s
+JOIN customer_periods AS ct ON s.plan_id = ct.plan_id AND s.customer_id = ct.customer_id
+WHERE s.start_date <= '2020-12-31') as subquery)
+as subquery2) 
+as subquery3
+-- where plan <> 0 and plan <> 4
+group by n_month
+-- order by plan asc
+with rollup)
+as subquery4;
+
 -- What are some key customer journeys or experiences that you would analyse further to improve customer retention?
 -- If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?
 -- What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?
