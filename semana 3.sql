@@ -3242,7 +3242,11 @@ with rollup)
 as subquery4;
 
 -- What are some key customer journeys or experiences that you would analyse further to improve customer retention?
+-- Answer: churn should be taken into consideration
+
 -- If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?
+-- Answer: the Foodie team should ask the customers if they are happy with the present subscrition
+
 -- What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?
 
 -- Conclusion
