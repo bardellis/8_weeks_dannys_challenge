@@ -435,18 +435,34 @@ JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id;
 -- What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
 ----- pizza_name as pizza, pt.topping_name as topping
 ----- count(*) as quantity  
-select pizza, topping, sum(ingredient) as request
-from (select order_id, exclusions, extras, pizza_name as pizza, pt.topping_id as topping_id, pt.topping_name as topping,
-case 
-when exclusions = pt.topping_id then "0"
-when extras = pt.topping_id then "2"
-else "1" 
-end as ingredient  
-from customer_orders as co
-join pizza_toppings_view as pv on co.pizza_id=pv.pizza_ID
-join pizza_toppings as pt on pv.Topping_id=pt.topping_id) as subquery
-group by pizza, topping
-order by request desc;
+SELECT 
+    pizza,
+    topping,
+    SUM(ingredient) AS request
+FROM (
+    SELECT 
+        co.order_id, 
+        co.exclusions, 
+        co.extras, 
+        pv.pizza_name AS pizza, 
+        pt.topping_id AS topping_id, 
+        pt.topping_name AS topping,
+        CASE 
+            WHEN FIND_IN_SET(pt.topping_id, co.exclusions) THEN 0
+            WHEN FIND_IN_SET(pt.topping_id, co.extras) THEN 2
+            ELSE 1 
+        END AS ingredient  
+    FROM 
+        customer_orders AS co
+    JOIN 
+        pizza_toppings_view AS pv ON co.pizza_id = pv.pizza_id
+    JOIN 
+        pizza_toppings AS pt ON pv.topping_id = pt.topping_id
+) AS subquery
+GROUP BY 
+    pizza, topping
+ORDER BY 
+    request DESC;
 
 -- D. Pricing and Ratings
 -- If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
@@ -562,23 +578,35 @@ select * from customer_orders;
 -- pickup_time
 -- Time between order and pickup
 -- Delivery duration
-select 
-co.customer_id,
-co.order_id, 
-ro.runner_id, 
-rr.customer_rating, 
-co.order_time, 
-ro.pickup_time, 
-CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2)) as distance,
-CAST(SUBSTRING_INDEX(ro.duration, ' ', 1) AS DECIMAL (10, 2)) as duration,
-CAST((distance/duration*60) AS DECIMAL (10, 2)) as speed_kmh,
-count(*) as quantity 
--- avg(CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2))/cast(SUBSTRING_INDEX(ro.duration, ' ', 1) AS DECIMAL (10, 2))) AS distance_km 
-from customer_orders as co
-join runner_ratings as rr on co.order_id=rr.order_id
-join runner_orders as ro on co.order_id=ro.order_id
-where pickup_time is not null
-group by co.customer_id, co.order_id, ro.runner_id, rr.customer_rating, co.order_time, ro.pickup_time, ro.duration, distance;
+SELECT 
+    co.customer_id,
+    co.order_id, 
+    ro.runner_id, 
+    rr.customer_rating, 
+    co.order_time, 
+    ro.pickup_time, 
+    CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2)) AS distance,
+    CAST(SUBSTRING_INDEX(ro.duration, ' ', 1) AS DECIMAL(10, 2)) AS duration,
+    CAST((CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2)) / 
+          CAST(SUBSTRING_INDEX(ro.duration, ' ', 1) AS DECIMAL(10, 2)) * 60) AS DECIMAL(10, 2)) AS speed_kmh,
+    COUNT(*) AS quantity
+FROM 
+    customer_orders AS co
+JOIN 
+    runner_ratings AS rr ON co.order_id = rr.order_id
+JOIN 
+    runner_orders AS ro ON co.order_id = ro.order_id
+WHERE 
+    ro.pickup_time IS NOT NULL
+GROUP BY 
+    co.customer_id, 
+    co.order_id, 
+    ro.runner_id, 
+    rr.customer_rating, 
+    co.order_time, 
+    ro.pickup_time, 
+    distance, 
+    duration;
 
 -- Average speed
 -- Total number of pizzas

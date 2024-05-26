@@ -2905,215 +2905,345 @@ Use foodie_fi;
 
 -- cREATE VIEW customer_basic_monthly_plan AS
 -- QUERY X TRIAL PLAN 
-select 
-subquery_since_trial.customer_id,
-subquery_since_trial.plan_id,
-subquery_since_trial.since, 
-subquery_since_trial.to_date, 
-price
-from (
-select customer_id, 
-case when trial_date is not null then 0 else '' end as plan_id,
-case when trial_date is not null then trial_date else '' end as since,
-case when basic_monthly_date <> 0 then basic_monthly_date
-	else case when pro_monthly_date <> 0 then pro_monthly_date 
-		else case when pro_annual_date <> 0 then pro_annual_date 
-			else case when churn_date <> 0 then churn_date else 0 end end end end as to_date
-from (
-select 
-customer_id,
-max(trial_date) as trial_date,
-max(basic_monthly_date) as basic_monthly_date,
-max(pro_monthly_date) as pro_monthly_date,
-max(pro_annual_date) as pro_annual_date,
-max(churn_date) as churn_date
-from (
-select
-customer_id,
-start_date,
-plan_name,
-price,
-case when s.plan_id=0 then start_date else 0 end as trial_date,
-case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
-case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
-case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
-case when s.plan_id=4 then start_date else 0 end as churn_date
-FROM subscriptions AS s
-JOIN plans AS p ON s.plan_id = p.plan_id
-where start_date <= '2020-12-31'
-) as subquery
-group by customer_id
-) as subquery_trial
-) as subquery_since_trial
+SELECT 
+    subquery_since_trial.customer_id,
+    subquery_since_trial.plan_id,
+    subquery_since_trial.since, 
+    subquery_since_trial.to_date, 
+    pl.price
+FROM (
+    SELECT 
+        customer_id, 
+        CASE 
+            WHEN trial_date IS NOT NULL THEN 0 
+            ELSE '' 
+        END AS plan_id,
+        CASE 
+            WHEN trial_date IS NOT NULL THEN trial_date 
+            ELSE '' 
+        END AS since,
+        CASE 
+            WHEN basic_monthly_date <> 0 THEN basic_monthly_date
+            ELSE CASE 
+                WHEN pro_monthly_date <> 0 THEN pro_monthly_date 
+                ELSE CASE 
+                    WHEN pro_annual_date <> 0 THEN pro_annual_date 
+                    ELSE CASE 
+                        WHEN churn_date <> 0 THEN churn_date 
+                        ELSE 0 
+                    END 
+                END 
+            END 
+        END AS to_date
+    FROM (
+        SELECT 
+            customer_id,
+            MAX(trial_date) AS trial_date,
+            MAX(basic_monthly_date) AS basic_monthly_date,
+            MAX(pro_monthly_date) AS pro_monthly_date,
+            MAX(pro_annual_date) AS pro_annual_date,
+            MAX(churn_date) AS churn_date
+        FROM (
+            SELECT
+                customer_id,
+                start_date,
+                plan_id,
+                CASE 
+                    WHEN plan_id = 0 THEN start_date 
+                    ELSE 0 
+                END AS trial_date,
+                CASE 
+                    WHEN plan_id = 1 THEN start_date 
+                    ELSE 0 
+                END AS basic_monthly_date,
+                CASE 
+                    WHEN plan_id = 2 THEN start_date 
+                    ELSE 0 
+                END AS pro_monthly_date,
+                CASE 
+                    WHEN plan_id = 3 THEN start_date 
+                    ELSE 0 
+                END AS pro_annual_date,
+                CASE 
+                    WHEN plan_id = 4 THEN start_date 
+                    ELSE 0 
+                END AS churn_date
+            FROM subscriptions
+            WHERE start_date <= '2020-12-31'
+        ) AS subquery
+        GROUP BY customer_id
+    ) AS subquery_trial
+) AS subquery_since_trial
 JOIN plans AS pl ON subquery_since_trial.plan_id = pl.plan_id;
+
 
 -- cREATE VIEW customer_basic_monthly_plan AS
 -- QUERY X BASIC MONTH
-select 
-subquery_since_basic.customer_id,
-subquery_since_basic.plan_id,
-subquery_since_basic.since, 
-subquery_since_basic.to_date, 
-price
-from (
-select customer_id, 
-case when basic_monthly_date is not null then 1 else '' end as plan_id,
-case when basic_monthly_date Is not null then basic_monthly_date else '' end as since,
-case when pro_monthly_date <> 0 and pro_monthly_date  > basic_monthly_date then pro_monthly_date 
-		else case when pro_annual_date <> 0 and pro_annual_date  > basic_monthly_date then pro_annual_date 
-			else case when churn_date <> 0 then churn_date else '2020-12-31' end end end as to_date
-from (
-select 
-customer_id,
-max(basic_monthly_date) as basic_monthly_date,
-max(pro_monthly_date) as pro_monthly_date,
-max(pro_annual_date) as pro_annual_date,
-max(churn_date) as churn_date
-from (
-select
-customer_id,
-start_date,
-plan_name,
-price,
-case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
-case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
-case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
-case when s.plan_id=4 then start_date else 0 end as churn_date
-FROM subscriptions AS s
-JOIN plans AS p ON s.plan_id = p.plan_id
-where start_date <= '2020-12-31'
-) as subquery
-group by customer_id
-) as subquery_basic
-) as subquery_since_basic
+SELECT 
+    subquery_since_basic.customer_id,
+    subquery_since_basic.plan_id,
+    subquery_since_basic.since, 
+    subquery_since_basic.to_date, 
+    pl.price
+FROM (
+    SELECT 
+        customer_id, 
+        CASE 
+            WHEN basic_monthly_date IS NOT NULL THEN 1 
+            ELSE '' 
+        END AS plan_id,
+        CASE 
+            WHEN basic_monthly_date IS NOT NULL THEN basic_monthly_date 
+            ELSE '' 
+        END AS since,
+        CASE 
+            WHEN pro_monthly_date <> 0 AND pro_monthly_date > basic_monthly_date THEN pro_monthly_date 
+            ELSE CASE 
+                WHEN pro_annual_date <> 0 AND pro_annual_date > basic_monthly_date THEN pro_annual_date 
+                ELSE CASE 
+                    WHEN churn_date <> 0 THEN churn_date 
+                    ELSE '2020-12-31' 
+                END 
+            END 
+        END AS to_date
+    FROM (
+        SELECT 
+            customer_id,
+            MAX(basic_monthly_date) AS basic_monthly_date,
+            MAX(pro_monthly_date) AS pro_monthly_date,
+            MAX(pro_annual_date) AS pro_annual_date,
+            MAX(churn_date) AS churn_date
+        FROM (
+            SELECT
+                customer_id,
+                start_date,
+                plan_id,
+                CASE 
+                    WHEN plan_id = 1 THEN start_date 
+                    ELSE 0 
+                END AS basic_monthly_date,
+                CASE 
+                    WHEN plan_id = 2 THEN start_date 
+                    ELSE 0 
+                END AS pro_monthly_date,
+                CASE 
+                    WHEN plan_id = 3 THEN start_date 
+                    ELSE 0 
+                END AS pro_annual_date,
+                CASE 
+                    WHEN plan_id = 4 THEN start_date 
+                    ELSE 0 
+                END AS churn_date
+            FROM subscriptions
+            WHERE start_date <= '2020-12-31'
+        ) AS subquery
+        GROUP BY customer_id
+    ) AS subquery_basic
+) AS subquery_since_basic
 JOIN plans AS pl ON subquery_since_basic.plan_id = pl.plan_id
-where since <> 0;
+WHERE since <> '';
+
 
 -- CREATE VIEW customer_pro_monthly_plan AS
 -- QUERY X PRO MONTH
-select 
-subquery_since_pro.customer_id,
-subquery_since_pro.plan_id,
-subquery_since_pro.since, 
-subquery_since_pro.to_date, 
-price
-from (
-select customer_id, 
-case when pro_monthly_date is not null then 2 else '' end as plan_id,
-case when pro_monthly_date is not null then pro_monthly_date else '' end as since,
-case when basic_monthly_date <> 0 and basic_monthly_date > pro_monthly_date then basic_monthly_date
-		else case when pro_annual_date <> 0 and pro_annual_date > pro_monthly_date then pro_annual_date 
-			else case when churn_date <> 0 then churn_date else '2020-12-31' end end end as to_date
-from (
-select 
-customer_id,
-max(basic_monthly_date) as basic_monthly_date,
-max(pro_monthly_date) as pro_monthly_date,
-max(pro_annual_date) as pro_annual_date,
-max(churn_date) as churn_date
-from (
-select
-customer_id,
-start_date,
-plan_name,
-price,
-case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
-case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
-case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
-case when s.plan_id=4 then start_date else 0 end as churn_date
-FROM subscriptions AS s
-JOIN plans AS p ON s.plan_id = p.plan_id
-where start_date <= '2020-12-31'
-) as subquery
-group by customer_id
-) as subquery_pro
-) as subquery_since_pro
+SELECT 
+    subquery_since_pro.customer_id,
+    subquery_since_pro.plan_id,
+    subquery_since_pro.since, 
+    subquery_since_pro.to_date, 
+    pl.price
+FROM (
+    SELECT 
+        customer_id, 
+        CASE 
+            WHEN pro_monthly_date IS NOT NULL THEN 2 
+            ELSE '' 
+        END AS plan_id,
+        CASE 
+            WHEN pro_monthly_date IS NOT NULL THEN pro_monthly_date 
+            ELSE '' 
+        END AS since,
+        CASE 
+            WHEN basic_monthly_date <> 0 AND basic_monthly_date > pro_monthly_date THEN basic_monthly_date
+            ELSE CASE 
+                WHEN pro_annual_date <> 0 AND pro_annual_date > pro_monthly_date THEN pro_annual_date 
+                ELSE CASE 
+                    WHEN churn_date <> 0 THEN churn_date 
+                    ELSE '2020-12-31' 
+                END 
+            END 
+        END AS to_date
+    FROM (
+        SELECT 
+            customer_id,
+            MAX(basic_monthly_date) AS basic_monthly_date,
+            MAX(pro_monthly_date) AS pro_monthly_date,
+            MAX(pro_annual_date) AS pro_annual_date,
+            MAX(churn_date) AS churn_date
+        FROM (
+            SELECT
+                customer_id,
+                start_date,
+                plan_id,
+                CASE 
+                    WHEN plan_id = 1 THEN start_date 
+                    ELSE 0 
+                END AS basic_monthly_date,
+                CASE 
+                    WHEN plan_id = 2 THEN start_date 
+                    ELSE 0 
+                END AS pro_monthly_date,
+                CASE 
+                    WHEN plan_id = 3 THEN start_date 
+                    ELSE 0 
+                END AS pro_annual_date,
+                CASE 
+                    WHEN plan_id = 4 THEN start_date 
+                    ELSE 0 
+                END AS churn_date
+            FROM subscriptions
+            WHERE start_date <= '2020-12-31'
+        ) AS subquery
+        GROUP BY customer_id
+    ) AS subquery_pro
+) AS subquery_since_pro
 JOIN plans AS pl ON subquery_since_pro.plan_id = pl.plan_id
-where since <> 0;
+WHERE since <> '';
+
 
 -- CREATE VIEW customer_pro_annual_plan AS
 -- QUERY X PRO ANNUAL
-select 
-subquery_since_proa.customer_id,
-subquery_since_proa.plan_id,
-subquery_since_proa.since, 
-subquery_since_proa.to_date, 
-price
-from (
-select customer_id, 
-case when pro_annual_date is not null then 3 else '' end as plan_id,
-case when pro_annual_date is not null then pro_annual_date else '' end as since,
-case when basic_monthly_date <> 0 and basic_monthly_date > pro_annual_date then basic_monthly_date
-		else case when pro_monthly_date <> 0 and pro_monthly_date > pro_annual_date then pro_monthly_date 
-			else case when churn_date <> 0 then churn_date else '2020-12-31' end end end as to_date
-from (
-select 
-customer_id,
-max(basic_monthly_date) as basic_monthly_date,
-max(pro_monthly_date) as pro_monthly_date,
-max(pro_annual_date) as pro_annual_date,
-max(churn_date) as churn_date
-from (
-select
-customer_id,
-start_date,
-plan_name,
-price,
-case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
-case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
-case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
-case when s.plan_id=4 then start_date else 0 end as churn_date
-FROM subscriptions AS s
-JOIN plans AS p ON s.plan_id = p.plan_id
-where start_date <= '2020-12-31'
-) as subquery
-group by customer_id
-) as subquery_proa
-) as subquery_since_proa
+SELECT 
+    subquery_since_proa.customer_id,
+    subquery_since_proa.plan_id,
+    subquery_since_proa.since, 
+    subquery_since_proa.to_date, 
+    pl.price
+FROM (
+    SELECT 
+        customer_id, 
+        CASE 
+            WHEN pro_annual_date IS NOT NULL THEN 3 
+            ELSE '' 
+        END AS plan_id,
+        CASE 
+            WHEN pro_annual_date IS NOT NULL THEN pro_annual_date 
+            ELSE '' 
+        END AS since,
+        CASE 
+            WHEN basic_monthly_date <> 0 AND basic_monthly_date > pro_annual_date THEN basic_monthly_date
+            ELSE CASE 
+                WHEN pro_monthly_date <> 0 AND pro_monthly_date > pro_annual_date THEN pro_monthly_date 
+                ELSE CASE 
+                    WHEN churn_date <> 0 THEN churn_date 
+                    ELSE '2020-12-31' 
+                END 
+            END 
+        END AS to_date
+    FROM (
+        SELECT 
+            customer_id,
+            MAX(basic_monthly_date) AS basic_monthly_date,
+            MAX(pro_monthly_date) AS pro_monthly_date,
+            MAX(pro_annual_date) AS pro_annual_date,
+            MAX(churn_date) AS churn_date
+        FROM (
+            SELECT
+                customer_id,
+                start_date,
+                plan_id,
+                CASE 
+                    WHEN plan_id = 1 THEN start_date 
+                    ELSE 0 
+                END AS basic_monthly_date,
+                CASE 
+                    WHEN plan_id = 2 THEN start_date 
+                    ELSE 0 
+                END AS pro_monthly_date,
+                CASE 
+                    WHEN plan_id = 3 THEN start_date 
+                    ELSE 0 
+                END AS pro_annual_date,
+                CASE 
+                    WHEN plan_id = 4 THEN start_date 
+                    ELSE 0 
+                END AS churn_date
+            FROM subscriptions
+            WHERE start_date <= '2020-12-31'
+        ) AS subquery
+        GROUP BY customer_id
+    ) AS subquery_proa
+) AS subquery_since_proa
 JOIN plans AS pl ON subquery_since_proa.plan_id = pl.plan_id
-where since <> 0;
+WHERE since <> '';
+
 
 -- CREATE VIEW customer_churn AS
 -- QUERY X CHURN
-select 
-subquery_since_proa.customer_id,
-subquery_since_proa.plan_id,
-subquery_since_proa.since, 
-subquery_since_proa.to_date, 
-price
-from (
-select customer_id, 
-case when churn_date is not null then 4 else '' end as plan_id,
-case when churn_date is not null then churn_date else '' end as since,
-case when basic_monthly_date > churn_date then basic_monthly_date
-		else case when pro_monthly_date > churn_date then pro_monthly_date 
-			else case when pro_annual_date > churn_date then pro_annual_date else '2020-12-31' end end end as to_date
-from (
-select 
-customer_id,
-max(basic_monthly_date) as basic_monthly_date,
-max(pro_monthly_date) as pro_monthly_date,
-max(pro_annual_date) as pro_annual_date,
-max(churn_date) as churn_date
-from (
-select
-customer_id,
-start_date,
-plan_name,
-price,
-case when s.plan_id=1 then start_date else 0 end as basic_monthly_date,
-case when s.plan_id=2 then start_date else 0 end as pro_monthly_date,
-case when s.plan_id=3 then start_date else 0 end as pro_annual_date,
-case when s.plan_id=4 then start_date else 0 end as churn_date
-FROM subscriptions AS s
-JOIN plans AS p ON s.plan_id = p.plan_id
-where start_date <= '2020-12-31'
-) as subquery
-group by customer_id
-) as subquery_proa
-) as subquery_since_proa
+SELECT 
+    subquery_since_proa.customer_id,
+    subquery_since_proa.plan_id,
+    subquery_since_proa.since, 
+    subquery_since_proa.to_date, 
+    pl.price
+FROM (
+    SELECT 
+        customer_id, 
+        CASE 
+            WHEN churn_date IS NOT NULL THEN 4 
+            ELSE '' 
+        END AS plan_id,
+        CASE 
+            WHEN churn_date IS NOT NULL THEN churn_date 
+            ELSE '' 
+        END AS since,
+        CASE 
+            WHEN basic_monthly_date > churn_date THEN basic_monthly_date
+            ELSE CASE 
+                WHEN pro_monthly_date > churn_date THEN pro_monthly_date 
+                ELSE CASE 
+                    WHEN pro_annual_date > churn_date THEN pro_annual_date 
+                    ELSE '2020-12-31' 
+                END 
+            END 
+        END AS to_date
+    FROM (
+        SELECT 
+            customer_id,
+            MAX(basic_monthly_date) AS basic_monthly_date,
+            MAX(pro_monthly_date) AS pro_monthly_date,
+            MAX(pro_annual_date) AS pro_annual_date,
+            MAX(churn_date) AS churn_date
+        FROM (
+            SELECT
+                customer_id,
+                start_date,
+                plan_id,
+                CASE 
+                    WHEN plan_id = 1 THEN start_date 
+                    ELSE 0 
+                END AS basic_monthly_date,
+                CASE 
+                    WHEN plan_id = 2 THEN start_date 
+                    ELSE 0 
+                END AS pro_monthly_date,
+                CASE 
+                    WHEN plan_id = 3 THEN start_date 
+                    ELSE 0 
+                END AS pro_annual_date,
+                CASE 
+                    WHEN plan_id = 4 THEN start_date 
+                    ELSE 0 
+                END AS churn_date
+            FROM subscriptions
+            WHERE start_date <= '2020-12-31'
+        ) AS subquery
+        GROUP BY customer_id
+    ) AS subquery_proa
+) AS subquery_since_proa
 JOIN plans AS pl ON subquery_since_proa.plan_id = pl.plan_id
-where since <> 0;
+WHERE since <> '';
+
 
 CREATE VIEW customer_periods AS
 SELECT * FROM customer_churn
@@ -3127,38 +3257,45 @@ UNION
 SELECT * FROM customer_trial_plan;
 
 -- ALL TOGETHER
-select 
-case when grouping(subquery3.plan)=1 then 'Total' else subquery3.plan END AS plan_name,
-count(customer) as customer,
-round(avg(price),2) as price,
-round(sum(periods),2) as periods,
-round(sum(payments),2) as paid
-from(
-select subquery2.*,
-round((price*periods),2) AS payments
-from (
-select 
-subquery.*,
-case 
-when subquery.plan = 0 then 
-(DATE_FORMAT(to_date, '%m')-DATE_FORMAT(since,'%m'))
-else 
-((DATE_FORMAT(to_date, '%m')-DATE_FORMAT(since,'%m'))-1) 
-end AS periods
-from(
-SELECT s.customer_id as customer,
-s.plan_id as plan,
-since, to_date, 
-price
-FROM subscriptions AS s
-JOIN customer_periods AS ct ON s.plan_id = ct.plan_id AND s.customer_id = ct.customer_id
-WHERE s.start_date <= '2020-12-31') as subquery)
-as subquery2) 
-as subquery3 
--- where plan <> 0 and plan <> 4
-group by plan
--- order by plan asc
-with rollup;
+SELECT 
+    CASE 
+        WHEN grouping(subquery3.plan) = 1 THEN 'Total' 
+        ELSE subquery3.plan 
+    END AS plan_name,
+    COUNT(customer) AS customer,
+    ROUND(AVG(price),2) AS price,
+    ROUND(SUM(periods),2) AS periods,
+    ROUND(SUM(payments),2) AS paid
+FROM (
+    SELECT subquery2.*,
+           ROUND((price*periods),2) AS payments
+    FROM (
+        SELECT 
+            subquery.*,
+            CASE 
+                WHEN subquery.plan = 0 THEN 
+                    (DATE_FORMAT(to_date, '%m')-DATE_FORMAT(since,'%m'))
+                ELSE 
+                    ((DATE_FORMAT(to_date, '%m')-DATE_FORMAT(since,'%m'))-1) 
+            END AS periods
+        FROM (
+            SELECT 
+                s.customer_id AS customer,
+                s.plan_id AS plan,
+                since, 
+                to_date, 
+                price
+            FROM subscriptions AS s
+            JOIN customer_periods AS ct ON s.plan_id = ct.plan_id AND s.customer_id = ct.customer_id
+            WHERE s.start_date <= '2020-12-31'
+        ) AS subquery
+    ) AS subquery2
+) AS subquery3 
+-- WHERE plan <> 0 AND plan <> 4
+GROUP BY plan
+-- ORDER BY plan ASC
+WITH ROLLUP;
+
 
 select * FROM subscriptions AS s
 JOIN plans AS p ON s.plan_id = p.plan_id
@@ -3168,78 +3305,98 @@ WHERE s.start_date <= '2020-12-31' AND s.plan_id = 3;
 -- The following are open ended questions which might be asked during a technical interview for this case study - there are no right or wrong answers, but answers that make sense from both a technical and a business perspective make an amazing impression!
 
 -- How would you calculate the rate of growth for Foodie-Fi?
-select 
-case when grouping(subquery3.n_month)=1 then 'Total' else subquery3.n_month END AS n_month,
-count(customer) as customer,
-round(avg(price),2) as price,
-round(sum(periods),2) as periods,
-round(sum(payments),2) as paid
-from(
-select subquery2.*,
-round((price*periods),2) AS payments
-from (
-select 
-subquery.*,
-case 
-when subquery.plan = 0 then 
-(DATE_FORMAT(to_date, '%m')-DATE_FORMAT(since,'%m'))
-else 
-((DATE_FORMAT(to_date, '%m')-DATE_FORMAT(since,'%m'))-1) 
-end AS periods
-from(
-SELECT s.customer_id as customer,
-s.plan_id as plan,
-since, to_date, DATE_FORMAT(since, '%m') as n_month,
-price
-FROM subscriptions AS s
-JOIN customer_periods AS ct ON s.plan_id = ct.plan_id AND s.customer_id = ct.customer_id
-WHERE s.start_date <= '2020-12-31') as subquery)
-as subquery2) 
-as subquery3 
--- where plan <> 0 and plan <> 4
-group by n_month
--- order by plan asc
-with rollup;
+SELECT 
+    CASE 
+        WHEN grouping(subquery3.n_month) = 1 THEN 'Total' 
+        ELSE subquery3.n_month 
+    END AS n_month,
+    COUNT(customer) AS customer,
+    ROUND(AVG(price), 2) AS price,
+    ROUND(SUM(periods), 2) AS periods,
+    ROUND(SUM(payments), 2) AS paid
+FROM (
+    SELECT 
+        subquery2.*,
+        ROUND((price * periods), 2) AS payments
+    FROM (
+        SELECT 
+            subquery.*,
+            CASE 
+                WHEN subquery.plan = 0 THEN 
+                    (DATE_FORMAT(to_date, '%m') - DATE_FORMAT(since, '%m'))
+                ELSE 
+                    ((DATE_FORMAT(to_date, '%m') - DATE_FORMAT(since, '%m')) - 1) 
+            END AS periods
+        FROM (
+            SELECT 
+                s.customer_id AS customer,
+                s.plan_id AS plan,
+                since, 
+                to_date, 
+                DATE_FORMAT(since, '%m') AS n_month,
+                price
+            FROM subscriptions AS s
+            JOIN customer_periods AS ct ON s.plan_id = ct.plan_id AND s.customer_id = ct.customer_id
+            WHERE s.start_date <= '2020-12-31'
+        ) AS subquery
+    ) AS subquery2
+) AS subquery3 
+GROUP BY n_month WITH ROLLUP;
+
 
 -- What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
 -- churn/trial mes a mes sobre el resto 
 
-select
+SELECT
     subquery4.*,
     (trials + churns + paid_subscriptions) AS Totals,
-    round((trials / (trials + churns + paid_subscriptions)*100),2) AS 'trials/totals',
-    round((churns / (trials + churns + paid_subscriptions)*100),2) AS 'churns/totals',
-    round((paid_subscriptions / (trials + churns + paid_subscriptions)*100),2) AS 'paid_subs/totals'
-from(
-select 
-case when grouping(subquery3.n_month)=1 then 'Total' else subquery3.n_month END AS n_month,
-count(customer) as customer,
-sum(trial) as trials,
-sum(churn) as churns,
-sum(paid_subscr) as paid_subscriptions
-from(
-select subquery2.*
-from (
-select 
-subquery.*,
-case when subquery.plan=0 then 1 else 0 end as trial,
-case when subquery.plan=4 then 1 else 0 end as churn,
-case when subquery.plan>0 and subquery.plan<4 then 1 else 0 end as paid_subscr
-from(
-SELECT s.customer_id as customer,
-s.plan_id as plan,
-since, to_date, DATE_FORMAT(since, '%m') as n_month,
-price
-FROM subscriptions AS s
-JOIN customer_periods AS ct ON s.plan_id = ct.plan_id AND s.customer_id = ct.customer_id
-WHERE s.start_date <= '2020-12-31') as subquery)
-as subquery2) 
-as subquery3
--- where plan <> 0 and plan <> 4
-group by n_month
--- order by plan asc
-with rollup)
-as subquery4;
+    ROUND((trials / (trials + churns + paid_subscriptions) * 100), 2) AS 'trials/totals',
+    ROUND((churns / (trials + churns + paid_subscriptions) * 100), 2) AS 'churns/totals',
+    ROUND((paid_subscriptions / (trials + churns + paid_subscriptions) * 100), 2) AS 'paid_subs/totals'
+FROM (
+    SELECT 
+        CASE 
+            WHEN grouping(subquery3.n_month) = 1 THEN 'Total' 
+            ELSE subquery3.n_month 
+        END AS n_month,
+        COUNT(customer) AS customer,
+        SUM(trial) AS trials,
+        SUM(churn) AS churns,
+        SUM(paid_subscr) AS paid_subscriptions
+    FROM (
+        SELECT subquery2.*
+        FROM (
+            SELECT 
+                subquery.*,
+                CASE 
+                    WHEN subquery.plan = 0 THEN 1 
+                    ELSE 0 
+                END AS trial,
+                CASE 
+                    WHEN subquery.plan = 4 THEN 1 
+                    ELSE 0 
+                END AS churn,
+                CASE 
+                    WHEN subquery.plan > 0 AND subquery.plan < 4 THEN 1 
+                    ELSE 0 
+                END AS paid_subscr
+            FROM (
+                SELECT 
+                    s.customer_id AS customer,
+                    s.plan_id AS plan,
+                    since, 
+                    to_date, 
+                    DATE_FORMAT(since, '%m') AS n_month,
+                    price
+                FROM subscriptions AS s
+                JOIN customer_periods AS ct ON s.plan_id = ct.plan_id AND s.customer_id = ct.customer_id
+                WHERE s.start_date <= '2020-12-31'
+            ) AS subquery
+        ) AS subquery2
+    ) AS subquery3
+    GROUP BY n_month WITH ROLLUP
+) AS subquery4;
+
 
 -- What are some key customer journeys or experiences that you would analyse further to improve customer retention?
 -- Answer: churn should be taken into consideration
@@ -3247,7 +3404,17 @@ as subquery4;
 -- If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?
 -- Answer: the Foodie team should ask the customers if they are happy with the present subscrition
 
--- What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?
+-- What business levers could the Foodie-Fi team use to reduce the customer churn rate? 
+-- Enhance Customer Experience
+-- Offer Incentives and Discounts
+-- Improve Food Quality and Variety
+-- Streamline Order and Delivery Process
+-- Collect and Act on Customer Feedback
+
+-- How would you validate the effectiveness of your ideas?
+-- A/B Testing: Implement changes or improvements to the platform in different user segments and compare the churn rates between the control group (no changes) and the test group (with changes).
 
 -- Conclusion
 -- This case study should reflect realistic questions we usually focus on for all product related analytics requests in a wide variety of industries, especially in the digital space!
+
+
