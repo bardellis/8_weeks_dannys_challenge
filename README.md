@@ -8,7 +8,7 @@ Data With Danny Case Studies Getting Started Resources About
 
 ## Case Study #3 | Foodie-Fi - Completed
 
-## Case Study #4 | Data Bank
+## Case Study #4 | Data Bank - In process
 
 ## Case Study #5 - Data Mart
 
