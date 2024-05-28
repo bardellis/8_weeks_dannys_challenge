@@ -9417,6 +9417,13 @@ VALUES
 
 -- A. Customer Nodes Exploration
 -- How many unique nodes are there on the Data Bank system?
+select count(distinct(node_id)) as nodes 
+from customer_nodes;
+
+select node_id as nodes, count(*) as clients
+from customer_nodes 
+group by node_id;
+
 -- What is the number of nodes per region?
 -- How many customers are allocated to each region?
 -- How many days on average are customers reallocated to a different node?
