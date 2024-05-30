@@ -38,10 +38,33 @@ GROUP BY
     region_name
 WITH ROLLUP;
 
-
-
 -- How many customers are allocated to each region?
+SELECT 
+    ifnull(region_name, 'Total') as Region,
+    COUNT(*) AS Total
+FROM 
+    customer_nodes as c
+join regions as r on c.region_id=r.region_id
+GROUP BY 
+    region_name
+WITH ROLLUP;
+
 -- How many days on average are customers reallocated to a different node?
+select node_id, round(avg(days),2) as days_realloc from(
+SELECT customer_id, node_id, c.region_id, end_date, start_date, DATEDIFF(end_date, start_date) AS days 
+FROM customer_nodes as c
+join regions  as r on c.region_id=r.region_id
+) subquery group by node_id;
+
+UPDATE customer_nodes
+SET customer_nodes.end_date = '2020-12-31'
+WHERE customer_nodes.end_date = '9999-12-31';
+
+select count(*), end_date from (select c.region_id, end_date, node_id, start_date FROM customer_nodes as c
+join regions  as r on c.region_id=r.region_id
+order by end_date desc) subquery
+Group by end_date order by end_date desc;
+
 -- What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
 
 -- B. Customer Transactions
