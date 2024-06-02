@@ -50,22 +50,96 @@ GROUP BY
 WITH ROLLUP;
 
 -- How many days on average are customers reallocated to a different node?
+# there was an error in one of the dates that must to be solved
+# UPDATE customer_nodes
+# SET customer_nodes.end_date = '2020-12-31'
+# WHERE customer_nodes.end_date = '9999-12-31';
+
 select node_id, round(avg(days),2) as days_realloc from(
 SELECT customer_id, node_id, c.region_id, end_date, start_date, DATEDIFF(end_date, start_date) AS days 
 FROM customer_nodes as c
 join regions  as r on c.region_id=r.region_id
 ) subquery group by node_id;
 
-UPDATE customer_nodes
-SET customer_nodes.end_date = '2020-12-31'
-WHERE customer_nodes.end_date = '9999-12-31';
-
-select count(*), end_date from (select c.region_id, end_date, node_id, start_date FROM customer_nodes as c
-join regions  as r on c.region_id=r.region_id
-order by end_date desc) subquery
-Group by end_date order by end_date desc;
-
 -- What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
+WITH RankedRows AS (
+    SELECT
+        ROW_NUMBER() OVER (PARTITION BY region ORDER BY days_realloc) AS row_num,
+        customer_id,
+        region,
+        days_realloc
+    FROM (
+        SELECT customer_id, region, ROUND(AVG(days), 0) AS days_realloc 
+        FROM (
+            SELECT customer_id, region_name AS region, node_id, c.region_id, end_date, start_date, DATEDIFF(end_date, start_date) AS days 
+            FROM customer_nodes AS c
+            JOIN regions AS r ON c.region_id = r.region_id
+        ) subquery 
+        GROUP BY customer_id, region
+    ) subquery2
+),
+MedianRowNum AS (
+    SELECT region, ROUND(MAX(row_num) / 2.0, 0) AS median_row_num
+    FROM RankedRows
+    GROUP BY region
+)
+SELECT r.customer_id, r.region, r.days_realloc, r.row_num as row_num_median
+FROM RankedRows r
+JOIN MedianRowNum m
+ON r.region = m.region AND r.row_num = m.median_row_num;
+
+WITH RankedRows AS (
+    SELECT
+        ROW_NUMBER() OVER (PARTITION BY region ORDER BY days_realloc) AS row_num,
+        customer_id,
+        region,
+        days_realloc
+    FROM (
+        SELECT customer_id, region, ROUND(AVG(days), 0) AS days_realloc 
+        FROM (
+            SELECT customer_id, region_name AS region, node_id, c.region_id, end_date, start_date, DATEDIFF(end_date, start_date) AS days 
+            FROM customer_nodes AS c
+            JOIN regions AS r ON c.region_id = r.region_id
+        ) subquery 
+        GROUP BY customer_id, region
+    ) subquery2
+),
+MedianRowNum AS (
+    SELECT region, ROUND(MAX(row_num) *0.8, 0) AS median_row_num
+    FROM RankedRows
+    GROUP BY region
+)
+SELECT r.customer_id, r.region, r.days_realloc, r.row_num as 'row_num_80th'
+FROM RankedRows r
+JOIN MedianRowNum m
+ON r.region = m.region AND r.row_num = m.median_row_num;
+
+WITH RankedRows AS (
+    SELECT
+        ROW_NUMBER() OVER (PARTITION BY region ORDER BY days_realloc) AS row_num,
+        customer_id,
+        region,
+        days_realloc
+    FROM (
+        SELECT customer_id, region, ROUND(AVG(days), 0) AS days_realloc 
+        FROM (
+            SELECT customer_id, region_name AS region, node_id, c.region_id, end_date, start_date, DATEDIFF(end_date, start_date) AS days 
+            FROM customer_nodes AS c
+            JOIN regions AS r ON c.region_id = r.region_id
+        ) subquery 
+        GROUP BY customer_id, region
+    ) subquery2
+),
+MedianRowNum AS (
+    SELECT region, ROUND(MAX(row_num) *0.95, 0) AS median_row_num
+    FROM RankedRows
+    GROUP BY region
+)
+SELECT r.customer_id, r.region, r.days_realloc, r.row_num as 'row_num_95th'
+FROM RankedRows r
+JOIN MedianRowNum m
+ON r.region = m.region AND r.row_num = m.median_row_num;
+
 
 -- B. Customer Transactions
 -- What is the unique count and total amount for each transaction type?
