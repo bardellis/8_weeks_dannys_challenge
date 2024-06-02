@@ -140,6 +140,11 @@ FROM RankedRows r
 JOIN MedianRowNum m
 ON r.region = m.region AND r.row_num = m.median_row_num;
 
+-- What is the number of nodes per region?
+-- How many customers are allocated to each region?
+-- How many days on average are customers reallocated to a different node?
+-- What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
+
 
 -- B. Customer Transactions
 -- What is the unique count and total amount for each transaction type?
