@@ -3,6 +3,7 @@
 Data With Danny Case Studies Getting Started Resources About
 
 ## Case Study #1 | Danny's Diner - Completed
+https://8weeksqlchallenge.com/case-study-1/
 Joins
 
 ## Case Study #2 | Pizza Runner - Completed
