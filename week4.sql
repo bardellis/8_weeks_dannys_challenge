@@ -152,49 +152,33 @@ FROM customer_transactions
 where txn_type = 'deposit';
 
 -- For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
-select customer_id,
-    MAX(CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END) AS rolling_total_1,
-    MAX(CASE WHEN rolling_total_2 = 0 THEN rolling_total_1 ELSE rolling_total_1+rolling_total_2 END) AS rolling_total_2,
-    MAX(CASE WHEN rolling_total_3 = 0 THEN rolling_total_1+rolling_total_2 ELSE rolling_total_1+rolling_total_2+rolling_total_3 END) AS rolling_total_3,
-    MAX(CASE WHEN rolling_total_4 = 0  THEN rolling_total_1+rolling_total_2+rolling_total_3 ELSE rolling_total_1+rolling_total_2+rolling_total_3+rolling_total_4 END) AS rolling_total_4
-from (WITH rolling_totals AS (
-    SELECT 
-        customer_id,
-        MONTH(txn_date) AS months, 
-        SUM(deposits) AS deposits, 
-        SUM(purchases) AS purchases, 
-        SUM(withdrawals) AS withdrawals,
-        SUM(deposits + purchases + withdrawals) AS month_balance,
-        SUM(SUM(deposits + purchases + withdrawals)) OVER (PARTITION BY customer_id ORDER BY MONTH(txn_date)) AS rolling_total
-    FROM (
-        SELECT *,
-            CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END AS deposits,
-            CASE WHEN txn_type = 'purchase' THEN txn_amount ELSE 0 END AS purchases,
-            CASE WHEN txn_type = 'withdrawal' THEN txn_amount ELSE 0 END AS withdrawals
-        FROM customer_transactions
-    ) subquery
-    GROUP BY customer_id, MONTH(txn_date)
-),
-cumulative_totals AS (
-    SELECT
-        customer_id,
-        months,
-        rolling_total,
-        SUM(rolling_total) OVER (PARTITION BY customer_id ORDER BY months ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_total
-    FROM rolling_totals
-)
-SELECT 
+select customer_id as customer,
+    MAX(CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END) AS rolling_total_m1,
+	MAX(CASE WHEN rolling_total_2 <> 0 THEN rolling_total_2 ELSE CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END END) AS rolling_total_m2,
+    MAX(CASE WHEN rolling_total_3 <> 0 THEN rolling_total_3 ELSE CASE WHEN rolling_total_2 <> 0 THEN rolling_total_2 ELSE CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END END END) AS rolling_total_m3,
+    MAX(CASE WHEN rolling_total_4 <> 0 THEN rolling_total_4 ELSE CASE WHEN rolling_total_3 <> 0 THEN rolling_total_3 ELSE CASE WHEN rolling_total_2 <> 0 THEN rolling_total_2 ELSE CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END END END END) AS rolling_total_m4
+FROM(
+	SELECT 
     customer_id,
-    MAX(CASE WHEN months = 1 THEN cumulative_total ELSE 0 END) AS rolling_total_1,
-    MAX(CASE WHEN months = 2 THEN cumulative_total ELSE 0 END) AS rolling_total_2,
-    MAX(CASE WHEN months = 3 THEN cumulative_total ELSE 0 END) AS rolling_total_3,
-    MAX(CASE WHEN months = 4 THEN cumulative_total ELSE 0 END) AS rolling_total_4
-FROM cumulative_totals
-GROUP BY customer_id) subquery
-group by customer_id;
+    MAX(CASE WHEN months = 1 THEN rolling_total ELSE 0 END) AS rolling_total_1,
+    MAX(CASE WHEN months = 2 THEN rolling_total ELSE 0 END) AS rolling_total_2,
+    MAX(CASE WHEN months = 3 THEN rolling_total ELSE 0 END) AS rolling_total_3,
+    MAX(CASE WHEN months = 4 THEN rolling_total ELSE 0 END) AS rolling_total_4
+	FROM (
+		SELECT 
+			customer_id,
+            MONTH(txn_date) AS months, 
+            SUM(CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END) AS deposits,
+            SUM(CASE WHEN txn_type = 'purchase' THEN txn_amount ELSE 0 END) AS purchases,
+            SUM(CASE WHEN txn_type = 'withdrawal' THEN txn_amount ELSE 0 END) AS withdrawals,
+            SUM(txn_amount) AS month_balance,
+            SUM(SUM(txn_amount)) OVER (PARTITION BY customer_id ORDER BY MONTH(txn_date)) AS rolling_total
+            FROM customer_transactions
+            GROUP BY customer_id, MONTH(txn_date))subquery
+            GROUP BY customer_id) subquery2
+            GROUP BY customer_id;
 
 -- What is the percentage of customers who increase their closing balance by more than 5%?
-
 -- C. Data Allocation Challenge
 -- To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
 
