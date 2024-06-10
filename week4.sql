@@ -152,6 +152,34 @@ FROM customer_transactions
 where txn_type = 'deposit';
 
 -- For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
+select sum(conditions) as customers
+from(
+SELECT 
+    customer,
+    months,
+    CASE 
+        WHEN deposits >= 1 AND purchase >= 1 THEN 1
+        WHEN deposits >= 1 AND withdrawal >= 1 THEN 1
+        ELSE 0
+    END AS conditions
+FROM (
+    SELECT 
+        customer_id AS customer,
+        MONTH(txn_date) AS months,
+        SUM(CASE WHEN txn_type = 'deposit' THEN 1 ELSE 0 END) AS deposits,
+        SUM(CASE WHEN txn_type = 'purchase' THEN 1 ELSE 0 END) AS purchase,
+        SUM(CASE WHEN txn_type = 'withdrawal' THEN 1 ELSE 0 END) AS withdrawal
+    FROM 
+        customer_transactions
+    GROUP BY 
+        customer_id, MONTH(txn_date)
+) subquery
+GROUP BY 
+    customer, months) subquery2;
+
+
+-- What is the closing balance for each customer at the end of the month?
+CREATE VIEW customer_balance AS 
 select customer_id as customer,
     MAX(CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END) AS rolling_total_m1,
 	MAX(CASE WHEN rolling_total_2 <> 0 THEN rolling_total_2 ELSE CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END END) AS rolling_total_m2,
@@ -179,6 +207,9 @@ FROM(
             GROUP BY customer_id;
 
 -- What is the percentage of customers who increase their closing balance by more than 5%?
+select * from customer_balance;
+
+
 -- C. Data Allocation Challenge
 -- To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
 
