@@ -207,7 +207,24 @@ FROM(
             GROUP BY customer_id;
 
 -- What is the percentage of customers who increase their closing balance by more than 5%?
-select * from customer_balance;
+WITH classified_customers AS (
+    SELECT *, 
+           ROUND((rolling_total_m1 / rolling_total_m4) * 100, 2) AS increase_percentage,
+           CASE 
+               WHEN (rolling_total_m1 / rolling_total_m4) * 100 > 5 
+               THEN '>5%' 
+               ELSE '<=5%' 
+           END AS increase
+    FROM customer_balance
+)
+SELECT 
+    increase,
+    COUNT(*) AS customer_count,
+    (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM classified_customers)) AS percentage
+FROM classified_customers
+GROUP BY increase;
+
+
 
 
 -- C. Data Allocation Challenge
