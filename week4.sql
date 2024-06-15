@@ -225,24 +225,91 @@ FROM classified_customers
 GROUP BY increase;
 
 
-
-
 -- C. Data Allocation Challenge
 -- To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
-
 -- Option 1: data is allocated based off the amount of money at the end of the previous month
 -- Option 2: data is allocated on the average amount of money kept in the account in the previous 30 days
 -- Option 3: data is updated real-time
 -- For this multi-part challenge question - you have been requested to generate the following data elements to help the Data Bank team estimate how much data will need to be provisioned for each option:
 -- running customer balance column that includes the impact each transaction
+
+SELECT 
+    customer_id, 
+    txn_date, 
+    txn_type, 
+    txn_amount,
+    SUM(
+        CASE 
+            WHEN txn_type = 'deposit' THEN txn_amount 
+            WHEN txn_type = 'withdrawal' THEN -txn_amount
+            ELSE 0 
+        END
+    ) OVER (PARTITION BY customer_id ORDER BY txn_date) AS running_balance
+FROM 
+    customer_transactions
+ORDER BY 
+    customer_id, txn_date;
+
 -- customer balance at the end of each month
+SELECT 
+    customer_id,
+    LAST_DAY(txn_date) AS month_end_date,
+    running_balance
+FROM (
+    SELECT 
+        customer_id, 
+        txn_date, 
+        txn_type, 
+        txn_amount,
+        SUM(
+            CASE 
+                WHEN txn_type = 'deposit' THEN txn_amount 
+                WHEN txn_type = 'withdrawal' THEN -txn_amount
+                ELSE 0 
+            END
+        ) OVER (PARTITION BY customer_id ORDER BY txn_date) AS running_balance
+    FROM 
+        customer_transactions
+) AS DailyBalances
+WHERE txn_date = LAST_DAY(txn_date)
+ORDER BY customer_id, month_end_date;
+
 -- minimum, average and maximum values of the running balance for each customer
+SELECT 
+    customer_id,
+    MIN(running_balance) AS min_balance,
+    round(AVG(running_balance),0) AS avg_balance,
+    MAX(running_balance) AS max_balance
+FROM (
+    SELECT 
+        customer_id, 
+        txn_date, 
+        txn_type, 
+        txn_amount,
+        @bal := CASE 
+            WHEN @cust = customer_id THEN @bal + CASE txn_type 
+                WHEN 'deposit' THEN txn_amount
+                WHEN 'withdrawal' THEN -txn_amount
+                ELSE 0
+            END
+            ELSE txn_amount
+        END AS running_balance,
+        @cust := customer_id
+    FROM 
+        customer_transactions,
+        (SELECT @bal := 0, @cust := NULL) AS vars
+    ORDER BY 
+        customer_id, txn_date
+) AS RunningBalances
+GROUP BY 
+    customer_id;
+
 -- Using all of the data available - how much data would have been required for each option on a monthly basis?
+
 
 -- D. Extra Challenge
 -- Data Bank wants to try another option which is a bit more difficult to implement - they want to calculate data growth using an interest calculation, just like in a traditional savings account you might have with a bank.
 -- If the annual interest rate is set at 6% and the Data Bank team wants to reward its customers by increasing their data allocation based off the interest calculated on a daily basis at the end of each day, how much data wo-- uld be required for this option on a monthly basis?
-
 -- Special notes:
 -- Data Bank wants an initial calculation which does not allow for compounding interest, however they may also be interested in a daily compounding interest calculation so you can try to perform this calculation if you have the stamina!
 -- Extension Request
