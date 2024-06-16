@@ -305,13 +305,74 @@ GROUP BY
     customer_id;
 
 -- Using all of the data available - how much data would have been required for each option on a monthly basis?
-
+SELECT
+    MONTH(txn_date) AS months,
+    COUNT(txn_amount) AS count
+FROM
+    customer_transactions
+WHERE
+    txn_type = 'deposit' OR txn_type = 'withdrawal'
+GROUP BY
+    months;
 
 -- D. Extra Challenge
--- Data Bank wants to try another option which is a bit more difficult to implement - they want to calculate data growth using an interest calculation, just like in a traditional savings account you might have with a bank.
--- If the annual interest rate is set at 6% and the Data Bank team wants to reward its customers by increasing their data allocation based off the interest calculated on a daily basis at the end of each day, how much data wo-- uld be required for this option on a monthly basis?
+-- Data Bank wants to try another option which is a bit more difficult to implement - they want to calculate data growth using an interest calculation, 
+-- just like in a traditional savings account you might have with a bank.
+-- If the annual interest rate is set at 6% and the Data Bank team wants to reward its customers by increasing their data allocation based off the interest calculated on a daily basis at the end of each day, 
+-- how much data would be required for this option on a monthly basis?
+
 -- Special notes:
 -- Data Bank wants an initial calculation which does not allow for compounding interest, however they may also be interested in a daily compounding interest calculation so you can try to perform this calculation if you have the stamina!
+-- Assuming an initial data allocation of 100 units for simplicity
+WITH DataAllocations AS (
+    SELECT 
+        customer_id,
+        100 AS initial_allocation -- Assuming initial allocation is 100 units, modify as necessary
+    FROM 
+        customer_transactions
+    GROUP BY
+        customer_id
+),
+InterestCalculation AS (
+    SELECT
+        customer_id,
+        initial_allocation,
+        initial_allocation + (initial_allocation * 0.06 / 365 * 30) AS allocation_after_one_month
+    FROM 
+        DataAllocations
+)
+SELECT 
+    customer_id,
+    initial_allocation,
+    allocation_after_one_month
+FROM 
+    InterestCalculation;
+
+-- Assuming an initial data allocation of 100 units for simplicity
+WITH DataAllocations AS (
+    SELECT 
+        customer_id,
+        100 AS initial_allocation -- Assuming initial allocation is 100 units, modify as necessary
+    FROM 
+        customer_transactions
+    GROUP BY
+        customer_id
+),
+CompoundingInterestCalculation AS (
+    SELECT
+        customer_id,
+        initial_allocation,
+        initial_allocation * POWER(1 + (0.06 / 365), 30) AS allocation_after_one_month
+    FROM 
+        DataAllocations
+)
+SELECT 
+    customer_id,
+    initial_allocation,
+    round(allocation_after_one_month,2) as allocation_after_one_month
+FROM 
+    CompoundingInterestCalculation;
+
 -- Extension Request
 -- The Data Bank team wants you to use the outputs generated from the above sections to create a quick Powerpoint presentation which will be used as marketing materials for both external investors who might want to buy Data Bank shares and new prospective customers who might want to bank with Data Bank.
 -- Using the outputs generated from the customer node questions, generate a few headline insights which Data Bank might use to market it’s world-leading security features to potential investors and customers.
