@@ -15,11 +15,11 @@ https://8weeksqlchallenge.com/case-study-2/
 https://8weeksqlchallenge.com/case-study-3/
 
 
-## Case Study #4 | Data Bank - In process  
+## Case Study #4 | Data Bank - Completed  
 https://8weeksqlchallenge.com/case-study-4/
 
 
-## Case Study #5 - Data Mart - Pending 
+## Case Study #5 - Data Mart - In process 
 https://8weeksqlchallenge.com/case-study-5/
 
 
