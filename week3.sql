@@ -2903,7 +2903,7 @@ Use foodie_fi;
 -- upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
 -- once a customer churns they will no longer make payments
 
--- cREATE VIEW customer_basic_monthly_plan AS
+-- cREATE VIEW customer_trial_plan AS
 -- QUERY X TRIAL PLAN 
 SELECT 
     subquery_since_trial.customer_id,
@@ -2975,7 +2975,6 @@ FROM (
     ) AS subquery_trial
 ) AS subquery_since_trial
 JOIN plans AS pl ON subquery_since_trial.plan_id = pl.plan_id;
-
 
 -- cREATE VIEW customer_basic_monthly_plan AS
 -- QUERY X BASIC MONTH
@@ -3177,7 +3176,7 @@ FROM (
 JOIN plans AS pl ON subquery_since_proa.plan_id = pl.plan_id
 WHERE since <> '';
 
-
+-- select * from customer_churn;
 -- CREATE VIEW customer_churn AS
 -- QUERY X CHURN
 SELECT 
@@ -3245,7 +3244,7 @@ JOIN plans AS pl ON subquery_since_proa.plan_id = pl.plan_id
 WHERE since <> '';
 
 
-CREATE VIEW customer_periods AS
+CREATE VIEW customer_periods AS;
 SELECT * FROM customer_churn
 UNION
 SELECT * FROM customer_pro_monthly_plan

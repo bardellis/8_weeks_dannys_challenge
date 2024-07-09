@@ -1,9 +1,7 @@
+CREATE SCHEMA pizza_runner;
+
 Use pizza_runner;
 
-CREATE SCHEMA pizza_runner;
-SET search_path = pizza_runner;
-
-DROP TABLE IF EXISTS runners;
 CREATE TABLE runners (
   runner_id INTEGER,
   registration_date DATE
@@ -45,6 +43,7 @@ VALUES
   (9, 103, 1, '4', '1', '2020-01-10 11:22:59'),
   (10, 104, 1, null, null, '2020-01-11 18:34:49'),
   (10, 104, 1, '2', '6', '2020-01-11 18:34:49');
+  
 select * from customer_orders;
 delete from customer_orders;
 
@@ -544,30 +543,30 @@ GROUP BY
 
 -- The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset 
 -- generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
-CREATE TABLE RunnerRatings (
-    rating_id SERIAL PRIMARY KEY,
-    order_id INT NOT NULL,
-    runner_id INT NOT NULL,
-    customer_rating INT NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
-    FOREIGN KEY (runner_id) REFERENCES Runners(runner_id)
+
+ALTER TABLE runner_orders
+ADD INDEX idx_order_id (order_id);
+
+CREATE TABLE runner_ratings (
+    rating_id INT,
+    order_id INT,
+    customer_rating INT,
+    FOREIGN KEY (order_id) REFERENCES runner_orders(order_id)
 );
 
-INSERT INTO runner_ratings (rating_id, order_id, runner_id, customer_rating) VALUES
-(1, 1, 101, 5),
-(2, 2, 101, 4),
-(3, 3, 102, 3),
-(4, 4, 103, 5),
-(5, 5, 104, 2),
-(6, 6, 101, 4),
-(7, 7, 105, 5),
-(8, 8, 102, 3),
-(9, 9, 103, 5),
-(10, 10, 104, 4);
+INSERT INTO runner_ratings (rating_id, order_id, customer_rating) VALUES
+(1, 1, 5),
+(2, 2, 4),
+(3, 3, 3),
+(4, 4, 5),
+(5, 5, 2),
+(6, 6, 4),
+(7, 7, 5),
+(8, 8, 3),
+(9, 9, 5),
+(10, 10, 4);
 
-delete from runner_ratings;
 select * from runner_ratings;
-select * from customer_orders;
 
 -- Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
 -- customer_id

@@ -1,11 +1,13 @@
-CREATE SCHEMA dannys_diner_2;
-SET search_path = dannys_diner_2;
+CREATE SCHEMA dannys_diner;
+USE dannys_diner;
 
-CREATE TABLE sales (customer_id INTEGER,order_date DATE,
-  product_id INTEGER);
+CREATE TABLE sales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id VARCHAR(10),
+    order_date DATE,
+    product_id INT
+);
 
-select * from sales;
-Delete FROM sales;
 INSERT INTO sales (customer_id, order_date, product_id)
 VALUES
   ('A', '2021-01-01', 1),
@@ -31,8 +33,6 @@ CREATE TABLE menu (
   price INTEGER
 );
 
-select * from menu;
-Delete FROM menu;
 INSERT INTO menu
   (product_id, product_name, price)
 VALUES
@@ -46,8 +46,7 @@ CREATE TABLE members (
   join_date DATE
 );
 
-select * from members;
-Delete FROM members;
+
 INSERT INTO members
   (customer_id, join_date)
 VALUES
