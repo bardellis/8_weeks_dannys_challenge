@@ -27,18 +27,81 @@ Add a week_number as the second column for each week_date value, for example any
 Add a month_number with the calendar month for each week_date value as the 3rd column
 Add a calendar_year column as the 4th column containing either 2018, 2019 or 2020 values
 Add a new column called age_band after the original segment column using the following mapping on the number inside the segment value*/
--- segment	age_band
+-- segment age_band
 -- 1 Young Adults
 -- 2 Middle Aged
 -- 3 or 4 Retirees
+
+DROP TABLE IF EXISTS data_mart.clean_weekly_sales;
+
+CREATE TABLE clean_weekly_sales (
+    week_date VARCHAR(7) NOT NULL,
+    date_format DATE,
+    segment VARCHAR(4), -- Asumiendo que segment existe en la tabla original
+    day_number INT,
+    month_number INT,
+    year_number INT,
+    age_band VARCHAR(20),
+    demographic VARCHAR(20),
+    transactions int,
+    sales int,
+    avg_transaction int
+);
+
+INSERT INTO clean_weekly_sales (week_date, segment, sales, transactions)
+SELECT week_date, segment, sales, transactions
+FROM weekly_sales;
+
+-- Agregar day_number, month_number, year_number
+UPDATE clean_weekly_sales
+SET 
+    day_number = CAST(SUBSTRING_INDEX(week_date, '/', 1) AS UNSIGNED),
+    month_number = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(week_date, '/', 2), '/', -1) AS UNSIGNED),
+    year_number = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(week_date, '/', -1), '/', 1) AS UNSIGNED);
+
+UPDATE clean_weekly_sales
+SET date_format = STR_TO_DATE(CONCAT(year_number, '-', LPAD(month_number, 2, '00'), '-', LPAD(day_number, 2, '00')), '%Y-%m-%d')
+WHERE year_number IS NOT NULL AND month_number IS NOT NULL AND day_number IS NOT NULL;
+
+-- Convertir week_date a formato DATE si es necesario
+UPDATE clean_weekly_sales
+SET date_format = STR_TO_DATE(CONCAT('01/', week_date), '%d/%m/%Y');
+
+-- Mapear segment a age_band
+UPDATE clean_weekly_sales
+SET age_band =
+    CASE
+        WHEN segment LIKE '%1' THEN 'Young Adults'  
+        WHEN segment LIKE '%2' THEN 'Middle Aged'  
+        WHEN segment LIKE '%3' THEN 'Retirees'     
+        WHEN segment LIKE '%4' THEN 'Retirees'     
+        ELSE 'Unknown'
+    END;
 
 -- Add a new demographic column using the following mapping for the first letter in the segment values:
 -- segment demographic
 -- C Couples
 -- F Families
 
-/*Ensure all null string values with an "unknown" string value in the original segment column as well as the new age_band and demographic columns
-Generate a new avg_transaction column as the sales value divided by transactions rounded to 2 decimal places for each record*/
+UPDATE clean_weekly_sales
+SET demographic =
+    CASE
+        WHEN segment LIKE 'C%' THEN 'Couples'  
+        WHEN segment LIKE 'F%' THEN 'Families'  
+        ELSE 'Unknown'
+    END;
+
+-- /*Ensure all null string values with an "unknown" string value in the original segment column as well as the new age_band and demographic columns
+select segment, age_band, demographic, count(*)
+FROM clean_weekly_sales
+Where segment = 'null'
+GROUP BY segment, age_band, demographic;
+
+-- Generate a new avg_transaction column as the sales value divided by transactions rounded to 2 decimal places for each record*/
+UPDATE clean_weekly_sales
+SET avg_transaction = ROUND(sales / transactions, 2);
+
+select * from clean_weekly_sales;
 
 -- 2. Data Exploration
 /*What day of the week is used for each week_date value?
