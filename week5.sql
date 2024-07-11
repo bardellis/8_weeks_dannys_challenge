@@ -101,8 +101,6 @@ GROUP BY segment, age_band, demographic;
 UPDATE clean_weekly_sales
 SET avg_transaction = ROUND(sales / transactions, 2);
 
-select * from clean_weekly_sales;
-
 -- 2. Data Exploration
 /*What day of the week is used for each week_date value?
 What range of week numbers are missing from the dataset?
@@ -114,6 +112,19 @@ What is the percentage of sales by demographic for each year in the dataset?
 Which age_band and demographic values contribute the most to Retail sales?
 Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? 
 If not - how would you calculate it instead?*/
+
+
+select * from clean_weekly_sales;
+
+ALTER TABLE clean_weekly_sales
+ADD COLUMN week_day VARCHAR(20);
+
+UPDATE clean_weekly_sales
+SET week_day = DAYNAME(date_format);
+
+select week_day, count(*)
+from clean_weekly_sales
+group by week_day; -- all dates are mondays 
 
 -- 3. Before & After Analysis
 /* This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
