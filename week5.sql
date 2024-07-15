@@ -41,12 +41,13 @@ Add a new column called age_band after the original segment column using the fol
 		demographic VARCHAR(20),
 		transactions int,
 		sales int,
+        region VARCHAR(13),
 		avg_transaction int,
-        platform VARCHAR(7),
+        platform VARCHAR(7)
 	);
 
-	INSERT INTO clean_weekly_sales (week_date, segment, sales, transactions, platform)
-	SELECT week_date, segment, sales, transactions, platform
+	INSERT INTO clean_weekly_sales (week_date, segment, sales, transactions, platform, region)
+	SELECT week_date, segment, sales, transactions, platform, region
 	FROM weekly_sales;
 
 -- ------------------------------------------------------------
@@ -207,7 +208,8 @@ If not - how would you calculate it instead?*/
 			year_number, month_number 
 			ORDER BY
 			year_number, month_number;
-			-- Y	M	Retail  Shopify
+			
+            -- Y	M	Retail  Shopify
 			-- 18	3	97.92	2.08
 			-- 18	4	97.93	2.07
 			-- 18	5	97.73	2.27
@@ -231,9 +233,81 @@ If not - how would you calculate it instead?*/
 
 -- --------------------------------------------------------------------------------
 -- What is the percentage of sales by demographic for each year in the dataset?
+select
+			year_number, 
+			max(case when region = 'OCEANIA' then percentage_sales else 0 end) as '%OCEANIA',
+            max(case when region = 'AFRICA' then percentage_sales else 0 end) as '%AFRICA',
+            max(case when region = 'ASIA' then percentage_sales else 0 end) as '%ASIA',
+			max(case when region = 'USA' then percentage_sales else 0 end) as '%USA',
+            max(case when region = 'CANADA' then percentage_sales else 0 end) as '%CANADA',
+            max(case when region = 'SOUTH AMERICA' then percentage_sales else 0 end) as '%S.AMERICA',
+            max(case when region = 'EUROPE' then percentage_sales else 0 end) as '%EUROPE'
+        from(
+        SELECT
+			s.year_number,
+			s.region,
+			SUM(s.sales) AS platform_sales,
+			t.total_sales_all_regions,
+			ROUND((SUM(s.sales) / t.total_sales_all_regions) * 100, 2) AS percentage_sales
+		FROM
+			clean_weekly_sales s
+		JOIN (
+			-- Subquery to get total sales for each month
+			SELECT
+				year_number,
+				SUM(sales) AS total_sales_all_regions
+			FROM
+				clean_weekly_sales
+			GROUP BY
+				year_number
+		) t ON s.year_number = t.year_number
+		GROUP BY
+			s.year_number, s.region, t.total_sales_all_regions
+		ORDER BY
+			s.year_number, s.region) as subquery
+            GROUP BY
+			year_number 
+			ORDER BY
+			year_number;
+            
+            -- year_number %OCEANIA %AFRICA %ASIA 	%USA 	%CANADA %S.AMIRICA %EUROPE
+            -- 18			32.49	24.59	22.25	9.76	6.12	3.02		1.77
+			-- 19			32.82	24.44	22.37	9.64	6.14	2.98		1.61
+			-- 20			32.89	24.18	22.84	9.53	5.99	2.99		1.58
 
 -- --------------------------------------------------------------------------------
 -- Which age_band and demographic values contribute the most to Retail sales?
+			SELECT
+				age_band,
+				percentage_total_sales
+				from(
+			SELECT
+				age_band,
+				platform,
+				SUM(sales) AS total_sales,
+				ROUND((SUM(sales) / total_retail_sales.total_sales_retail) * 100, 2) AS percentage_total_sales
+			FROM
+				clean_weekly_sales
+			JOIN (
+				SELECT
+					SUM(sales) AS total_sales_retail
+				FROM
+					clean_weekly_sales
+				WHERE
+					platform = 'Retail'
+			) AS total_retail_sales ON 1=1  -- Dummy join condition to ensure the subquery is executed once
+			WHERE
+				platform = 'Retail'
+			GROUP BY
+				age_band, platform, total_retail_sales.total_sales_retail
+			ORDER BY
+				total_sales DESC) subquery;
+			
+            -- Unknown			40.52
+			-- Retirees			32.80
+			-- Middle Aged		15.66
+			-- Young Adults		11.03
+
 
 -- ------------------------------------------------------------------------------------------------------------------
 -- Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? 
@@ -244,7 +318,7 @@ If not - how would you calculate it instead?*/
 	USE data_mart;
 	select * from clean_weekly_sales;
 	select * from weekly_sales;
-    
+       
 -- 3. Before & After Analysis
 /* This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
 Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.
