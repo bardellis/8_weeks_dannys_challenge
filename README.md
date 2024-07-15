@@ -19,11 +19,7 @@ https://8weeksqlchallenge.com/case-study-3/
 https://8weeksqlchallenge.com/case-study-4/
 
 
-<<<<<<< HEAD
-## Case Study #5 - Data Mart – In process
-=======
-## Case Study #5 - Data Mart - In process 
->>>>>>> 219395108583007ee50b17d39c21908513e8586f
+## Case Study #5 - Data Mart â€“ In process
 https://8weeksqlchallenge.com/case-study-5/
 
 
@@ -37,4 +33,5 @@ https://8weeksqlchallenge.com/case-study-7/
 
 ## Case Study #8 - Fresh Segments - Pending 
 https://8weeksqlchallenge.com/case-study-8/
+
 
