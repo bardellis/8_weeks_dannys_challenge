@@ -311,9 +311,27 @@ select
 
 -- ------------------------------------------------------------------------------------------------------------------
 -- Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? 
+			SELECT
+				year_number, 
+				ROUND(AVG(CASE WHEN platform = 'Retail' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Retail,
+				ROUND(AVG(CASE WHEN platform = 'Shopify' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Shopify
+			FROM (
+				SELECT
+					year_number,
+					platform,
+					AVG(avg_transaction_size) AS avg_transaction_size
+				FROM
+					clean_weekly_sales
+				GROUP BY
+					year_number, platform
+			) AS subquery
+			GROUP BY
+				year_number;
 
--- ---------------------------------------------------- 
--- If not - how would you calculate it instead?*/
+			-- year_number 	AVG.Retail 	AVG.Shopify
+			-- 20			20.32		87.44
+			-- 19			20.98		88.79
+			-- 18			21.45		94.14
 
 	USE data_mart;
 	select * from clean_weekly_sales;
