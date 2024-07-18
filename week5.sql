@@ -50,7 +50,7 @@ Add a new column called age_band after the original segment column using the fol
 	SELECT week_date, segment, sales, transactions, platform, region
 	FROM weekly_sales;
 
--- ------------------------------------------------------------
+--------------------------------------------------------------
 -- Agregar day_number, month_number, year_number
 	UPDATE clean_weekly_sales
 	SET 
@@ -66,7 +66,7 @@ Add a new column called age_band after the original segment column using the fol
 	UPDATE clean_weekly_sales
 	SET date_format = STR_TO_DATE(CONCAT('01/', week_date), '%d/%m/%Y');
 
--- ------------------------------------------------------------
+----------------------------------------------------------------
 -- Mapear segment a age_band
 	UPDATE clean_weekly_sales
 	SET age_band =
@@ -78,7 +78,7 @@ Add a new column called age_band after the original segment column using the fol
 			ELSE 'Unknown'
 		END;
 
--- ------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
 -- Add a new demographic column using the following mapping for the first letter in the segment values:
 -- segment demographic-- C Couples-- F Families
 	UPDATE clean_weekly_sales
@@ -89,14 +89,14 @@ Add a new column called age_band after the original segment column using the fol
 			ELSE 'Unknown'
 		END;
 
--- ------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------
 -- /*Ensure all null string values with an "unknown" string value in the original segment column as well as the new age_band and demographic columns
 	select segment, age_band, demographic, count(*)
 	FROM clean_weekly_sales
 	Where segment = 'null'
 	GROUP BY segment, age_band, demographic;
 
--- ------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------
 -- Generate a new avg_transaction column as the sales value divided by transactions rounded to 2 decimal places for each record*/
 	UPDATE clean_weekly_sales
 	SET avg_transaction = ROUND(sales / transactions, 2);
@@ -113,7 +113,7 @@ Which age_band and demographic values contribute the most to Retail sales?
 Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? 
 If not - how would you calculate it instead?*/
 
--- ------------------------------------------------------------
+--------------------------------------------------------------------
 -- What day of the week is used for each week_date value?
 	ALTER TABLE clean_weekly_sales
 	ADD COLUMN week_day VARCHAR(20);
@@ -125,7 +125,7 @@ If not - how would you calculate it instead?*/
 	from clean_weekly_sales
 	group by week_day; -- all dates are mondays 
 
--- ------------------------------------------------------------
+---------------------------------------------------------------------
 -- What range of week numbers are missing from the dataset?
 		ALTER TABLE clean_weekly_sales
 		ADD COLUMN week_number VARCHAR(20);
@@ -137,7 +137,7 @@ If not - how would you calculate it instead?*/
 		group by week_number
 		order by week_number asc;
 
--- ------------------------------------------------------------ 
+---------------------------------------------------------------------- 
 -- What range of week numbers are missing from the dataset?
 		WITH RECURSIVE Weeks AS (
 			SELECT 1 AS week_num
@@ -154,7 +154,7 @@ If not - how would you calculate it instead?*/
 		WHERE existing_weeks.week_number IS NULL
 		ORDER BY missing_week_number;
 
--- -----------------------------------------------------------------------
+-------------------------------------------------------------------------
 -- How many total transactions were there for each year in the dataset?
 		select year_number, count(*)
 		from clean_weekly_sales
@@ -164,7 +164,7 @@ If not - how would you calculate it instead?*/
 		-- 19	5708
 		-- 20	5711
 
--- -------------------------------------------------------------
+------------------------------------------------------------------------
 -- What is the total count of transactions for each platform
 		select platform, count(*) as quantity
 		from weekly_sales
@@ -173,7 +173,7 @@ If not - how would you calculate it instead?*/
 		-- Shopify	8549
 		-- Retail	8568
 
--- -----------------------------------------------------------------------
+-------------------------------------------------------------------------
 -- What is the percentage of sales for Retail vs Shopify for each month?
         select
 			year_number, month_number, 
@@ -231,7 +231,7 @@ If not - how would you calculate it instead?*/
 			-- 20	7	96.67	3.33
 			-- 20	8	96.51	3.49
 
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 -- What is the percentage of sales by demographic for each year in the dataset?
 select
 			year_number, 
@@ -275,7 +275,7 @@ select
 			-- 19			32.82	24.44	22.37	9.64	6.14	2.98		1.61
 			-- 20			32.89	24.18	22.84	9.53	5.99	2.99		1.58
 
--- --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 -- Which age_band and demographic values contribute the most to Retail sales?
 			SELECT
 				age_band,
@@ -311,40 +311,109 @@ select
 
 -- ------------------------------------------------------------------------------------------------------------------
 -- Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? 
-			SELECT
-				year_number, 
-				ROUND(AVG(CASE WHEN platform = 'Retail' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Retail,
-				ROUND(AVG(CASE WHEN platform = 'Shopify' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Shopify
-			FROM (
-				SELECT
-					year_number,
-					platform,
-					AVG(avg_transaction_size) AS avg_transaction_size
-				FROM
-					clean_weekly_sales
-				GROUP BY
-					year_number, platform
-			) AS subquery
-			GROUP BY
-				year_number;
+		SELECT
+			year_number, 
+			round(max(CASE WHEN platform = 'Shopify' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Shopify,
+            round(max(CASE WHEN platform = 'Retail' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Retail
+		FROM(
+			select year_number, platform, avg(avg_transaction) as avg_transaction_size
+			from clean_weekly_sales
+			group by year_number, platform) subquery
+            group by year_number;
 
 			-- year_number 	AVG.Retail 	AVG.Shopify
-			-- 20			20.32		87.44
-			-- 19			20.98		88.79
-			-- 18			21.45		94.14
+			-- 20			40.65		174.89
+			-- 19			41.97		177.58
+			-- 18			42.91		188.29
 
-	USE data_mart;
-	select * from clean_weekly_sales;
-	select * from weekly_sales;
-       
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------
 -- 3. Before & After Analysis
 /* This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
 Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.
 We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before
 Using this analysis approach - answer the following questions:
-What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
+What is the total sales for the 4 weeks before and after 2020-06-15? 
+What is the growth or reduction rate in actual values and percentage of sales?
 What about the entire 12 weeks before and after?
 How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?*/
+
+-- -----------------------------------------------------------------------
+-- What is the total sales for the 4 weeks before and after 2020-06-15?
+			SELECT 'Before' AS period, round(SUM(sales)/1000000,2) AS sales_in_M
+			FROM clean_weekly_sales
+			WHERE date_format BETWEEN '2020-05-18' AND '2020-06-14'
+			UNION ALL
+			SELECT 'After' AS period, round(SUM(sales)/1000000,2) AS sales_in_M
+			FROM clean_weekly_sales
+			WHERE date_format BETWEEN '2020-06-16' AND '2020-07-13';
+
+			-- Before 	(millons)	2345.88
+			-- After 	(millons) 	2334.91
+
+
+-- --------------------------------------------------------------------------------
+-- What is the growth or reduction rate in actual values and percentage of sales?
+			SELECT 
+			Sales_in_M_Before,
+			Sales_in_M_After,
+			(Sales_in_M_Before - Sales_in_M_After) AS growth_reduction_in_M,
+			ROUND((Sales_in_M_Before - Sales_in_M_After) / Sales_in_M_Before * 100, 2) AS PCT_sales
+			FROM (
+				SELECT
+					MAX(CASE WHEN period = 'Before' THEN sales_in_M ELSE 0 END) AS Sales_in_M_Before,
+					MAX(CASE WHEN period = 'After' THEN sales_in_M ELSE 0 END) AS Sales_in_M_After
+				FROM (
+					SELECT 'Before' AS period, ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-05-18' AND '2020-06-14'
+					
+					UNION ALL
+					
+					SELECT 'After' AS period, ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-06-16' AND '2020-07-13'
+				) AS subquery
+			) AS subquery2;
+			
+            -- Before(Millons)	After(Millons)	Growth(Millons)	%_increase
+			-- 2345.88			2334.91			10.97			%0.47
+
+
+-- ---------------------------------------------------
+-- What about the entire 12 weeks before and after?
+			SELECT 
+			Sales_in_M_Before,
+			Sales_in_M_After,
+			(Sales_in_M_Before - Sales_in_M_After) AS growth_reduction_in_M,
+			ROUND((Sales_in_M_Before - Sales_in_M_After) / Sales_in_M_Before * 100, 2) AS PCT_sales
+			FROM (
+				SELECT
+					MAX(CASE WHEN period = 'Before' THEN sales_in_M ELSE 0 END) AS Sales_in_M_Before,
+					MAX(CASE WHEN period = 'After' THEN sales_in_M ELSE 0 END) AS Sales_in_M_After
+				FROM (
+					SELECT 'Before' AS period, ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-03-23' AND '2020-06-14'
+					
+					UNION ALL
+					
+					SELECT 'After' AS period, ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-06-15' AND '2020-09-07'
+				) AS subquery
+			) AS subquery2;
+
+            -- Before(Millons)	After(Millons)	Growth(Millons)	%_increase
+			-- 7126.27			6973.95			152.32			%2.14
+	
+
+-- -------------------------------------------------------------------------------------------------------------
+-- How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019
+
+	USE data_mart;
+	select * from clean_weekly_sales;
+	select * from weekly_sales;
 
 -- 4. Bonus Question
 /*Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
