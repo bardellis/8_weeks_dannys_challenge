@@ -410,11 +410,43 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 
 -- -------------------------------------------------------------------------------------------------------------
 -- How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019
+SELECT 
+			year_number,
+            Sales_in_M_Before,
+			Sales_in_M_After,
+			(Sales_in_M_Before - Sales_in_M_After) AS growth_reduction_in_M,
+			ROUND((Sales_in_M_Before - Sales_in_M_After) / Sales_in_M_Before * 100, 2) AS PCT_sales
+			FROM (
+				SELECT
+					year_number,
+					MAX(CASE WHEN period = 'Before' THEN sales_in_M ELSE 0 END) AS Sales_in_M_Before,
+					MAX(CASE WHEN period = 'After' THEN sales_in_M ELSE 0 END) AS Sales_in_M_After
+				FROM (
+					SELECT 'Before' AS period, year_number, ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-03-23' AND '2020-06-14' 
+						OR date_format BETWEEN '2019-03-23' AND '2019-06-14' 
+						OR date_format BETWEEN '2018-03-23' AND '2018-06-14'
+					group by year_number
+                    
+					UNION ALL
+					
+					SELECT 'After' AS period, year_number,  ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-06-15' AND '2020-09-07' 
+						OR date_format BETWEEN '2019-06-15' AND '2019-09-07' 
+						OR date_format BETWEEN '2018-06-15' AND '2018-09-07'
+                    group by year_number
+				) AS subquery
+                group by year_number
+			) AS subquery2;
+            -- 		Before(Millons)	After(Millons)	Growth(Millons)	%_increase
+			-- 20	7126.27			6973.95			152.32			2.14
+			-- 19	6883.39			6862.65			20.74			0.30
+			-- 18	6396.56			6500.82			-104.26			-1.63
 
-	USE data_mart;
-	select * from clean_weekly_sales;
-	select * from weekly_sales;
 
+-- -------------------------------------------------------------------------------------------------------------
 -- 4. Bonus Question
 /*Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
 region
@@ -423,6 +455,10 @@ age_band
 demographic
 customer_type
 Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?*/
+
+	USE data_mart;
+	select * from clean_weekly_sales;
+	select * from weekly_sales;
 
 -- Conclusion
 /*This case study actually is based off a real life change in Australia retailers where plastic bags were no longer provided for free - as you can expect, 
