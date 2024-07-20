@@ -43,11 +43,12 @@ Add a new column called age_band after the original segment column using the fol
 		sales int,
         region VARCHAR(13),
 		avg_transaction int,
-        platform VARCHAR(7)
+        platform VARCHAR(7),
+        customer_type VARCHAR(8)
 	);
 
-	INSERT INTO clean_weekly_sales (week_date, segment, sales, transactions, platform, region)
-	SELECT week_date, segment, sales, transactions, platform, region
+	INSERT INTO clean_weekly_sales (week_date, segment, sales, transactions, platform, region, customer_type)
+	SELECT week_date, segment, sales, transactions, platform, region, customer_type
 	FROM weekly_sales;
 
 --------------------------------------------------------------
@@ -65,6 +66,9 @@ Add a new column called age_band after the original segment column using the fol
 	-- Convertir week_date a formato DATE si es necesario
 	UPDATE clean_weekly_sales
 	SET date_format = STR_TO_DATE(CONCAT('01/', week_date), '%d/%m/%Y');
+    
+    UPDATE clean_weekly_sales
+	SET date_format = STR_TO_DATE(week_date, '%d/%m/%y');
 
 ----------------------------------------------------------------
 -- Mapear segment a age_band
@@ -357,8 +361,8 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 			SELECT 
 			Sales_in_M_Before,
 			Sales_in_M_After,
-			(Sales_in_M_Before - Sales_in_M_After) AS growth_reduction_in_M,
-			ROUND((Sales_in_M_Before - Sales_in_M_After) / Sales_in_M_Before * 100, 2) AS PCT_sales
+			(Sales_in_M_After-Sales_in_M_Before) AS growth_reduction_in_M,
+			ROUND((Sales_in_M_After-Sales_in_M_Before) / Sales_in_M_Before * 100, 2) AS PCT_sales
 			FROM (
 				SELECT
 					MAX(CASE WHEN period = 'Before' THEN sales_in_M ELSE 0 END) AS Sales_in_M_Before,
@@ -377,7 +381,7 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 			) AS subquery2;
 			
             -- Before(Millons)	After(Millons)	Growth(Millons)	%_increase
-			-- 2345.88			2334.91			10.97			%0.47
+			-- 2345.88			2334.91			-10.97			-%0.47
 
 
 -- ---------------------------------------------------
@@ -385,8 +389,8 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 			SELECT 
 			Sales_in_M_Before,
 			Sales_in_M_After,
-			(Sales_in_M_Before - Sales_in_M_After) AS growth_reduction_in_M,
-			ROUND((Sales_in_M_Before - Sales_in_M_After) / Sales_in_M_Before * 100, 2) AS PCT_sales
+			(Sales_in_M_After-Sales_in_M_Before) AS growth_reduction_in_M,
+			ROUND((Sales_in_M_After-Sales_in_M_Before) / Sales_in_M_Before * 100, 2) AS PCT_sales
 			FROM (
 				SELECT
 					MAX(CASE WHEN period = 'Before' THEN sales_in_M ELSE 0 END) AS Sales_in_M_Before,
@@ -405,7 +409,7 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 			) AS subquery2;
 
             -- Before(Millons)	After(Millons)	Growth(Millons)	%_increase
-			-- 7126.27			6973.95			152.32			%2.14
+			-- 7126.27			6973.95			-152.32			-%2.14
 	
 
 -- -------------------------------------------------------------------------------------------------------------
@@ -414,8 +418,8 @@ SELECT
 			year_number,
             Sales_in_M_Before,
 			Sales_in_M_After,
-			(Sales_in_M_Before - Sales_in_M_After) AS growth_reduction_in_M,
-			ROUND((Sales_in_M_Before - Sales_in_M_After) / Sales_in_M_Before * 100, 2) AS PCT_sales
+			(Sales_in_M_After-Sales_in_M_Before) AS growth_reduction_in_M,
+			ROUND((Sales_in_M_After-Sales_in_M_Before) / Sales_in_M_Before * 100, 2) AS PCT_sales
 			FROM (
 				SELECT
 					year_number,
@@ -440,10 +444,10 @@ SELECT
 				) AS subquery
                 group by year_number
 			) AS subquery2;
-            -- 		Before(Millons)	After(Millons)	Growth(Millons)	%_increase
-			-- 20	7126.27			6973.95			152.32			2.14
-			-- 19	6883.39			6862.65			20.74			0.30
-			-- 18	6396.56			6500.82			-104.26			-1.63
+            -- 		Before(Millons)	After(Millons)	Growth(Millons)		%_increase
+			-- 20	7126.27			6973.95			-152.32				-2.14
+			-- 19	6883.39			6862.65			-20.74				-0.30
+			-- 18	6396.56			6500.82			104.26				1.63
 
 
 -- -------------------------------------------------------------------------------------------------------------
@@ -456,9 +460,46 @@ demographic
 customer_type
 Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?*/
 
-	USE data_mart;
-	select * from clean_weekly_sales;
-	select * from weekly_sales;
+			SELECT 
+			platform, age_band, demographic, customer_type,
+			sum(case when region = 'OCEANIA' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'OCEANIA',
+            sum(case when region = 'ASIA' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'ASIA',
+            sum(case when region = 'AFRICA' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'AFRICA',
+			sum(case when region = 'USA' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'USA',
+            sum(case when region = 'CANADA' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'CANADA',
+			sum(case when region = 'SOUTH AMERICA' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'S.AMERICA',
+            sum(case when region = 'EUROPE' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'EUROPE',
+            sum(Sales_in_M_After-Sales_in_M_Before) as Total_growth
+			FROM (
+				SELECT
+					region, platform, age_band, demographic, customer_type,
+					MAX(CASE WHEN period = 'Before' THEN sales_in_M ELSE 0 END) AS Sales_in_M_Before,
+					MAX(CASE WHEN period = 'After' THEN sales_in_M ELSE 0 END) AS Sales_in_M_After
+				FROM (
+					SELECT 'Before' AS period, region, platform, age_band, demographic, customer_type, ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-03-23' AND '2020-06-14' 
+					group by region, platform, age_band, demographic, customer_type
+                    
+					UNION ALL
+					
+					SELECT 'After' AS period, region, platform, age_band, demographic, customer_type, ROUND(SUM(sales) / 1000000, 2) AS sales_in_M
+					FROM clean_weekly_sales
+					WHERE date_format BETWEEN '2020-06-15' AND '2020-09-07' 
+                    group by region, platform, age_band, demographic, customer_type
+				) AS subquery
+                group by region, platform, age_band, demographic, customer_type
+			) AS subquery2
+			group by platform, age_band, demographic, customer_type
+            order by Total_growth;
+            
+            -- platform  age_band	demographic	customer_type	OCEANIA 	ASIA 		AFRICA 		USA			CANADA		S.AMERICA 	EUROPE		TOTAL
+            -- Retail	 Unknown	Unknown		Guest			-32.85		-28.43		-8.23		-7.11		-4.20		-4.47		2.38		-82.91
+			-- Retail	Retirees	Couples		Existing		-11.87		-9.53		-0.70		-1.18		-1.47		-0.20		0.95		-24.00
+            -- Retail	Middle Aged	Families	Existing		-9.97		-5.99		-3.89		-1.83		-1.03		-0.03		0.09		-22.65
+
+
+USE data_mart;
 
 -- Conclusion
 /*This case study actually is based off a real life change in Australia retailers where plastic bags were no longer provided for free - as you can expect, 
