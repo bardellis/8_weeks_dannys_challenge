@@ -1,5 +1,5 @@
 use clique_bait;
-select * from events;
+select * from page_hierarchy;
 
 -- Introduction
 -- Clique Bait is not like your regular online seafood store - the founder and CEO Danny, was also a part of a digital data analytics team and wanted to expand his knowledge into the seafood industry!
@@ -8,24 +8,66 @@ select * from events;
 -- Available Data
 -- For this case study there is a total of 5 datasets which you will need to combine to solve all of the questions.
 
--- Interactive SQL Instance
--- You can use the provided DB Fiddle instance to easily access these example datasets - this interactive session has everything you need to start solving these questions using SQL.
--- Click here to open a fully functional SQL editor where you can write your own queries to analyse the data.
--- In past case studies - you would have seen an embedded DB Fiddle instance, but this time it seems like this week’s case study datasets might have been too big and broke the API for the embedded iframe code - whoops!!!
--- You can feel free to choose any SQL dialect you’d like to use, the existing Fiddle is using PostgreSQL 13 as default.
--- Serious SQL students will have access to the same relevant schema SQL and example solutions which they can use with their Docker setup from within the course player!
-
 -- 2. Digital Analysis
 -- Using the available datasets - answer the following questions using a single query for each one:
 -- How many users are there?
+		SELECT COUNT(DISTINCT user_id) AS users
+		FROM users;
+        -- 500
+
 -- How many cookies does each user have on average?
+		SELECT ROUND(AVG(cookies), 2) AS avg_cookies
+		FROM (
+			SELECT user_id, COUNT(cookie_id) AS cookies
+			FROM users
+			GROUP BY user_id
+			) AS subquery;
+			-- 3.56
+
 -- What is the unique number of visits by all users per month?
+		ALTER TABLE events
+		ADD COLUMN month_number INT;
+		
+        UPDATE events
+		SET month_number = MONTH(event_time);		
+        
+        SELECT
+			subquery.month_number,
+			COUNT(subquery.visit_id) AS visits
+		FROM (
+			SELECT
+				e.visit_id,
+				e.cookie_id AS event_cookie_id,
+				e.month_number,
+				u.user_id
+			FROM events AS e
+			JOIN users AS u ON e.cookie_id = u.cookie_id
+		) AS subquery
+		GROUP BY subquery.month_number
+		order by month_number asc;
+		-- Month 	Visits
+		-- 1		8112
+		-- 2		13645
+		-- 3		8255
+		-- 4		2311
+		-- 5		411
+
+
+
+
+
+
+
 -- What is the number of events for each event type?
 -- What is the percentage of visits which have a purchase event?
 -- What is the percentage of visits which view the checkout page but do not have a purchase event?
 -- What are the top 3 pages by number of views?
 -- What is the number of views and cart adds for each product category?
 -- What are the top 3 products by purchases?
+
+select count(distinct(user_id)) as users from users;
+
+
 
 -- 3. Product Funnel Analysis
 -- Using a single SQL query - create a new output table which has the following details:
