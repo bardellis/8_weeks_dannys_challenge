@@ -19,11 +19,11 @@ https://8weeksqlchallenge.com/case-study-3/
 https://8weeksqlchallenge.com/case-study-4/
 
 
-## Case Study #5 - Data Mart – In process
+## Case Study #5 - Data Mart - Completed
 https://8weeksqlchallenge.com/case-study-5/
 
 
-## Case Study #6 - Clique Bait - Pending 
+## Case Study #6 - Clique Bait - Working on it
 https://8weeksqlchallenge.com/case-study-6/
 
 
