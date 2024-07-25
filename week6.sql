@@ -53,14 +53,60 @@ select * from page_hierarchy;
 		-- 5		411
 
 
-
-
-
-
-
 -- What is the number of events for each event type?
+		select event_name, count(visits) as visits
+		from (select e.visit_id as visits, i.event_name as event_name from events as e
+		join event_identifier as i on i.event_type=e.event_type) subquery
+		group by i.event_name;
+		-- Event_name 		Visits
+		-- Page View		20928
+		-- Add to Cart		8451
+		-- Purchase			1777
+		-- Ad Impression	876
+		-- Ad Click			702
+
+
 -- What is the percentage of visits which have a purchase event?
+        SELECT 
+			e.event_name, 
+			COUNT(*) AS visits, 
+			ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM events), 2) AS percentage
+		FROM 
+			events AS e
+		JOIN 
+			event_identifier AS i ON i.event_type = e.event_type
+		GROUP BY 
+			e.event_name;
+		-- events			visits	%
+		-- Page View		20928	0.64
+		-- Add to Cart		8451	0.26
+		-- Purchase			1777	0.05
+		-- Ad Impression	876		0.03
+		-- Ad Click			702		0.02
+		
+
 -- What is the percentage of visits which view the checkout page but do not have a purchase event?
+		use clique_bait;
+SELECT *
+FROM (
+    SELECT
+        e.visit_id AS visit_id,
+        SUM(CASE WHEN i.event_name = 'Page View' THEN 1 ELSE 0 END) AS 'Page_View',
+        SUM(CASE WHEN i.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS 'Add_to_Cart',
+        SUM(CASE WHEN i.event_name = 'Purchase' THEN 1 ELSE 0 END) AS 'Purchase',
+        SUM(CASE WHEN i.event_name = 'Ad Impression' THEN 1 ELSE 0 END) AS 'Ad_Impression',
+        SUM(CASE WHEN i.event_name = 'Ad Click' THEN 1 ELSE 0 END) AS 'Ad_Click'
+    FROM
+        events AS e
+    JOIN
+        event_identifier AS i ON i.event_type = e.event_type
+    GROUP BY
+        e.visit_id
+) subquery 
+having Purchase =0 and Add_to_Cart<>0; -- Check alias casing and usage
+
+
+            
 -- What are the top 3 pages by number of views?
 -- What is the number of views and cart adds for each product category?
 -- What are the top 3 products by purchases?
