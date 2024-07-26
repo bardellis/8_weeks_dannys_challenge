@@ -86,35 +86,82 @@ select * from page_hierarchy;
 		
 
 -- What is the percentage of visits which view the checkout page but do not have a purchase event?
-		use clique_bait;
-SELECT *
-FROM (
-    SELECT
-        e.visit_id AS visit_id,
-        SUM(CASE WHEN i.event_name = 'Page View' THEN 1 ELSE 0 END) AS 'Page_View',
-        SUM(CASE WHEN i.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS 'Add_to_Cart',
-        SUM(CASE WHEN i.event_name = 'Purchase' THEN 1 ELSE 0 END) AS 'Purchase',
-        SUM(CASE WHEN i.event_name = 'Ad Impression' THEN 1 ELSE 0 END) AS 'Ad_Impression',
-        SUM(CASE WHEN i.event_name = 'Ad Click' THEN 1 ELSE 0 END) AS 'Ad_Click'
-    FROM
-        events AS e
-    JOIN
-        event_identifier AS i ON i.event_type = e.event_type
-    GROUP BY
-        e.visit_id
-) subquery 
-having Purchase =0 and Add_to_Cart<>0; -- Check alias casing and usage
-
+		WITH event_counts AS (
+			SELECT
+				e.visit_id,
+				SUM(CASE WHEN i.event_name = 'Page View' THEN 1 ELSE 0 END) AS Page_View,
+				SUM(CASE WHEN i.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS Add_to_Cart,
+				SUM(CASE WHEN i.event_name = 'Purchase' THEN 1 ELSE 0 END) AS Purchase,
+				SUM(CASE WHEN i.event_name = 'Ad Impression' THEN 1 ELSE 0 END) AS Ad_Impression,
+				SUM(CASE WHEN i.event_name = 'Ad Click' THEN 1 ELSE 0 END) AS Ad_Click,
+				MAX(CASE WHEN p.page_name = 'Checkout' THEN 1 ELSE 0 END) AS Checkout
+			FROM events AS e
+			JOIN event_identifier AS i ON i.event_type = e.event_type
+			JOIN page_hierarchy AS p ON e.page_id = p.page_id
+			GROUP BY e.visit_id
+		),
+		event_conditions AS (
+			SELECT
+				ec.visit_id,
+				CASE
+					WHEN ec.Checkout = 1 AND ec.Purchase = 0 THEN 'checkout-no_purchase'
+					ELSE 'others'
+				END AS event_condition
+			FROM event_counts AS ec
+		)
+		SELECT
+			event_condition,
+			COUNT(*) AS visits,
+			ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS percentage_visits
+		FROM event_conditions
+		GROUP BY event_condition
+		ORDER BY event_condition;
+		-- event_condition			visits		percentage
+		-- checkout-no_purchase		326			9.15
+		-- others					3238		90.85  
 
             
 -- What are the top 3 pages by number of views?
+		select page_name, count(*) as visits
+		from (
+			select p.page_name, e.visit_id from events as e
+			join event_identifier as i on e.event_type = i.event_Type
+			join page_hierarchy as p on e.page_id=p.page_id
+			where event_name = 'Page View') subquery
+		group by page_name
+		Order by visits
+		limit 3;
+		-- Page				visits
+		-- Black Truffle	1469
+		-- Tuna				1515
+		-- Abalone			1525
+
 -- What is the number of views and cart adds for each product category?
+			SELECT 
+				p.product_category,
+				SUM(CASE WHEN i.event_name = 'Page View' THEN 1 ELSE 0 END) AS Page_Views,
+				SUM(CASE WHEN i.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS Add_to_Cart
+			FROM events AS e
+			JOIN event_identifier AS i ON e.event_type = i.event_type
+			JOIN page_hierarchy AS p ON e.page_id = p.page_id
+			WHERE i.event_name IN ('Page View', 'Add to Cart') 
+			  AND p.page_name NOT IN ('Home Page', 'All Products', 'Checkout')
+			GROUP BY p.product_category
+			ORDER BY p.product_category;
+			-- Category		Page_v		Add_to cart
+			-- Luxury		3032		1870
+			-- Shellfish	6204		3792
+			-- Fish			4633		2789
+
 -- What are the top 3 products by purchases?
+			SELECT * FROM events AS e
+			JOIN event_identifier AS i ON e.event_type = i.event_type
+			JOIN page_hierarchy AS p ON e.page_id = p.page_id;
+            -- where event_name = 'Purchase';
+                
 
-select count(distinct(user_id)) as users from users;
 
-
-
+use clique_bait;
 -- 3. Product Funnel Analysis
 -- Using a single SQL query - create a new output table which has the following details:
 -- How many times was each product viewed?
