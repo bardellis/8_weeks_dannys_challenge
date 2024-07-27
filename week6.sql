@@ -45,12 +45,12 @@ select * from page_hierarchy;
 		) AS subquery
 		GROUP BY subquery.month_number
 		order by month_number asc;
-		-- Month 	Visits
-		-- 1		8112
-		-- 2		13645
-		-- 3		8255
-		-- 4		2311
-		-- 5		411
+		-- Month 	|	Visits
+		-- 1		|	8112
+		-- 2		|	13645
+		-- 3		|	8255
+		-- 4		|	2311
+		-- 5		|	411
 
 
 -- What is the number of events for each event type?
@@ -58,12 +58,12 @@ select * from page_hierarchy;
 		from (select e.visit_id as visits, i.event_name as event_name from events as e
 		join event_identifier as i on i.event_type=e.event_type) subquery
 		group by i.event_name;
-		-- Event_name 		Visits
-		-- Page View		20928
-		-- Add to Cart		8451
-		-- Purchase			1777
-		-- Ad Impression	876
-		-- Ad Click			702
+		-- Event_name 		|	Visits
+		-- Page View		|	20928
+		-- Add to Cart		|	8451
+		-- Purchase			|	1777
+		-- Ad Impression	|	876
+		-- Ad Click			|	702
 
 
 -- What is the percentage of visits which have a purchase event?
@@ -77,12 +77,12 @@ select * from page_hierarchy;
 			event_identifier AS i ON i.event_type = e.event_type
 		GROUP BY 
 			e.event_name;
-		-- events			visits	%
-		-- Page View		20928	0.64
-		-- Add to Cart		8451	0.26
-		-- Purchase			1777	0.05
-		-- Ad Impression	876		0.03
-		-- Ad Click			702		0.02
+		-- events			|	visits	|	%
+		-- Page View		|	20928	|	0.64
+		-- Add to Cart		|	8451	|	0.26
+		-- Purchase			|	1777	|	0.05
+		-- Ad Impression	|	876		|	0.03
+		-- Ad Click			|	702		|	0.02
 		
 
 -- What is the percentage of visits which view the checkout page but do not have a purchase event?
@@ -116,9 +116,9 @@ select * from page_hierarchy;
 		FROM event_conditions
 		GROUP BY event_condition
 		ORDER BY event_condition;
-		-- event_condition			visits		percentage
-		-- checkout-no_purchase		326			9.15
-		-- others					3238		90.85  
+		-- event_condition		|	visits	|	percentage
+		-- checkout-no_purchase	|	326		|	9.15
+		-- others				|	3238	|	90.85  
 
             
 -- What are the top 3 pages by number of views?
@@ -131,10 +131,11 @@ select * from page_hierarchy;
 		group by page_name
 		Order by visits
 		limit 3;
-		-- Page				visits
-		-- Black Truffle	1469
-		-- Tuna				1515
-		-- Abalone			1525
+		-- Page				|	visits
+		-- Black Truffle	|	1469
+		-- Tuna				|	1515
+		-- Abalone			|	1525
+
 
 -- What is the number of views and cart adds for each product category?
 			SELECT 
@@ -148,21 +149,45 @@ select * from page_hierarchy;
 			  AND p.page_name NOT IN ('Home Page', 'All Products', 'Checkout')
 			GROUP BY p.product_category
 			ORDER BY p.product_category;
-			-- Category		Page_v		Add_to cart
-			-- Luxury		3032		1870
-			-- Shellfish	6204		3792
-			-- Fish			4633		2789
+			-- Category		|	Page_v	|	Add_to cart
+			-- Luxury		|	3032	|	1870
+			-- Shellfish	|	6204	|	3792
+			-- Fish			|	4633	|	2789
+
 
 -- What are the top 3 products by purchases?
-			SELECT * FROM events AS e
-			JOIN event_identifier AS i ON e.event_type = i.event_type
-			JOIN page_hierarchy AS p ON e.page_id = p.page_id;
-            -- where event_name = 'Purchase';
-                
+			WITH purchases AS (
+				SELECT DISTINCT visit_id
+				FROM events AS e
+				JOIN event_identifier AS i ON e.event_type = i.event_type
+				WHERE i.event_name = 'Purchase'
+			),
+			add_to_cart AS (
+				SELECT e.visit_id, p.product_id 
+				FROM events AS e
+				JOIN event_identifier AS i ON e.event_type = i.event_type
+				JOIN page_hierarchy AS p ON e.page_id = p.page_id
+				WHERE i.event_name = 'Add to Cart'
+			)
+			select product_id, count(visit_id) as sales 
+				FROM (
+					SELECT a.visit_id, a.product_id, 
+					CASE WHEN p.visit_id IS NOT NULL THEN 'Yes' ELSE 'No' END AS purchase
+					FROM add_to_cart a
+					LEFT JOIN purchases p ON a.visit_id = p.visit_id)subquery
+					where purchase = 'Yes'
+					GROUP BY product_id
+					order by sales desc
+					limit 3;
+				-- product_id	|	sales
+				-- 7			|	754
+				-- 9			|	726
+				-- 8			|	719
 
 
-use clique_bait;
+
 -- 3. Product Funnel Analysis
+use clique_bait;
 -- Using a single SQL query - create a new output table which has the following details:
 -- How many times was each product viewed?
 -- How many times was each product added to cart?
