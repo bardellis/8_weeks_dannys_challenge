@@ -94,7 +94,7 @@ select * from page_hierarchy;
 				SUM(CASE WHEN i.event_name = 'Purchase' THEN 1 ELSE 0 END) AS Purchase,
 				SUM(CASE WHEN i.event_name = 'Ad Impression' THEN 1 ELSE 0 END) AS Ad_Impression,
 				SUM(CASE WHEN i.event_name = 'Ad Click' THEN 1 ELSE 0 END) AS Ad_Click,
-				MAX(CASE WHEN p.page_name = 'Checkout' THEN 1 ELSE 0 END) AS Checkout
+				SUM(CASE WHEN p.page_name = 'Checkout' THEN 1 ELSE 0 END) AS Checkout
 			FROM events AS e
 			JOIN event_identifier AS i ON i.event_type = e.event_type
 			JOIN page_hierarchy AS p ON e.page_id = p.page_id
@@ -187,12 +187,139 @@ select * from page_hierarchy;
 
 
 -- 3. Product Funnel Analysis
-use clique_bait;
 -- Using a single SQL query - create a new output table which has the following details:
+CREATE TABLE IF NOT EXISTS product_metrics (
+    product_id INT PRIMARY KEY,
+    views INT DEFAULT 0,
+    added_to_cart INT DEFAULT 0,
+    purchased INT DEFAULT 0,
+    abandoned INT DEFAULT 0
+);
+
+
+-- INSERT INTO product_metrics (product_id, views, added_to_cart, purchased, abandoned);
+TRUNCATE TABLE product_metrics;
+select * from product_metrics;
+DROP TABLE IF EXISTS product_metrics;
+
+
 -- How many times was each product viewed?
+				INSERT INTO product_metrics (product_id, views)
+                select product_id, count(*) as views 
+				from (
+					select p.product_id, i.event_type, i.event_name 
+					from events as e
+					join event_identifier as i on e.event_type = i.event_type
+					join page_hierarchy as p on e.page_id = p.page_id
+				) subquery
+				where event_name = 'Page View' and product_id is not null
+				group by product_id
+				order by views desc
+                ON DUPLICATE KEY UPDATE views = VALUES(views);
+				-- Product	|	Views
+				-- 9		|	1568
+				-- 8		|	1564
+				-- 4		|	1563
+				-- 2		|	1559
+				-- 1		|	1559
+				-- 7		|	1547
+				-- 6		|	1525
+				-- 3		|	1515
+				-- 5		|	1469
+
+
 -- How many times was each product added to cart?
+				INSERT INTO product_metrics (product_id, added_to_cart)
+				SELECT product_id, COUNT(*) AS added_to_cart
+				FROM (
+					SELECT p.product_id, i.event_name
+					FROM events AS e
+					JOIN event_identifier AS i ON e.event_type = i.event_type
+					JOIN page_hierarchy AS p ON e.page_id = p.page_id
+				) AS subquery
+				WHERE event_name = 'Add to Cart' AND product_id IS NOT NULL
+				GROUP BY product_id
+				ON DUPLICATE KEY UPDATE added_to_cart = VALUES(added_to_cart);
+                -- Product	|	Added to cart
+                -- 7		|	968
+				-- 8		|	949
+				-- 4		|	946
+				-- 9		|	943
+				-- 1		|	938
+				-- 6		|	932
+				-- 3		|	931
+				-- 5		|	924
+				-- 2		|	920
+                
+
 -- How many times was each product added to a cart but not purchased (abandoned)?
+				INSERT INTO product_metrics (product_id, purchased, abandoned)
+				WITH purchases AS (
+					SELECT DISTINCT visit_id
+					FROM events AS e
+					JOIN event_identifier AS i ON e.event_type = i.event_type
+					WHERE i.event_name = 'Purchase'
+				),
+				add_to_cart AS (
+					SELECT e.visit_id, p.product_id 
+					FROM events AS e
+					JOIN event_identifier AS i ON e.event_type = i.event_type
+					JOIN page_hierarchy AS p ON e.page_id = p.page_id
+					WHERE i.event_name = 'Add to Cart'
+				)
+				SELECT a.product_id, 
+					   SUM(CASE WHEN p.visit_id IS NOT NULL THEN 1 ELSE 0 END) AS purchased,
+					   SUM(CASE WHEN p.visit_id IS NULL THEN 1 ELSE 0 END) AS abandoned
+				FROM add_to_cart a
+				LEFT JOIN purchases p ON a.visit_id = p.visit_id
+				GROUP BY a.product_id
+				ON DUPLICATE KEY UPDATE
+					purchased = VALUES(purchased),
+					abandoned = VALUES(abandoned);
+				-- product_id 	| purchased 	| abandoned
+				-- 7			| 754			| 214
+				-- 8			| 719			| 230
+				-- 9			| 726			| 217
+				-- 2			| 707			| 213
+				-- 3			| 697			| 234
+				-- 6			| 699			| 233
+				-- 5			| 707			| 217
+				-- 4			| 697			| 249
+				-- 1			| 711			| 227
+
+
 -- How many times was each product purchased?
+			WITH purchases AS (
+				SELECT DISTINCT visit_id
+				FROM events AS e
+				JOIN event_identifier AS i ON e.event_type = i.event_type
+				WHERE i.event_name = 'Purchase'
+			),
+			add_to_cart AS (
+				SELECT e.visit_id, p.product_id 
+				FROM events AS e
+				JOIN event_identifier AS i ON e.event_type = i.event_type
+				JOIN page_hierarchy AS p ON e.page_id = p.page_id
+				WHERE i.event_name = 'Add to Cart'
+			)
+			SELECT a.product_id, 
+					sum(CASE WHEN p.visit_id IS NOT NULL THEN 1 ELSE 0 END) AS purchased,
+                    sum(CASE WHEN p.visit_id IS NULL THEN 1 ELSE 0 END) AS abandoned
+					FROM add_to_cart a
+					LEFT JOIN purchases p ON a.visit_id = p.visit_id
+					GROUP BY a.product_id;
+			-- product_id 	| purchased 	| abandoned
+			-- 7			| 754			| 214
+			-- 8			| 719			| 230
+			-- 9			| 726			| 217
+			-- 2			| 707			| 213
+			-- 3			| 697			| 234
+			-- 6			| 699			| 233
+			-- 5			| 707			| 217
+			-- 4			| 697			| 249
+			-- 1			| 711			| 227
+
+
 -- Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
 -- Use your 2 new output tables - answer the following questions:
 -- Which product had the most views, cart adds and purchases?
