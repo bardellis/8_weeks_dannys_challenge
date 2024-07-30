@@ -235,12 +235,79 @@ select * from page_hierarchy;
 
 
 -- Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
+                CREATE TABLE IF NOT EXISTS product_category_metrics (
+					product_category VARCHAR(9) PRIMARY KEY,
+					views INT DEFAULT 0,
+					added_to_cart INT DEFAULT 0,
+					purchased INT DEFAULT 0,
+					abandoned INT DEFAULT 0);
+
+				INSERT INTO product_category_metrics (product_category, views, added_to_cart, purchased, abandoned)
+				WITH purchases AS (
+					SELECT DISTINCT visit_id
+					FROM events AS e
+					JOIN event_identifier AS i ON e.event_type = i.event_type
+					WHERE i.event_name = 'Purchase'
+				),
+				add_to_cart AS (
+					SELECT e.visit_id, p.product_id, i.event_name, p.product_category
+					FROM events AS e
+					JOIN event_identifier AS i ON e.event_type = i.event_type
+					JOIN page_hierarchy AS p ON e.page_id = p.page_id
+					WHERE i.event_name = 'Add to Cart'
+					   OR (i.event_name = 'Page View' AND p.product_id IS NOT NULL)
+				)
+				SELECT a.product_category,
+					   SUM(CASE WHEN a.event_name = 'Page View' THEN 1 ELSE 0 END) AS views,
+					   SUM(CASE WHEN a.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS added_to_cart,
+					   SUM(CASE WHEN a.event_name = 'Add to Cart' AND p.visit_id IS NOT NULL THEN 1 ELSE 0 END) AS purchased,
+					   SUM(CASE WHEN a.event_name = 'Add to Cart' AND p.visit_id IS NULL THEN 1 ELSE 0 END) AS abandoned
+				FROM add_to_cart a
+				LEFT JOIN purchases p ON a.visit_id = p.visit_id
+				WHERE a.product_id IS NOT NULL
+				GROUP BY a.product_category;
+				-- Category		| 	views 	| 	added_to_cart	| 	purchased 	| 	abandoned
+				-- Fish			| 	4633	| 	2789			| 	2115		| 	674
+				-- Luxury		| 	3032	| 	1870			| 	1404		| 	466
+				-- Shellfish	| 	6204	| 	3792			| 	2898		| 	894
+
+
 -- Use your 2 new output tables - answer the following questions:
 -- Which product had the most views, cart adds and purchases?
 -- Which product was most likely to be abandoned?
 -- Which product had the highest view to purchase percentage?
 -- What is the average conversion rate from view to cart add?
 -- What is the average conversion rate from cart add to purchase?
+				
+
+
+                    
+DROP TABLE IF EXISTS category_metrics;
+
+				--- INSERT INTO product_metrics (product_category, views, added_to_cart, purchased, abandoned)
+                WITH purchases AS (
+					SELECT DISTINCT visit_id
+					FROM events AS e
+					JOIN event_identifier AS i ON e.event_type = i.event_type
+					WHERE i.event_name = 'Purchase'
+				),
+				add_to_cart AS (
+					SELECT e.visit_id, p.product_id, i.event_name, p.product_category
+					FROM events AS e
+					JOIN event_identifier AS i ON e.event_type = i.event_type
+					JOIN page_hierarchy AS p ON e.page_id = p.page_id
+					WHERE i.event_name = 'Add to Cart'
+                    or i.event_name = 'Page View' AND product_id IS NOT NULL
+				)
+				SELECT a.product_category,
+						SUM(CASE WHEN a.event_name = 'Page View' THEN 1 ELSE 0 END) AS views,
+						SUM(CASE WHEN a.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS added_to_cart,
+						SUM(CASE WHEN a.event_name = 'Add to Cart' AND p.visit_id IS NOT NULL THEN 1 ELSE 0 END) AS purchased,
+						SUM(CASE WHEN a.event_name = 'Add to Cart' AND p.visit_id IS NULL THEN 1 ELSE 0 END) AS abandoned
+				FROM add_to_cart a
+				LEFT JOIN purchases p ON a.visit_id = p.visit_id
+                WHERE a.product_id IS NOT NULL
+				GROUP BY a.product_category;
 
 
 -- 3. Campaigns Analysis
