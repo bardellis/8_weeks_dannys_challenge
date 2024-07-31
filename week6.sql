@@ -61,9 +61,9 @@ select * from page_hierarchy;
 		-- Event_name 		|	Visits
 		-- Page View		|	20928
 		-- Add to Cart		|	8451
-		-- Purchase			|	1777
+		-- Purchase		|	1777
 		-- Ad Impression	|	876
-		-- Ad Click			|	702
+		-- Ad Click		|	702
 
 
 -- What is the percentage of visits which have a purchase event?
@@ -78,11 +78,11 @@ select * from page_hierarchy;
 		GROUP BY 
 			e.event_name;
 		-- events			|	visits	|	%
-		-- Page View		|	20928	|	0.64
-		-- Add to Cart		|	8451	|	0.26
+		-- Page View			|	20928	|	0.64
+		-- Add to Cart			|	8451	|	0.26
 		-- Purchase			|	1777	|	0.05
-		-- Ad Impression	|	876		|	0.03
-		-- Ad Click			|	702		|	0.02
+		-- Ad Impression		|	876	|	0.03
+		-- Ad Click			|	702	|	0.02
 		
 
 -- What is the percentage of visits which view the checkout page but do not have a purchase event?
@@ -117,8 +117,8 @@ select * from page_hierarchy;
 		GROUP BY event_condition
 		ORDER BY event_condition;
 		-- event_condition		|	visits	|	percentage
-		-- checkout-no_purchase	|	326		|	9.15
-		-- others				|	3238	|	90.85  
+		-- checkout-no_purchase		|	326	|	9.15
+		-- others			|	3238	|	90.85  
 
             
 -- What are the top 3 pages by number of views?
@@ -131,10 +131,10 @@ select * from page_hierarchy;
 		group by page_name
 		Order by visits
 		limit 3;
-		-- Page				|	visits
+		-- Page			|	visits
 		-- Black Truffle	|	1469
-		-- Tuna				|	1515
-		-- Abalone			|	1525
+		-- Tuna			|	1515
+		-- Abalone		|	1525
 
 
 -- What is the number of views and cart adds for each product category?
@@ -151,7 +151,7 @@ select * from page_hierarchy;
 			ORDER BY p.product_category;
 			-- Category		|	Page_v	|	Add_to cart
 			-- Luxury		|	3032	|	1870
-			-- Shellfish	|	6204	|	3792
+			-- Shellfish		|	6204	|	3792
 			-- Fish			|	4633	|	2789
 
 
@@ -179,7 +179,7 @@ select * from page_hierarchy;
 					GROUP BY product_id
 					order by sales desc
 					limit 3;
-				-- product_id	|	sales
+				-- product_id		|	sales
 				-- 7			|	754
 				-- 9			|	726
 				-- 8			|	719
@@ -222,16 +222,16 @@ select * from page_hierarchy;
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
                 WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_id;
-				-- product_id 	| views 	| added_to_cart		| purchased 	| abandoned
-				-- 4			| 1563		| 946				| 697			| 249
-				-- 7			| 1547		| 968				| 754			| 214
-				-- 8			| 1564		| 949				| 719			| 230
-				-- 9			| 1568		| 943				| 726			| 217
-				-- 2			| 1559		| 920				| 707			| 213
-				-- 3			| 1515		| 931				| 697			| 234
-				-- 5			| 1469		| 924				| 707			| 217
-				-- 6			| 1525		| 932				| 699			| 233
-				-- 1			| 1559		| 938				| 711			| 227
+				-- product_id 		| views 	| added_to_cart		| purchased 	| abandoned
+				-- 4			| 1563		| 946			| 697		| 249
+				-- 7			| 1547		| 968			| 754		| 214
+				-- 8			| 1564		| 949			| 719		| 230
+				-- 9			| 1568		| 943			| 726		| 217
+				-- 2			| 1559		| 920			| 707		| 213
+				-- 3			| 1515		| 931			| 697		| 234
+				-- 5			| 1469		| 924			| 707		| 217
+				-- 6			| 1525		| 932			| 699		| 233
+				-- 1			| 1559		| 938			| 711		| 227
 
 
 -- Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
@@ -266,10 +266,10 @@ select * from page_hierarchy;
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
 				WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_category;
-				-- Category		| 	views 	| 	added_to_cart	| 	purchased 	| 	abandoned
-				-- Fish			| 	4633	| 	2789			| 	2115		| 	674
-				-- Luxury		| 	3032	| 	1870			| 	1404		| 	466
-				-- Shellfish	| 	6204	| 	3792			| 	2898		| 	894
+				-- Category		|	views 	|	added_to_cart	| 	purchased 	| 	abandoned
+				-- Fish			| 	4633	|	2789		| 	2115		| 	674
+				-- Luxury		| 	3032	|	1870		| 	1404		| 	466
+				-- Shellfish		| 	6204	|	3792		| 	2898		| 	894
 
 
 -- Use your 2 new output tables - answer the following questions:
@@ -284,7 +284,7 @@ select * from page_hierarchy;
 				ORDER BY totals DESC
 				LIMIT 1;
 				-- product_id	| views		| cart_adds		| purchases		| totals
-                -- 7			| 1547		| 968			| 754			| 3269
+                		-- 7		| 1547		| 968			| 754			| 3269
 
 
 -- Which product was most likely to be abandoned?
@@ -295,8 +295,8 @@ select * from page_hierarchy;
 				FROM product_metrics
                 order by probability_of_aband desc
                 limit 1;
-				-- product_id	| cart_adds | 	abandoned 	| 	probability_of_abandone
-				-- 4			| 249		|	946			|	0.2632
+				-- product_id	| cart_adds 	| 	abandoned 	| 	probability_of_abandone
+				-- 4		| 249		|	946		|	0.2632
 
 
 use clique_bait;
