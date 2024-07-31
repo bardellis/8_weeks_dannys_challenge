@@ -274,10 +274,10 @@ select
 			ORDER BY
 			year_number;
             
-            -- year_number %OCEANIA %AFRICA %ASIA 	%USA 	%CANADA %S.AMIRICA %EUROPE
-            -- 18			32.49	24.59	22.25	9.76	6.12	3.02		1.77
-			-- 19			32.82	24.44	22.37	9.64	6.14	2.98		1.61
-			-- 20			32.89	24.18	22.84	9.53	5.99	2.99		1.58
+            	-- year_number %OCEANIA %AFRICA %ASIA 	%USA 	%CANADA %S.AMIRICA 	%EUROPE
+            	-- 18		32.49	24.59	22.25	9.76	6.12	3.02		1.77
+		-- 19		32.82	24.44	22.37	9.64	6.14	2.98		1.61
+		-- 20		32.89	24.18	22.84	9.53	5.99	2.99		1.58
 
 ----------------------------------------------------------------------------------
 -- Which age_band and demographic values contribute the most to Retail sales?
@@ -307,8 +307,8 @@ select
 			ORDER BY
 				total_sales DESC) subquery;
 			
-            -- Unknown			40.52
-			-- Retirees			32.80
+            		-- Unknown		40.52
+			-- Retirees		32.80
 			-- Middle Aged		15.66
 			-- Young Adults		11.03
 
@@ -325,7 +325,7 @@ select
 			group by year_number, platform) subquery
             group by year_number;
 
-			-- year_number 	AVG.Retail 	AVG.Shopify
+			-- year_number 		AVG.Retail 	AVG.Shopify
 			-- 20			40.65		174.89
 			-- 19			41.97		177.58
 			-- 18			42.91		188.29
@@ -380,7 +380,7 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 				) AS subquery
 			) AS subquery2;
 			
-            -- Before(Millons)	After(Millons)	Growth(Millons)	%_increase
+            		-- Before(Millons)		After(Millons)		Growth(Millons)		%_increase
 			-- 2345.88			2334.91			-10.97			-%0.47
 
 
@@ -408,7 +408,7 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 				) AS subquery
 			) AS subquery2;
 
-            -- Before(Millons)	After(Millons)	Growth(Millons)	%_increase
+            		-- Before(Millons)		After(Millons)		Growth(Millons)		%_increase
 			-- 7126.27			6973.95			-152.32			-%2.14
 	
 
@@ -444,7 +444,7 @@ SELECT
 				) AS subquery
                 group by year_number
 			) AS subquery2;
-            -- 		Before(Millons)	After(Millons)	Growth(Millons)		%_increase
+            		-- 	Before(Millons)		After(Millons)		Growth(Millons)			%_increase
 			-- 20	7126.27			6973.95			-152.32				-2.14
 			-- 19	6883.39			6862.65			-20.74				-0.30
 			-- 18	6396.56			6500.82			104.26				1.63
@@ -492,11 +492,10 @@ Do you have any further recommendations for Danny’s team at Data Mart or any i
 			) AS subquery2
 			group by platform, age_band, demographic, customer_type
             order by Total_growth;
-            
-            -- platform  age_band	demographic	customer_type	OCEANIA 	ASIA 		AFRICA 		USA			CANADA		S.AMERICA 	EUROPE		TOTAL
-            -- Retail	 Unknown	Unknown		Guest			-32.85		-28.43		-8.23		-7.11		-4.20		-4.47		2.38		-82.91
-			-- Retail	Retirees	Couples		Existing		-11.87		-9.53		-0.70		-1.18		-1.47		-0.20		0.95		-24.00
-            -- Retail	Middle Aged	Families	Existing		-9.97		-5.99		-3.89		-1.83		-1.03		-0.03		0.09		-22.65
+                -- platform  	age_band	demographic	customer_type	OCEANIA 	ASIA 		AFRICA 		USA		CANADA		S.AMERICA 	EUROPE		TOTAL
+           	-- Retail	Unknown		Unknown		Guest		-32.85		-28.43		-8.23		-7.11		-4.20		-4.47		2.38		-82.91
+		-- Retail	Retirees	Couples		Existing	-11.87		-9.53		-0.70		-1.18		-1.47		-0.20		0.95		-24.00
+           	-- Retail	Middle Aged	Families	Existing	-9.97		-5.99		-3.89		-1.83		-1.03		-0.03		0.09		-22.65
 
 
 USE data_mart;
