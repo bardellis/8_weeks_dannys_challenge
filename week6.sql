@@ -274,42 +274,37 @@ select * from page_hierarchy;
 
 -- Use your 2 new output tables - answer the following questions:
 -- Which product had the most views, cart adds and purchases?
+				SELECT product_id, 
+					   views, 
+					   added_to_cart, 
+					   purchased, 
+					   (views + added_to_cart + purchased) AS totals
+				FROM product_metrics
+				GROUP BY product_id, views, added_to_cart, purchased
+				ORDER BY totals DESC
+				LIMIT 1;
+				-- product_id	| views		| cart_adds		| purchases		| totals
+                -- 7			| 1547		| 968			| 754			| 3269
+
+
 -- Which product was most likely to be abandoned?
+				SELECT product_id, 
+					   abandoned, 
+					   added_to_cart, 
+					   (abandoned/added_to_cart) AS probability_of_aband
+				FROM product_metrics
+                order by probability_of_aband desc
+                limit 1;
+				-- product_id	| cart_adds | 	abandoned 	| 	probability_of_abandone
+				-- 4			| 249		|	946			|	0.2632
+
+
+use clique_bait;
 -- Which product had the highest view to purchase percentage?
 -- What is the average conversion rate from view to cart add?
 -- What is the average conversion rate from cart add to purchase?
 				
-
-
-                    
-DROP TABLE IF EXISTS category_metrics;
-
-				--- INSERT INTO product_metrics (product_category, views, added_to_cart, purchased, abandoned)
-                WITH purchases AS (
-					SELECT DISTINCT visit_id
-					FROM events AS e
-					JOIN event_identifier AS i ON e.event_type = i.event_type
-					WHERE i.event_name = 'Purchase'
-				),
-				add_to_cart AS (
-					SELECT e.visit_id, p.product_id, i.event_name, p.product_category
-					FROM events AS e
-					JOIN event_identifier AS i ON e.event_type = i.event_type
-					JOIN page_hierarchy AS p ON e.page_id = p.page_id
-					WHERE i.event_name = 'Add to Cart'
-                    or i.event_name = 'Page View' AND product_id IS NOT NULL
-				)
-				SELECT a.product_category,
-						SUM(CASE WHEN a.event_name = 'Page View' THEN 1 ELSE 0 END) AS views,
-						SUM(CASE WHEN a.event_name = 'Add to Cart' THEN 1 ELSE 0 END) AS added_to_cart,
-						SUM(CASE WHEN a.event_name = 'Add to Cart' AND p.visit_id IS NOT NULL THEN 1 ELSE 0 END) AS purchased,
-						SUM(CASE WHEN a.event_name = 'Add to Cart' AND p.visit_id IS NULL THEN 1 ELSE 0 END) AS abandoned
-				FROM add_to_cart a
-				LEFT JOIN purchases p ON a.visit_id = p.visit_id
-                WHERE a.product_id IS NOT NULL
-				GROUP BY a.product_category;
-
-
+                   
 -- 3. Campaigns Analysis
 -- Generate a table that has 1 single row for every unique visit_id record and has the following columns:
 	-- user_id
