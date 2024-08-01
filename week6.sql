@@ -199,7 +199,7 @@ select * from page_hierarchy;
 					abandoned INT DEFAULT 0);
 
 				INSERT INTO product_metrics (product_id, views, added_to_cart, purchased, abandoned)
-                WITH purchases AS (
+                		WITH purchases AS (
 					SELECT DISTINCT visit_id
 					FROM events AS e
 					JOIN event_identifier AS i ON e.event_type = i.event_type
@@ -211,7 +211,7 @@ select * from page_hierarchy;
 					JOIN event_identifier AS i ON e.event_type = i.event_type
 					JOIN page_hierarchy AS p ON e.page_id = p.page_id
 					WHERE i.event_name = 'Add to Cart'
-                    or i.event_name = 'Page View' AND product_id IS NOT NULL
+                    		or i.event_name = 'Page View' AND product_id IS NOT NULL
 				)
 				SELECT a.product_id, 
 						SUM(CASE WHEN a.event_name = 'Page View' THEN 1 ELSE 0 END) AS views,
@@ -220,7 +220,7 @@ select * from page_hierarchy;
 						SUM(CASE WHEN a.event_name = 'Add to Cart' AND p.visit_id IS NULL THEN 1 ELSE 0 END) AS abandoned
 				FROM add_to_cart a
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
-                WHERE a.product_id IS NOT NULL
+                		WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_id;
 				-- product_id 		| views 	| added_to_cart		| purchased 	| abandoned
 				-- 4			| 1563		| 946			| 697		| 249
@@ -293,8 +293,8 @@ select * from page_hierarchy;
 					   added_to_cart, 
 					   (abandoned/added_to_cart) AS probability_of_aband
 				FROM product_metrics
-                order by probability_of_aband desc
-                limit 1;
+                		order by probability_of_aband desc
+                		limit 1;
 				-- product_id	| cart_adds 	| 	abandoned 	| 	probability_of_abandone
 				-- 4		| 249		|	946		|	0.2632
 
@@ -306,10 +306,10 @@ use clique_bait;
 					   purchased, 
 					   (purchased/views) AS probability_view_to_purchase
 				FROM product_metrics
-                order by probability_view_to_purchase desc
-                limit 1;
+                		order by probability_view_to_purchase desc
+                		limit 1;
 				-- product_id	| views		| 	purchased 	| 	probability_view_to_purchase
-				-- 4			| 1563		|	697			|	0.4874
+				-- 4		| 1563		|	697		|	0.4874
 
 
 -- What is the average conversion rate from view to cart add?
@@ -318,17 +318,17 @@ use clique_bait;
 					   added_to_cart, 
 					   (added_to_cart/views) AS probability_view_to_added_to_cart
 				FROM product_metrics
-                order by probability_view_to_added_to_cart desc
-                limit 1;
+                		order by probability_view_to_added_to_cart desc
+                		limit 1;
 				-- product_id	| 	views	| 	added_to_cart 	| 	probability_view_to_added_to_cart
-				-- 5			|	1469	|	924				|	0.6290
+				-- 5		|	1469	|	924		|	0.6290
 
 
 -- What is the average conversion rate from cart add to purchase?
 				SELECT avg(purchased) as puchased_avg, avg(added_to_cart) as cart_added_avg, avg(purchased/added_to_cart) AS conversion_purchase_added_to_cart
 				FROM product_metrics;
-                -- purchased	|	cart_added	| 	conversion
-                -- 713.00		|	939.00		|	0.759
+                		-- purchased	|	cart_added	| 	conversion
+                		-- 713.00	|	939.00		|	0.759
 				
                    
 -- 3. Campaigns Analysis
