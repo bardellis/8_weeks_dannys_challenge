@@ -301,8 +301,34 @@ select * from page_hierarchy;
 
 use clique_bait;
 -- Which product had the highest view to purchase percentage?
+				SELECT product_id, 
+					   views, 
+					   purchased, 
+					   (purchased/views) AS probability_view_to_purchase
+				FROM product_metrics
+                order by probability_view_to_purchase desc
+                limit 1;
+				-- product_id	| views		| 	purchased 	| 	probability_view_to_purchase
+				-- 4			| 1563		|	697			|	0.4874
+
+
 -- What is the average conversion rate from view to cart add?
+				SELECT product_id, 
+					   views, 
+					   added_to_cart, 
+					   (added_to_cart/views) AS probability_view_to_added_to_cart
+				FROM product_metrics
+                order by probability_view_to_added_to_cart desc
+                limit 1;
+				-- product_id	| 	views	| 	added_to_cart 	| 	probability_view_to_added_to_cart
+				-- 5			|	1469	|	924				|	0.6290
+
+
 -- What is the average conversion rate from cart add to purchase?
+				SELECT avg(purchased) as puchased_avg, avg(added_to_cart) as cart_added_avg, avg(purchased/added_to_cart) AS conversion_purchase_added_to_cart
+				FROM product_metrics;
+                -- purchased	|	cart_added	| 	conversion
+                -- 713.00		|	939.00		|	0.759
 				
                    
 -- 3. Campaigns Analysis
