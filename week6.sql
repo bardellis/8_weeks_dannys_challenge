@@ -342,6 +342,91 @@ use clique_bait;
 	-- campaign_name: map the visit to a campaign if the visit_start_time falls between the start_date and end_date
 	-- impression: count of ad impressions for each visit
 	-- click: count of ad clicks for each visit
+    
+				WITH campaigns AS (
+				select visit_id, user_id, event_time, page_name, count(*) as visits 
+				from events as e 
+				join users as u on e.cookie_id=u.cookie_id
+				join page_hierarchy p on e.page_id=p.page_id
+				where sequence_number=1
+				group by visit_id, user_id, event_time, page_name
+				order by visits desc
+				),
+				cart_adds AS( 
+				select visit_id, event_name, count(*) cart_adds from events as e
+				join event_identifier i on e.event_type=i.event_type
+				where e.event_type=2
+				group by event_name, visit_id
+				),
+				page_visited AS(
+				select visit_id, count(e.page_id) as page_visited 
+				from events as e
+				join event_identifier i on e.event_type=i.event_type
+				join page_hierarchy p on e.page_id=p.page_id
+				where e.event_type=1 and e.page_id > 2
+				group by visit_id
+				),
+				purchases as (
+				select visit_id, count(*) as purchases
+				from events as e
+				join event_identifier i on e.event_type=i.event_type
+				join page_hierarchy p on e.page_id=p.page_id
+				where i.event_type = 3
+				group by visit_id
+				order by purchases
+				),
+				campname as (
+				SELECT
+				v.visit_id,
+				v.event_time,
+				c.campaign_name
+				FROM
+				events as v
+				LEFT JOIN
+				campaign_identifier as c
+				ON
+				v.event_time BETWEEN c.start_date AND c.end_date
+				where sequence_number=1
+				), 
+				clicks as(
+				 select visit_id, count(*) as clicks from events as e
+				join event_identifier i on e.event_type=i.event_type
+				join page_hierarchy as p on e.page_id=p.page_id
+				where page_name <> 'Home Page' and page_name <> 'All Products' and page_name <> 'Checkout'and event_name = 'Page View'
+				group by visit_id
+				)
+				SELECT 
+				c.visit_id, 
+				c.user_id, 
+				date(c.event_time) as event_time, 
+				n.campaign_name, 
+				MAX(CASE WHEN u.purchases IS NOT NULL THEN 1 ELSE 0 END) AS purchase,
+				sum(CASE WHEN a.cart_adds is not null then a.cart_adds else 0 end) AS cart_adds, 
+				SUM(CASE WHEN p.page_visited is not null then p.page_visited else 0 end) AS page_visited, 
+				SUM(case when k.clicks is not null then k.clicks else 0 end) AS clicks
+				FROM 
+					campaigns AS c
+				LEFT JOIN 
+					cart_adds AS a ON c.visit_id = a.visit_id
+				LEFT JOIN 
+					page_visited AS p ON c.visit_id = p.visit_id
+				LEFT JOIN 
+					purchases AS u ON c.visit_id = u.visit_id
+				LEFT JOIN 
+					campname AS n ON c.visit_id = n.visit_id
+				LEFT JOIN 
+					clicks AS k ON c.visit_id = k.visit_id
+				GROUP BY 
+					c.visit_id, c.user_id, c.event_time, n.campaign_name;
+				-- visit_id 	|	user_id	|	event_date 	|	Campaign							|	purchases 	|	cart_adds 	|	page_visited 	|	clicks
+				-- 0fc437		|	1		|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1			|	6			|	9				|	8
+				-- ccf365		|	1		|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1			|	3			|	5				|	4
+				-- c5c0ee		|	2		|	2020-01-18 	|	25% Off - Living The Lux Life		|	0			|	0			|	0				|	0
+				-- d58cbd		|	2		|	2020-01-18 	|	25% Off - Living The Lux Life		|	0			|	4			|	6				|	5
+				-- 25502e		|	3		|	2020-02-21  |	Half Off - Treat Your Shellf(ish)	|	0			|	0			|	0				|	0
+				-- 9a2f24		|	3		|	2020-02-21 	|	Half Off - Treat Your Shellf(ish)	|	1			|	2			|	5				|	4
+
+    
 -- (Optional column) cart_products: a comma separated text value with products added to the cart sorted by the order they were added to the cart (hint: use the sequence_number)
 -- Use the subsequent dataset to generate at least 5 insights for the Clique Bait team - bonus: prepare a single A4 infographic that the team can use for their management reporting sessions, be sure to emphasise the most important points from your findings.
 -- Some ideas you might want to investigate further include:
@@ -349,8 +434,7 @@ use clique_bait;
 	-- Does clicking on an impression lead to higher purchase rates?
 	-- What is the uplift in purchase rate when comparing users who click on a campaign impression versus users who do not receive an impression? What if we compare them with users who just an impression but do not click?
 	-- What metrics can you use to quantify the success or failure of each campaign compared to eachother?
-    
-    
+
 -- Conclusion
 -- This case study is based off my many years working with Digital datasets in consumer banking and retail supermarkets - all of the datasets are designed based off real datasets I’ve come across in challenging problem solving scenarios and the questions reflect similar problems which I worked on.
 -- Campaign analysis is almost everywhere in the data world, especially in marketing, digital, UX and retail industries - and being able to analyse views, clicks and other digital behaviour is a critical skill to have in your toolbelt as a data professional!
