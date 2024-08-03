@@ -45,6 +45,7 @@ select * from page_hierarchy;
 		) AS subquery
 		GROUP BY subquery.month_number
 		order by month_number asc;
+		
 		-- Month 	|	Visits
 		-- 1		|	8112
 		-- 2		|	13645
@@ -58,6 +59,7 @@ select * from page_hierarchy;
 		from (select e.visit_id as visits, i.event_name as event_name from events as e
 		join event_identifier as i on i.event_type=e.event_type) subquery
 		group by i.event_name;
+		
 		-- Event_name 		|	Visits
 		-- Page View		|	20928
 		-- Add to Cart		|	8451
@@ -77,6 +79,7 @@ select * from page_hierarchy;
 			event_identifier AS i ON i.event_type = e.event_type
 		GROUP BY 
 			e.event_name;
+		
 		-- events			|	visits	|	%
 		-- Page View			|	20928	|	0.64
 		-- Add to Cart			|	8451	|	0.26
@@ -116,6 +119,7 @@ select * from page_hierarchy;
 		FROM event_conditions
 		GROUP BY event_condition
 		ORDER BY event_condition;
+		
 		-- event_condition		|	visits	|	percentage
 		-- checkout-no_purchase		|	326	|	9.15
 		-- others			|	3238	|	90.85  
@@ -131,6 +135,7 @@ select * from page_hierarchy;
 		group by page_name
 		Order by visits
 		limit 3;
+		
 		-- Page			|	visits
 		-- Black Truffle	|	1469
 		-- Tuna			|	1515
@@ -149,6 +154,7 @@ select * from page_hierarchy;
 			  AND p.page_name NOT IN ('Home Page', 'All Products', 'Checkout')
 			GROUP BY p.product_category
 			ORDER BY p.product_category;
+			
 			-- Category		|	Page_v	|	Add_to cart
 			-- Luxury		|	3032	|	1870
 			-- Shellfish		|	6204	|	3792
@@ -179,6 +185,7 @@ select * from page_hierarchy;
 					GROUP BY product_id
 					order by sales desc
 					limit 3;
+				
 				-- product_id		|	sales
 				-- 7			|	754
 				-- 9			|	726
@@ -222,6 +229,7 @@ select * from page_hierarchy;
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
                 		WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_id;
+				
 				-- product_id 		| views 	| added_to_cart		| purchased 	| abandoned
 				-- 4			| 1563		| 946			| 697		| 249
 				-- 7			| 1547		| 968			| 754		| 214
@@ -266,6 +274,7 @@ select * from page_hierarchy;
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
 				WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_category;
+				
 				-- Category		|	views 	|	added_to_cart	| 	purchased 	| 	abandoned
 				-- Fish			| 	4633	|	2789		| 	2115		| 	674
 				-- Luxury		| 	3032	|	1870		| 	1404		| 	466
@@ -283,6 +292,7 @@ select * from page_hierarchy;
 				GROUP BY product_id, views, added_to_cart, purchased
 				ORDER BY totals DESC
 				LIMIT 1;
+				
 				-- product_id	| views		| cart_adds		| purchases		| totals
                 		-- 7		| 1547		| 968			| 754			| 3269
 
@@ -295,6 +305,7 @@ select * from page_hierarchy;
 				FROM product_metrics
                 		order by probability_of_aband desc
                 		limit 1;
+				
 				-- product_id	| cart_adds 	| 	abandoned 	| 	probability_of_abandone
 				-- 4		| 249		|	946		|	0.2632
 
@@ -308,6 +319,7 @@ use clique_bait;
 				FROM product_metrics
                 		order by probability_view_to_purchase desc
                 		limit 1;
+				
 				-- product_id	| views		| 	purchased 	| 	probability_view_to_purchase
 				-- 4		| 1563		|	697		|	0.4874
 
@@ -320,6 +332,7 @@ use clique_bait;
 				FROM product_metrics
                 		order by probability_view_to_added_to_cart desc
                 		limit 1;
+				
 				-- product_id	| 	views	| 	added_to_cart 	| 	probability_view_to_added_to_cart
 				-- 5		|	1469	|	924		|	0.6290
 
@@ -327,7 +340,8 @@ use clique_bait;
 -- What is the average conversion rate from cart add to purchase?
 				SELECT avg(purchased) as puchased_avg, avg(added_to_cart) as cart_added_avg, avg(purchased/added_to_cart) AS conversion_purchase_added_to_cart
 				FROM product_metrics;
-                		-- purchased	|	cart_added	| 	conversion
+                		
+				-- purchased	|	cart_added	| 	conversion
                 		-- 713.00	|	939.00		|	0.759
 				
                    
@@ -418,13 +432,14 @@ use clique_bait;
 					clicks AS k ON c.visit_id = k.visit_id
 				GROUP BY 
 					c.visit_id, c.user_id, c.event_time, n.campaign_name;
-				-- visit_id 	|	user_id	|	event_date 	|	Campaign							|	purchases 	|	cart_adds 	|	page_visited 	|	clicks
-				-- 0fc437		|	1		|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1			|	6			|	9				|	8
-				-- ccf365		|	1		|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1			|	3			|	5				|	4
-				-- c5c0ee		|	2		|	2020-01-18 	|	25% Off - Living The Lux Life		|	0			|	0			|	0				|	0
-				-- d58cbd		|	2		|	2020-01-18 	|	25% Off - Living The Lux Life		|	0			|	4			|	6				|	5
-				-- 25502e		|	3		|	2020-02-21  |	Half Off - Treat Your Shellf(ish)	|	0			|	0			|	0				|	0
-				-- 9a2f24		|	3		|	2020-02-21 	|	Half Off - Treat Your Shellf(ish)	|	1			|	2			|	5				|	4
+				
+				-- visit_id 	|	user_id	|	event_date 	|	Campaign				|	purchases 	|	cart_adds 	|	page_visited 	|	clicks
+				-- 0fc437	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	6		|	9		|	8
+				-- ccf365	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	3		|	5		|	4
+				-- c5c0ee	|	2	|	2020-01-18 	|	25% Off - Living The Lux Life		|	0		|	0		|	0		|	0
+				-- d58cbd	|	2	|	2020-01-18 	|	25% Off - Living The Lux Life		|	0		|	4		|	6		|	5
+				-- 25502e	|	3	|	2020-02-21  	|	Half Off - Treat Your Shellf(ish)	|	0		|	0		|	0		|	0
+				-- 9a2f24	|	3	|	2020-02-21 	|	Half Off - Treat Your Shellf(ish)	|	1		|	2		|	5		|	4
 
     
 -- (Optional column) cart_products: a comma separated text value with products added to the cart sorted by the order they were added to the cart (hint: use the sequence_number)
