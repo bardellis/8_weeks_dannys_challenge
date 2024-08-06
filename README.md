@@ -23,11 +23,11 @@ https://8weeksqlchallenge.com/case-study-4/
 https://8weeksqlchallenge.com/case-study-5/
 
 
-## Case Study #6 - Clique Bait - Working on it
+## Case Study #6 - Clique Bait - Completed
 https://8weeksqlchallenge.com/case-study-6/
 
 
-## Case Study #7 - Balanced Tree Clothing Co. - Pending 
+## Case Study #7 - Balanced Tree Clothing Co. - Working on it
 https://8weeksqlchallenge.com/case-study-7/
 
 
