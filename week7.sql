@@ -5,12 +5,6 @@
 -- You can feel free to choose any SQL dialect you’d like to use, the existing Fiddle is using PostgreSQL 13 as default.
 -- Serious SQL students will have access to the same relevant schema SQL and example solutions which they can use with their Docker setup from within the course player!
 
-use balanced_tree;
-select * from product_details;
-select * from product_hierarchy;
-select * from product_prices;
-select * from sales;
-
 -- Case Study Questions
 -- The following questions can be considered key business questions and metrics that the Balanced Tree team requires for their monthly reports.
 -- Each question can be answered using a single query - but as you are writing the SQL to solve each individual problem, keep in mind how you would generate all of these 
@@ -93,7 +87,44 @@ with RevenuePerTransaction as (
 
 
 -- What is the percentage split of all transactions for members vs non-members?
+		select 
+			case when members=1 then 'member' else 'non-member' end as client_type,
+			qty_member,
+			qty_total, 
+            round((qty_member/qty_total),2) as pct 
+		from (select 
+				members,
+				count(*) as qty_member,
+					(select count(*) from sales) as qty_total
+					from sales
+				group by members)
+		subquery; 
+        -- members		9061	15095	0.60
+		-- non-members	6034	15095	0.40
+
+
 -- What is the average revenue for member transactions and non-member transactions?
+		select 
+			case when members=1 then 'member' else 'non-member' end as client_type,
+            round(avg(revenue),2) as avg_revenue 
+		from(
+			SELECT
+            members,
+			txn_id,
+            prod_id,
+			round(sum((qty*price)*((100-discount)/100)),2) AS revenue
+			FROM sales
+			GROUP BY members, txn_id, prod_id
+			order by txn_id, prod_id)
+		subquery
+        group by client_type;
+		-- non-member	74.54
+		-- member		75.43
+use balanced_tree;
+select * from product_details;
+select * from product_hierarchy;
+select * from product_prices;
+select * from sales;
 
 
 -- Product Analysis
