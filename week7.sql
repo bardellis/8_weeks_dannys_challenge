@@ -65,25 +65,25 @@ with RevenuePerTransaction as (
 		MIN(CASE WHEN ranking >= CEIL(0.50 * @total_rows) THEN total_revenue END) AS p50,
 		MIN(CASE WHEN ranking >= CEIL(0.75 * @total_rows) THEN total_revenue END) AS p75
 	FROM RankedRevenue; 
-    -- | P25		|	P50			|	P75
-    -- | 326.18		|	441.00		|	572.75
+    -- | Perc.25		|	Perc.50			|	Perc.75
+    -- | 326.18			|	441.00			|	572.75
 
 
 -- What is the average discount value per transaction?
-		select round(avg(total_descount),2) as avg_descount
+		select round(avg(total_discount),2) as avg_descount
 		from(
-			select txn_id, sum(descount) as total_descount 
+			select txn_id, sum(discount) as total_discount 
 			from(
 				SELECT
 					txn_id,
 					prod_id,
-					round(sum((qty*price)*((discount)/100)),2) AS descount 
+					round(sum((qty*price)*((discount)/100)),2) AS discount 
 				from sales
 				group by txn_id, prod_id
 				order by txn_id asc
-			) as descount_per_product
+			) as discount_per_product
 			group by txn_id
-		) as descounts_per_transation; -- 62,49
+		) as discounts_per_transation; -- 62,49
 
 
 -- What is the percentage split of all transactions for members vs non-members?
@@ -120,19 +120,98 @@ with RevenuePerTransaction as (
         group by client_type;
 		-- non-member	74.54
 		-- member		75.43
+
 use balanced_tree;
 select * from product_details;
 select * from product_hierarchy;
 select * from product_prices;
 select * from sales;
 
-
 -- Product Analysis
 -- What are the top 3 products by total revenue before discount?
+		select 
+			s.prod_id,
+			p.product_name,
+			round(sum((s.qty)*(s.price)),2) as rev_bef_desc 
+		from sales as s
+			join product_details as p on s.prod_id=p.product_id
+			group by prod_id, product_name
+			order by rev_bef_desc desc
+			limit 3;
+			-- Prod_id	| 	Product_name					|	Revenue before descount
+			-- 2a2353	|	Blue Polo Shirt - Mens			|	217.683
+			-- 9ec847	|	Grey Fashion Jacket - Womens	|	209.304
+			-- 5d267b	|	White Tee Shirt - Mens			|	152.000
+
+
 -- What is the total quantity, revenue and discount for each segment?
+		select 
+			p.segment_name as segment,
+			sum(qty) AS quantity,
+            round(sum((qty*s.price)*((100-discount)/100)),2) AS revenue,
+            round(sum((qty*s.price)*((discount)/100)),2) AS discount
+		from sales as s
+			join product_details as p on s.prod_id=p.product_id
+			group by segment;
+			-- segment	|	quantity	|	revenue		|	discount
+			-- Jeans	|	11349		|	183006.03	|	25343.97
+			-- Shirt	|	11265		|	356548.73	|	49594.27
+			-- Socks	|	11217		|	270963.56	|	37013.44
+			-- Jacket	|	11385		|	322705.54	|	44277.46
+
+
 -- What is the top selling product for each segment?
+		select 
+			p.product_id as product_id,
+            p.product_name as product,
+			sum(qty) AS sales
+		from sales as s
+			join product_details as p on s.prod_id=p.product_id
+			group by product, product_id
+            order by sales desc
+            limit 1; 
+            -- Grey Fashion Jacket - Womens	3876
+
+
 -- What is the total quantity, revenue and discount for each category?
+		select 
+			p.category_name as category,
+			sum(qty) AS quantity,
+            round(sum((qty*s.price)*((100-discount)/100)),2) AS revenue,
+            round(sum((qty*s.price)*((discount)/100)),2) AS discount
+		from sales as s
+			join product_details as p on s.prod_id=p.product_id
+			group by category;
+			-- category | quantity	|	revenue		|	discount
+			-- Womens	|	22734	|	505711.57	|	69621.43
+			-- Mens		|	22482	|	627512.29	|	86607.71
+
+
 -- What is the top selling product for each category?
+		WITH RankedProducts AS (
+			SELECT 
+				p.product_name AS product,
+				p.category_name AS category,
+				SUM(s.qty) AS total_sales,
+				ROW_NUMBER() OVER (PARTITION BY p.category_name ORDER BY SUM(s.qty) DESC) AS ranking
+			FROM 
+				sales AS s
+				JOIN product_details AS p ON s.prod_id = p.product_id
+			GROUP BY 
+				p.product_name, p.category_name
+		)
+		SELECT 
+			product,
+			category,
+			total_sales
+		FROM 
+			RankedProducts
+		WHERE 
+			ranking = 1;
+		-- Blue Polo Shirt - Mens		| 	Mens	| 	3819
+		-- Grey Fashion Jacket - Womens	| 	Womens	| 	3876
+
+
 -- What is the percentage split of revenue by product for each segment?
 -- What is the percentage split of revenue by segment for each category?
 -- What is the percentage split of total revenue by category?
