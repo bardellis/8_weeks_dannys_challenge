@@ -121,11 +121,6 @@ with RevenuePerTransaction as (
 		-- non-member	74.54
 		-- member		75.43
 
-use balanced_tree;
-select * from product_details;
-select * from product_hierarchy;
-select * from product_prices;
-select * from sales;
 
 -- Product Analysis
 -- What are the top 3 products by total revenue before discount?
@@ -213,10 +208,160 @@ select * from sales;
 
 
 -- What is the percentage split of revenue by product for each segment?
+		WITH product_revenue AS (
+			SELECT 
+				p.segment_id,
+				p.segment_name AS segment,
+				p.product_name AS product,
+				s.prod_id,
+				ROUND(SUM((qty * s.price) * ((100 - discount) / 100)), 2) AS revenue
+			FROM sales AS s
+			JOIN product_details AS p ON s.prod_id = p.product_id
+			GROUP BY segment_id, segment, product, prod_id
+		),
+		segment_revenue AS (
+			SELECT 
+				p.segment_id,
+				p.segment_name AS segment,
+				ROUND(SUM((qty * s.price) * ((100 - discount) / 100)), 2) AS segment_revenue
+			FROM sales AS s
+			JOIN product_details AS p ON s.prod_id = p.product_id
+			GROUP BY segment_id, segment
+		)
+		SELECT 
+			p.segment,
+			p.prod_id,
+			p.product,
+			p.revenue,
+			round((p.revenue/s.segment_revenue),2) as segment_prc
+		FROM product_revenue AS p
+		JOIN segment_revenue AS s ON p.segment_id = s.segment_id
+		order by segment, segment_prc desc;
+		-- Segment	|	prod_id	|	product								revenue		pct
+		-- Jacket	|	9ec847	|	Grey Fashion Jacket - Womens		183912.12	0.57
+		-- Jacket	|	d5e9a6	|	Khaki Suit Jacket - Womens			76052.95	0.24
+		-- Jacket	|	72f5d4	|	Indigo Rain Jacket - Womens			62740.47	0.19
+
+		-- Jeans	|	e83aa3	|	Black Straight Jeans - Womens		106407.04	0.58
+		-- Jeans	|	c4a632	|	Navy Oversized Jeans - Womens		43992.39	0.24
+		-- Jeans	|	e31d39	|	Cream Relaxed Jeans - Womens		32606.60	0.18
+
+		-- Shirt	|	2a2353	|	Blue Polo Shirt - Mens				190863.93	0.54
+		-- Shirt	|	5d267b	|	White Tee Shirt - Mens				133622.40	0.37
+		-- Shirt	|	c8d436	|	Teal Button Up Shirt - Mens			32062.40	0.09
+
+		-- Socks	|	f084eb	|	Navy Solid Socks - Mens				119861.64	0.44
+		-- Socks	|	2feb6b	|	Pink Fluro Polkadot Socks - Mens	96377.73	0.36
+		-- Socks	|	b9a74d	|	White Striped Socks - Mens			54724.19	0.20
+
+
 -- What is the percentage split of revenue by segment for each category?
+		WITH segment_revenue AS (
+			SELECT 
+				p.segment_id as segment_id,
+                p.segment_name AS segment,
+                p.category_id as category_id,
+				ROUND(SUM((qty * s.price) * ((100 - discount) / 100)), 2) AS segment_revenue
+			FROM sales AS s
+			JOIN product_details AS p ON s.prod_id = p.product_id
+			GROUP BY segment_id, segment, category_id
+		),
+		category_revenue AS (
+			SELECT 
+				p.category_id as category_id,
+				p.category_name AS category,
+				ROUND(SUM((qty * s.price) * ((100 - discount) / 100)), 2) AS category_revenue
+			FROM sales AS s
+			JOIN product_details AS p ON s.prod_id = p.product_id
+			GROUP BY category_id, category
+		)
+		SELECT 
+			c.category,
+            s.segment,
+			s.segment_revenue,
+            round((s.segment_revenue/c.category_revenue),2) as category_prc
+		FROM segment_revenue AS s
+		JOIN category_revenue AS c ON s.category_id = c.category_id
+		order by segment, category_prc desc;
+		-- Category	|	Segment	|	revenue		|	pct
+		-- Womens	|	Jacket	|	322705.54	|	0.64
+		-- Womens	|	Jeans	|	183006.03	|	0.36
+		-- Mens		|	Shirt	|	356548.73	|	0.57
+		-- Mens		|	Socks	|	270963.56	|	0.43
+
+
 -- What is the percentage split of total revenue by category?
+			select 
+            category, 
+            category_revenue, 
+            (category_revenue/revenue) as prc_revenue 
+            from (SELECT 
+					p.category_id as category_id,
+					p.category_name AS category,
+					ROUND(SUM((qty * s.price) * ((100 - discount) / 100)), 2) AS category_revenue,
+					(select ROUND(SUM((qty * price) * ((100 - discount) / 100)), 2) AS revenue from sales) as revenue
+				FROM sales AS s
+				JOIN product_details AS p ON s.prod_id = p.product_id
+				GROUP BY category_id, category) 
+			subquery;
+			-- category	|	revenue		|	prc_total
+			-- Womens	|	505711.57	|	0.446259
+			-- Mens		|	627512.29	|	0.553741
+
+
 -- What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+		SELECT
+			s.prod_id,
+			p.product_name AS product,
+			COUNT(DISTINCT s.txn_id) AS txn_count,
+			ROUND(
+				COUNT(DISTINCT s.txn_id) * 1.0 / (
+					SELECT COUNT(DISTINCT txn_id)
+					FROM sales
+				), 2
+			) AS penetration
+		FROM sales AS s
+		JOIN product_details AS p ON s.prod_id = p.product_id
+		GROUP BY s.prod_id, p.product_name
+		ORDER BY penetration DESC;
+		-- c4a632	Navy Oversized Jeans - Womens		1274	0.51
+		-- 5d267b	White Tee Shirt - Mens				1268	0.51
+		-- 2a2353	Blue Polo Shirt - Mens				1268	0.51
+		-- f084eb	Navy Solid Socks - Mens				1281	0.51
+		-- 9ec847	Grey Fashion Jacket - Womens		1275	0.51
+		-- b9a74d	White Striped Socks - Mens			1243	0.50
+		-- 2feb6b	Pink Fluro Polkadot Socks - Mens	1258	0.50
+		-- e31d39	Cream Relaxed Jeans - Womens		1243	0.50
+		-- 72f5d4	Indigo Rain Jacket - Womens			1250	0.50
+		-- e83aa3	Black Straight Jeans - Womens		1246	0.50
+		-- d5e9a6	Khaki Suit Jacket - Womens			1247	0.50
+		-- c8d436	Teal Button Up Shirt - Mens			1242	0.50
+
+
 -- What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
+-- Using a Common Table Expression (CTE) to filter transactions with at least three distinct products
+		WITH RelevantTransactions AS (
+			SELECT txn_id
+			FROM sales
+			GROUP BY txn_id
+			HAVING COUNT(DISTINCT prod_id) >= 3
+		)
+		-- Cross-joining to find all combinations of three products within the filtered transactions
+		, ProductCombinations AS (
+			SELECT a.txn_id, a.prod_id AS prod1, b.prod_id AS prod2, c.prod_id AS prod3
+			FROM sales a
+			JOIN sales b ON a.txn_id = b.txn_id AND a.prod_id < b.prod_id
+			JOIN sales c ON a.txn_id = c.txn_id AND b.prod_id < c.prod_id
+			WHERE a.txn_id IN (SELECT txn_id FROM RelevantTransactions)
+		)
+		-- Counting and finding the most common combination
+		SELECT prod1, prod2, prod3, COUNT(*) AS occurrence_count
+		FROM ProductCombinations
+		GROUP BY prod1, prod2, prod3
+		ORDER BY occurrence_count DESC
+		LIMIT 1;
+		-- prod1	|	prod2	|	prod3	|	ocurrences
+        -- 5d267b	|	9ec847	|	c8d436	|	352
 
 
 -- Reporting Challenge
@@ -225,6 +370,11 @@ select * from sales;
 -- He first wants you to generate the data for January only - but then he also wants you to demonstrate that you can easily run the samne analysis for February without many changes (if at all).
 -- Feel free to split up your final outputs into as many tables as you need - but be sure to explicitly reference which table outputs relate to which question for full marks :)
 
+use balanced_tree;
+select * from product_details;
+select * from product_hierarchy;
+select * from product_prices;
+select * from sales;
 
 -- Bonus Challenge
 -- Use a single SQL query to transform the product_hierarchy and product_prices datasets to the product_details table.
