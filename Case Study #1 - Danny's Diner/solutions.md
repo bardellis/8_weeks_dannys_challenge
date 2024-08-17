@@ -66,6 +66,12 @@ from (
 ) as ranked_sales
 where ranked = 1;
 ````
+| customer\_id |product\_name|total\_purchases|ranked|
+|----------- |----------- |---------- |---------- |
+|A	|ramen	|3	|1|
+|B	|curry|	2	|1|
+|C	|ramen	|3	|1|
+
 ### 6. Which item was purchased first by the customer after they became a member?
 ````sql
 select *
