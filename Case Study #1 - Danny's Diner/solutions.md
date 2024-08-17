@@ -11,7 +11,7 @@ group by sales.customer_id;
 | B            | 74              |
 | C            | 36              |
 
-
+***
 ### 2. How many days has each customer visited the restaurant?
 ````sql
 SELECT sales.customer_id, count(distinct sales.order_date) AS count_days
@@ -24,7 +24,7 @@ GROUP BY sales.customer_id;
 | B	| 6	|
 | C	| 2	|
 
-
+***
 ### 3. What was the first item from the menu purchased by each customer?
 ````sql
 SELECT ranked_sales.*, menu.product_name
@@ -42,7 +42,7 @@ where row_num = 1;
 |B		|2021-01-01|2	|1	|curry|
 |C		|2021-01-01|3	|1	|ramen|
 
-
+***
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 ````sql
 SELECT menu.product_name, COUNT(*) AS total_purchases
@@ -56,7 +56,7 @@ LIMIT 1;
 |----------- |----------- |
 |ramen	|8|
 
-
+***
 ### 5. Which item was the most popular for each customer?
 ````sql
 select customer_id, product_name, total_purchases, ranked
@@ -76,7 +76,7 @@ where ranked = 1;
 |B	|curry|	2	|1|
 |C	|ramen	|3	|1|
 
-
+***
 ### 6. Which item was purchased first by the customer after they became a member?
 ````sql
 select *
@@ -103,7 +103,7 @@ where ranked = 1;
 |A	|2021-01-10	|3	|2021-01-07	|ramen	|after	|1|
 |B	|2021-01-11	|1	|2021-01-09	|sushi	|after	|1|
 
-
+***
 ### 7. Which item was purchased just before the customer became a member?
 ````sql
 select * 
@@ -129,7 +129,7 @@ where ranked =1;
 |A|2021-01-01|sushi|2021-01-07|before|1|
 |B|2021-01-01|curry|2021-01-09|before|1|
 
-
+***
 ### 8. What is the total items and amount spent for each member before they became a member?
 ````sql
 select subquery_inicial.customer_id, count(*) as total_items, sum(subquery_inicial.price) as price
@@ -145,6 +145,8 @@ from (
 where subquery_inicial.comparison_date = 'before'
 group by subquery_inicial.customer_id;
 ````
+
+***
 ### 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 ````sql
 select subquery_final.customer_id, sum(subquery_final.points) as total_points
@@ -161,6 +163,8 @@ from(
 		) as subquery_inicial) as subquery_final
 group by subquery_final.customer_id;
 ````
+
+***
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 ````sql
 select subquery_inicial.customer_id, sum(subquery_inicial.points) as total_points
