@@ -5,6 +5,12 @@ from sales
 join menu on sales.product_id=menu.product_id
 group by sales.customer_id;
 ````
+| customer\_id | total\_spending |
+| ------------ | --------------- |
+| A            | 76              |
+| B            | 74              |
+| C            | 36              |
+
 ### 2. How many days has each customer visited the restaurant?
 ````sql
 SELECT sales.customer_id, count(distinct sales.order_date) AS count_days
