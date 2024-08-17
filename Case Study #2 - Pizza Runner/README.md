@@ -66,89 +66,12 @@ This case study has LOTS of questions - they are broken up by area of focus incl
 - Average speed
 - Total number of pizzas
 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
-## Data cleaning
+
+### E. Bonus Questions
+If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 Before going through questions of Case Study #2. We need to clean database ('null' values, strings,etc ...). And some new table for specific questions.
-### 1. Table customer_orders
-#### Create a clean temp table #customer_orders
-- Change all the blanks value or 'null' to NULL value
-```sql
-SELECT order_id, 
-        customer_id,
-        pizza_id, 
-        CASE WHEN exclusions = '' OR exclusions like 'null' THEN NULL
-            ELSE exclusions END AS exclusions,
-        CASE WHEN extras = '' OR extras like 'null' THEN NULL
-            ELSE extras END AS extras, 
-        order_time
-INTO #customer_orders -- create TEMP TABLE
-FROM customer_orders;
-```
-#### Original table :
-![image](https://user-images.githubusercontent.com/120476961/226275857-4a806e2b-ccd4-4bad-99d7-ee2e62f4068a.png)
-#### Cleaned table :
-![image](https://user-images.githubusercontent.com/120476961/226276116-52a5e4c8-eeae-4a9a-aa0b-1d901ebc505c.png)
-### 2. Table runner_orders
-#### Create a clean temp table #runner_orders
-- Changing all the NULL and 'null' to blanks for strings
-- Changing all the 'null' to NULL for non strings
-- Removing 'km' from distance
-- Removing anything after the numbers from duration
-```sql
-SELECT  order_id, 
-        runner_id,
-        CASE 
-          WHEN pickup_time LIKE 'null' THEN NULL
-          ELSE pickup_time 
-          END AS pickup_time,
-        CASE 
-          WHEN distance LIKE 'null' THEN NULL
-          WHEN distance LIKE '%km' THEN TRIM('km' from distance) 
-          ELSE distance END AS distance,
-        CASE 
-          WHEN duration LIKE 'null' THEN NULL 
-          WHEN duration LIKE '%mins' THEN TRIM('mins' from duration) 
-          WHEN duration LIKE '%minute' THEN TRIM('minute' from duration)        
-          WHEN duration LIKE '%minutes' THEN TRIM('minutes' from duration)       
-          ELSE duration END AS duration,
-        CASE 
-          WHEN cancellation LIKE 'null' THEN NULL
-          WHEN cancellation = '' THEN NULL
-          ELSE cancellation END AS cancellation
-INTO #runner_orders
-FROM runner_orders;
-```
-#### Original table :
-![image](https://user-images.githubusercontent.com/120476961/226289713-fa823df2-a1c9-4720-a19a-f5e2a17915a3.png)
-#### Cleaned table :
-![image](https://user-images.githubusercontent.com/120476961/226289489-05a4fd12-39a5-49b1-8914-cbbc6a3c2f6e.png)
-### 3. Change several data types of columns
-```sql
-ALTER TABLE #runner_orders 
-ALTER COLUMN pickup_time DATETIME
 
-ALTER TABLE #runner_orders
-ALTER COLUMN distance FLOAT
 
-ALTER TABLE #runner_orders
-ALTER COLUMN duration INT;
-
-ALTER TABLE pizza_names
-ALTER COLUMN pizza_name VARCHAR(MAX);
-
-ALTER TABLE pizza_recipes
-ALTER COLUMN toppings VARCHAR(MAX);
-
-ALTER TABLE pizza_toppings
-ALTER COLUMN topping_name VARCHAR(MAX)
-```
-## Solution
-[Click here](https://github.com/DooPhiLong/8-Week-SQL-Challenge/blob/main/Case%20Study%20%232%20-%20Pizza%20Runner/Solution.md)
-## Method applied
-- Data Cleaning
-- Creating Tables
-- JOINS
-- Aggregate Functions including STRING_AGG()
-- CTE's
-- CASE Statements
-- Subqueries
-- String Functions like CONCAT()
+### Conclusion
+I hope there were enough case study questions to keep you occupied - I kinda went out all out in this case study!
+Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #3!
