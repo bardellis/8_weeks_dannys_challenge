@@ -17,6 +17,12 @@ SELECT sales.customer_id, count(distinct sales.order_date) AS count_days
 FROM sales
 GROUP BY sales.customer_id;
 ````
+| customer\_id | count\_days|
+| ----- | ------ |
+| A	| 4	|
+| B	| 6	|
+| C	| 2	|
+
 ### 3. What was the first item from the menu purchased by each customer?
 ````sql
 SELECT ranked_sales.*, menu.product_name
@@ -28,6 +34,11 @@ from(
 join menu on menu.product_id=ranked_sales.product_id
 where row_num = 1;
 ````
+
+A	2021-01-01	1	1	sushi
+B	2021-01-01	2	1	curry
+C	2021-01-01	3	1	ramen
+
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 ````sql
 SELECT menu.product_name, COUNT(*) AS total_purchases
@@ -37,6 +48,9 @@ GROUP BY menu.product_name
 ORDER BY total_purchases DESC
 LIMIT 1;
 ````
+
+ramen	8
+
 ### 5. Which item was the most popular for each customer?
 ````sql
 select customer_id, product_name, total_purchases, ranked
