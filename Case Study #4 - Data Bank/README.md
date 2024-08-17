@@ -11,28 +11,7 @@ The management team at Data Bank want to increase their total customer base - bu
 This case study is all about calculating metrics, growth and helping the business analyse their data in a smart way to better forecast and plan for their future developments!
 
 ## Data
-### Source data
 [Click here](https://8weeksqlchallenge.com/case-study-4/)
-
-#### Table 1: Regions
-This regions table contains the region_id and their respective region_name values.
-
-![image](https://github.com/DooPhiLong/8-Week-SQL-Challenge/assets/120476961/0cd95f52-bdd8-4d31-a30f-5c80935367f5)
-
-#### Table 2: Customer
-This table just show the unique customer's id 
-
-![image](https://github.com/DooPhiLong/8-Week-SQL-Challenge/assets/120476961/9f53b9b7-ef81-421e-b777-8c0c47b6efc0)
-
-#### Table 3 : Customer Nodes
-Customers are randomly distributed across the nodes according to their region. This random distribution changes frequently to reduce the risk of hackers getting into Data Bank’s system and stealing customer’s money and data!
-
-![image](https://github.com/DooPhiLong/8-Week-SQL-Challenge/assets/120476961/0ea5df7f-f19c-4930-a35c-c2ba06cf9cb1)
-
-#### Table 4 : Customer Transactions
-This table stores all customer deposits, withdrawals and purchases made using their Data Bank debit card.
-
-![image](https://github.com/DooPhiLong/8-Week-SQL-Challenge/assets/120476961/c5a8f89b-eb70-4a15-9503-a788a39aeee1)
 
 ##  Task Questions
 
