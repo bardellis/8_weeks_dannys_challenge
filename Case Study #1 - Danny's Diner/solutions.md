@@ -5,7 +5,7 @@ from sales
 join menu on sales.product_id=menu.product_id
 group by sales.customer_id;
 ````
-| customer\_id | total\_spending |
+| customer\_id | total\_amount |
 | ------------ | --------------- |
 | A            | 76              |
 | B            | 74              |
