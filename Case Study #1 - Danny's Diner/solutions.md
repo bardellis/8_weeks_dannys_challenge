@@ -49,8 +49,9 @@ GROUP BY menu.product_name
 ORDER BY total_purchases DESC
 LIMIT 1;
 ````
-
-ramen	8
+| product\_name|total\_purchases|
+|----------- |----------- |
+|ramen	|8|
 
 ### 5. Which item was the most popular for each customer?
 ````sql
