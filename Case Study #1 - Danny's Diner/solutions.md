@@ -145,6 +145,10 @@ from (
 where subquery_inicial.comparison_date = 'before'
 group by subquery_inicial.customer_id;
 ````
+|customer_id |total_items |price|
+|------------|------------|-----|
+|B	|3	|40|
+|A	|2	|25|
 
 ***
 ### 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
@@ -163,6 +167,11 @@ from(
 		) as subquery_inicial) as subquery_final
 group by subquery_final.customer_id;
 ````
+|customer_id|total_points|
+|------------|------------|
+|A	|860|
+|B	|940|
+|C	|360|
 
 ***
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
@@ -179,3 +188,7 @@ from(
 	join members on sales.customer_id=members.customer_id) as subquery_inicial
 group by customer_id;
 ````
+|customer_id|total_points|
+|------------|------------|
+|B	|960|
+|A	|1120|
