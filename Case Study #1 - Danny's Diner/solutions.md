@@ -34,10 +34,11 @@ from(
 join menu on menu.product_id=ranked_sales.product_id
 where row_num = 1;
 ````
-
-A	2021-01-01	1	1	sushi
-B	2021-01-01	2	1	curry
-C	2021-01-01	3	1	ramen
+| customer\_id | order\_date| product\_id | product\_name|
+| ------------ | ---------- | ----------- |----------- |
+|A		|2021-01-01|1	|1	|sushi|
+|B		|2021-01-01|2	|1	|curry|
+|C		|2021-01-01|3	|1	|ramen|
 
 ### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 ````sql
