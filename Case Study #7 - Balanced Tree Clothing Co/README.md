@@ -60,22 +60,29 @@ For this case study there is a total of 4 datasets for this case study - however
   
 
 ***
-### D. Bonus Challenge
+### D. Reporting Challenge
+Write a single SQL script that combines all of the previous questions into a scheduled report that the Balanced Tree team can run at the beginning of each month to calculate the previous month’s values.
+
+Imagine that the Chief Financial Officer (which is also Danny) has asked for all of these questions at the end of every month.
+
+He first wants you to generate the data for January only - but then he also wants you to demonstrate that you can easily run the samne analysis for February without many changes (if at all).
+
+Feel free to split up your final outputs into as many tables as you need - but be sure to explicitly reference which table outputs relate to which question for full marks :)
+
+***
+### E. Bonus Challenge
 
 Use a single SQL query to transform the product_hierarchy and product_prices datasets to the product_details table.
 
 Hint: you may want to consider using a recursive CTE to solve this problem!
 
 ***
-## Solution
-[Click here](https://github.com/DooPhiLong/8-Week-SQL-Challenge/blob/main/Case%20Study%20%237%20-%20Balanced%20Tree%20Clothing%20Co/Solution.md).
+### Conclusion
+Sales, transactions and product exposure is always going to be a main objective for many data analysts and data scientists when working within a company that sells some type of product - Spoiler alert: nearly all companies will sell products!
 
-## Method apllied
-- Creating Tables
-- JOINS
-- CTE's
-- Window Functions RANK
-- CASE Statements
-- As well as other functions, operators and clauses
-- PERCENTILE_CONT 
+Being able to navigate your way around a product hierarchy and understand the different levels of the structures as well as being able to join these details to sales related datasets will be super valuable for anyone wanting to work within a financial, customer or exploratory analytics capacity.
+
+Hopefully these questions helped provide some exposure to the type of analysis we perform daily in these sorts of roles!
+
+Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #8!
 
