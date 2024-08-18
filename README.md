@@ -27,7 +27,7 @@ https://8weeksqlchallenge.com/case-study-5/
 https://8weeksqlchallenge.com/case-study-6/
 
 
-## Case Study #7 - Balanced Tree Clothing Co. - Working on it
+## Case Study #7 - Balanced Tree Clothing Co. - Completed
 https://8weeksqlchallenge.com/case-study-7/
 
 
