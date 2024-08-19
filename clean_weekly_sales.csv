@@ -1,3 +1,0 @@
-customer_id,order_date,product_name,join_date,comparison_date,ranked
-A,2021-01-01,sushi,2021-01-07,before,1
-B,2021-01-01,curry,2021-01-09,before,1

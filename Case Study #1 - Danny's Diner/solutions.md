@@ -1,70 +1,32 @@
-CREATE SCHEMA dannys_diner;
-USE dannys_diner;
-
-CREATE TABLE sales (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id VARCHAR(10),
-    order_date DATE,
-    product_id INT
-);
-
-INSERT INTO sales (customer_id, order_date, product_id)
-VALUES
-  ('A', '2021-01-01', 1),
-  ('A', '2021-01-01', 2),
-  ('A', '2021-01-07', 2),
-  ('A', '2021-01-10', 3),
-  ('A', '2021-01-11', 3),
-  ('A', '2021-01-11', 3),
-  ('B', '2021-01-01', 2),
-  ('B', '2021-01-02', 2),
-  ('B', '2021-01-04', 1),
-  ('B', '2021-01-11', 1),
-  ('B', '2021-01-16', 3),
-  ('B', '2021-02-01', 3),
-  ('C', '2021-01-01', 3),
-  ('C', '2021-01-01', 3),
-  ('C', '2021-01-07', 3); 
-
-
-CREATE TABLE menu (
-  product_id INTEGER,
-  product_name VARCHAR(5),
-  price INTEGER
-);
-
-INSERT INTO menu
-  (product_id, product_name, price)
-VALUES
-  (1, 'sushi', 10),
-  (2, 'curry', 15),
-  (3, 'ramen', 12);
-
-
-CREATE TABLE members (
-  customer_id VARCHAR(1),
-  join_date DATE
-);
-
-
-INSERT INTO members
-  (customer_id, join_date)
-VALUES
-  ('A', '2021-01-07'),
-  ('B', '2021-01-09');
-
--- 1. What is the total amount each customer spent at the restaurant?
+### 1. What is the total amount each customer spent at the restaurant?
+````sql
 select sales.customer_id, sum(price) as total_amount
 from sales
 join menu on sales.product_id=menu.product_id
 group by sales.customer_id;
+````
+| customer\_id | total\_amount |
+| ------------ | --------------- |
+| A            | 76              |
+| B            | 74              |
+| C            | 36              |
 
--- 2. How many days has each customer visited the restaurant?
+***
+### 2. How many days has each customer visited the restaurant?
+````sql
 SELECT sales.customer_id, count(distinct sales.order_date) AS count_days
 FROM sales
 GROUP BY sales.customer_id;
+````
+| customer\_id | count\_days|
+| ----- | ------ |
+| A	| 4	|
+| B	| 6	|
+| C	| 2	|
 
--- 3. What was the first item from the menu purchased by each customer?
+***
+### 3. What was the first item from the menu purchased by each customer?
+````sql
 SELECT ranked_sales.*, menu.product_name
 from(
 	select *,
@@ -73,16 +35,30 @@ from(
 ) as ranked_sales
 join menu on menu.product_id=ranked_sales.product_id
 where row_num = 1;
+````
+| customer\_id | order\_date| product\_id | product\_name|
+| ------------ | ---------- | ----------- |----------- |
+|A		|2021-01-01|1	|1	|sushi|
+|B		|2021-01-01|2	|1	|curry|
+|C		|2021-01-01|3	|1	|ramen|
 
--- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+***
+### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+````sql
 SELECT menu.product_name, COUNT(*) AS total_purchases
 FROM sales
 JOIN menu ON sales.product_id = menu.product_id
 GROUP BY menu.product_name
 ORDER BY total_purchases DESC
 LIMIT 1;
+````
+| product\_name|total\_purchases|
+|----------- |----------- |
+|ramen	|8|
 
--- 5. Which item was the most popular for each customer?
+***
+### 5. Which item was the most popular for each customer?
+````sql
 select customer_id, product_name, total_purchases, ranked
 from (
 	select sales.customer_id, menu.product_name,
@@ -93,8 +69,16 @@ from (
 	group by sales.customer_id, menu.product_name
 ) as ranked_sales
 where ranked = 1;
+````
+| customer\_id |product\_name|total\_purchases|ranked|
+|----------- |----------- |---------- |---------- |
+|A	|ramen	|3	|1|
+|B	|curry|	2	|1|
+|C	|ramen	|3	|1|
 
--- 6. Which item was purchased first by the customer after they became a member?
+***
+### 6. Which item was purchased first by the customer after they became a member?
+````sql
 select *
 from(
 	select *,
@@ -113,8 +97,15 @@ from(
 	where date_comparison = 'after'
 ) as subquery_final
 where ranked = 1;
+````
+| customer\_id |order\_date| product\_id| product\_name|date\_comparison|ranked|
+|----------- |----------- |---------- |---------- |----------- |----------- |
+|A	|2021-01-10	|3	|2021-01-07	|ramen	|after	|1|
+|B	|2021-01-11	|1	|2021-01-09	|sushi	|after	|1|
 
--- 7. Which item was purchased just before the customer became a member?
+***
+### 7. Which item was purchased just before the customer became a member?
+````sql
 select * 
 from (
 	select *,
@@ -132,8 +123,15 @@ from (
 		where comparison_date = 'before'
 	) as suquery_final
 where ranked =1;
+````
+|customer_id|order_date|product_name|join_date|comparison_date|ranked|
+|-----------|-----------|-----------|-----------|-----------|-----------|
+|A|2021-01-01|sushi|2021-01-07|before|1|
+|B|2021-01-01|curry|2021-01-09|before|1|
 
--- 8. What is the total items and amount spent for each member before they became a member?
+***
+### 8. What is the total items and amount spent for each member before they became a member?
+````sql
 select subquery_inicial.customer_id, count(*) as total_items, sum(subquery_inicial.price) as price
 from (
 	select sales.customer_id, sales.order_date, menu.price, members.join_date,
@@ -146,8 +144,15 @@ from (
 		join members on sales.customer_id=members.customer_id) as subquery_inicial
 where subquery_inicial.comparison_date = 'before'
 group by subquery_inicial.customer_id;
+````
+|customer_id |total_items |price|
+|------------|------------|-----|
+|B	|3	|40|
+|A	|2	|25|
 
--- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+***
+### 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+````sql
 select subquery_final.customer_id, sum(subquery_final.points) as total_points
 from(
 	select subquery_inicial.*,
@@ -161,8 +166,16 @@ from(
 			join menu on sales.product_id=menu.product_id
 		) as subquery_inicial) as subquery_final
 group by subquery_final.customer_id;
+````
+|customer_id|total_points|
+|------------|------------|
+|A	|860|
+|B	|940|
+|C	|360|
 
--- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+***
+### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+````sql
 select subquery_inicial.customer_id, sum(subquery_inicial.points) as total_points
 from(
 	select sales.customer_id, sales.order_date, menu.price, members.join_date,
@@ -174,3 +187,8 @@ from(
 	join menu on sales.product_id=menu.product_id
 	join members on sales.customer_id=members.customer_id) as subquery_inicial
 group by customer_id;
+````
+|customer_id|total_points|
+|------------|------------|
+|B	|960|
+|A	|1120|
