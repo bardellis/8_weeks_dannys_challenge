@@ -15517,9 +15517,6 @@ VALUES
   
 -- update NULL values
 -- Update to handle 'NULL' as NULL values and cast to integers where necessary
-DROP TABLE IF EXISTS fresh_segments.json_data;
-
-CREATE TABLE fresh_segments.json_data (raw_data JSON);
 
 UPDATE fresh_segments.interest_metrics
 SET _month = CASE 
@@ -15541,46 +15538,8 @@ UPDATE fresh_segments.interest_metrics
 SET interest_id = NULL
 WHERE interest_id = 'NULL';
 
--- only a tiny sample of the dataset is inserted here as it breaks the DB Fiddle system if I put in all the data!
-INSERT INTO fresh_segments.json_data (raw_data)
-VALUES (
-'[{"month": 7, "year": 2018, "month_year": "07-2018", "a.attribute_interest_id": 32486, "average_composition": 11.89, "average_index": 6.19, "rank": 1, "percentile_rank": 99.86"},
-  {"month": 7, "year": 2018, "month_year": "07-2018", "a.attribute_interest_id": 32486, "average_composition": 11.89, "average_index": 6.19, "rank": 1, "percentile_rank": 99.86"},
-  {"month": 7, "year": 2018, "month_year": "07-2018", "a.attribute_interest_id": 6106, "average_composition": 9.93, "average_index": 5.31, "rank": 2, "percentile_rank": 99.73"},
-  {"month": 7, "year": 2018, "month_year": "07-2018", "a.attribute_interest_id": 18923, "average_composition": 10.85, "average_index": 5.29, "rank": 3, "percentile_rank": 99.59"}]');
-  
-select * from fresh_segments.json_data;
-  
-INSERT INTO fresh_segments.json_data (raw_data)
-VALUES ('{
-        "month": 7,
-        "year": 2018,
-        "month_year": "07-2018",
-        "a.attribute_interest_id": 32486,
-        "average_composition": 11.89,
-        "average_index": 6.19,
-        "rank": 1,
-        "percentile_rank": 99.86
-    }'),
-    ('{
-        "month": 7,
-        "year": 2018,
-        "month_year": "07-2018",
-        "a.attribute_interest_id": 32486,
-        "average_composition": 11.89,
-        "average_index": 6.19,
-        "rank": 1,
-        "percentile_rank": 99.86}');
-
-use fresh_segment;
-
-select info '$.year' 
-from fresh_segments.json_data;
-
-SELECT JSON_EXTRACT(raw_data, '$.year') AS year
-FROM fresh_segments.json_data;
-
-select * from fresh_segments.json_data;
+use fresh_segments;
+select * from interest_metrics;
 
 -- Case Study Questions
 -- The following questions can be considered key business questions that are required to be answered for the Fresh Segments team.
@@ -15588,6 +15547,8 @@ select * from fresh_segments.json_data;
 
 -- Data Exploration and Cleansing
 -- Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month
+
+
 -- What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?
 -- What do you think we should do with these null values in the fresh_segments.interest_metrics
 -- How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
