@@ -1,56 +1,56 @@
-CREATE SCHEMA fresh_segments;
+	CREATE SCHEMA fresh_segments;
 
-CREATE TABLE fresh_segments.interest_map (
-  id INTEGER,
-  interest_name TEXT,
-  interest_summary TEXT,
-  created_at TIMESTAMP,
-  last_modified TIMESTAMP
-);
-  
--- update the null values
-UPDATE fresh_segments.interest_map
-SET interest_summary = NULL
-WHERE interest_summary = '';
+	CREATE TABLE fresh_segments.interest_map (
+	  id INTEGER,
+	  interest_name TEXT,
+	  interest_summary TEXT,
+	  created_at TIMESTAMP,
+	  last_modified TIMESTAMP
+	);
+	  
+	-- update the null values
+	UPDATE fresh_segments.interest_map
+	SET interest_summary = NULL
+	WHERE interest_summary = '';
 
-CREATE TABLE fresh_segments.interest_metrics (
-  _month VARCHAR(4),
-  _year VARCHAR(4),
-  month_year VARCHAR(7),
-  interest_id VARCHAR(5),
-  composition FLOAT,
-  index_value FLOAT,
-  ranking INTEGER,
-  percentile_ranking FLOAT
-);
-  
--- update NULL values
--- Update to handle 'NULL' as NULL values and cast to integers where necessary
+	CREATE TABLE fresh_segments.interest_metrics (
+	  _month VARCHAR(4),
+	  _year VARCHAR(4),
+	  month_year VARCHAR(7),
+	  interest_id VARCHAR(5),
+	  composition FLOAT,
+	  index_value FLOAT,
+	  ranking INTEGER,
+	  percentile_ranking FLOAT
+	);
+	  
+	-- update NULL values
+	-- Update to handle 'NULL' as NULL values and cast to integers where necessary
 
-UPDATE fresh_segments.interest_metrics
-SET _month = CASE 
-    WHEN _month = 'NULL' THEN NULL
-    ELSE CAST(_month AS UNSIGNED)
-END;
+	UPDATE fresh_segments.interest_metrics
+	SET _month = CASE 
+		WHEN _month = 'NULL' THEN NULL
+		ELSE CAST(_month AS UNSIGNED)
+	END;
 
-UPDATE fresh_segments.interest_metrics
-SET _year = CASE 
-    WHEN _year = 'NULL' THEN NULL
-    ELSE CAST(_year AS UNSIGNED)
-END;
+	UPDATE fresh_segments.interest_metrics
+	SET _year = CASE 
+		WHEN _year = 'NULL' THEN NULL
+		ELSE CAST(_year AS UNSIGNED)
+	END;
 
-UPDATE fresh_segments.interest_metrics
-SET month_year = NULL
-WHERE month_year = 'NULL';
+	UPDATE fresh_segments.interest_metrics
+	SET month_year = NULL
+	WHERE month_year = 'NULL';
 
-UPDATE fresh_segments.interest_metrics
-SET interest_id = NULL
-WHERE interest_id = 'NULL';
+	UPDATE fresh_segments.interest_metrics
+	SET interest_id = NULL
+	WHERE interest_id = 'NULL';
 
-use fresh_segments;
-select * from interest_metrics
-where month_year is NULL
-order by new_month_year desc;
+	use fresh_segments;
+	select * from interest_metrics
+	where month_year is NULL
+	order by new_month_year desc;
 
 -- Case Study Questions
 -- The following questions can be considered key business questions that are required to be answered for the Fresh Segments team.
@@ -60,7 +60,6 @@ order by new_month_year desc;
 	-- Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month
 	ALTER TABLE fresh_segments.interest_metrics
 	ADD COLUMN new_month_year DATE;
-
 	UPDATE fresh_segments.interest_metrics
 	SET new_month_year = STR_TO_DATE(CONCAT('01-', month_year), '%d-%m-%Y');
 
@@ -102,8 +101,18 @@ order by new_month_year desc;
 	GROUP BY id
 	ORDER BY record_count DESC;
 
--- What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.
--- Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?
+	-- What sort of table join should we perform for our analysis and why? 
+	-- Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics 
+	-- and all columns from fresh_segments.interest_map except from the id column.
+	-- Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? 
+    -- Do you think these values are valid and why? This happens because the value of month_year is month/year, so we do not know what day the metric was entered
+		select 
+		i._month, i._year, i.month_year, i.interest_id, i.composition, i.index_value, i.ranking, i.percentile_ranking, i.new_month_year,
+		m.interest_name, m.interest_summary, m.created_at, m.last_modified
+		from fresh_segments.interest_metrics as i
+		left join fresh_segments.interest_map as m on m.id = i.interest_id
+		where i.new_month_year < m.created_at;
+
 
 -- Interest Analysis
 -- Which interests have been present in all month_year dates in our dataset?
