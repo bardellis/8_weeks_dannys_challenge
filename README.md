@@ -31,7 +31,7 @@ https://8weeksqlchallenge.com/case-study-6/
 https://8weeksqlchallenge.com/case-study-7/
 
 
-## Case Study #8 - Fresh Segments - Pending 
+## Case Study #8 - Fresh Segments - Completed
 https://8weeksqlchallenge.com/case-study-8/
 
 
