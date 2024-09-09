@@ -237,7 +237,7 @@
 		select new_month_year, count(distinct(interest_id)) as records from fresh_segments.interest_metrics me
 		join fresh_segments.interest_map as ma on ma.id=me.interest_id
 		group by new_month_year; 
-        -- 480 interests
+        -- 480 interest_ids
 
         
 -- Segment Analysis
