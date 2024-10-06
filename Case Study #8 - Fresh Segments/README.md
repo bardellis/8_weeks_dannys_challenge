@@ -50,21 +50,21 @@ The index_value is 6.19, means that the composition value is 6.19x the average c
 
 The ranking and percentage_ranking relates to the order of index_value records in each month year.
 
-<p align="center">
-## Interest Map
+##Interest Map
 This mapping table links the interest_id with their relevant interest information. You will need to join this table onto the previous interest_details table to obtain the interest_name as well as any details about the summary information.
 
-id	interest_name	interest_summary	created_at	last_modified
-1	Fitness Enthusiasts	Consumers using fitness tracking apps and websites.	2016-05-26 14:57:59	2018-05-23 11:30:12
-2	Gamers	Consumers researching game reviews and cheat codes.	2016-05-26 14:57:59	2018-05-23 11:30:12
-3	Car Enthusiasts	Readers of automotive news and car reviews.	2016-05-26 14:57:59	2018-05-23 11:30:12
-4	Luxury Retail Researchers	Consumers researching luxury product reviews and gift ideas.	2016-05-26 14:57:59	2018-05-23 11:30:12
-5	Brides & Wedding Planners	People researching wedding ideas and vendors.	2016-05-26 14:57:59	2018-05-23 11:30:12
-6	Vacation Planners	Consumers reading reviews of vacation destinations and accommodations.	2016-05-26 14:57:59	2018-05-23 11:30:13
-7	Motorcycle Enthusiasts	Readers of motorcycle news and reviews.	2016-05-26 14:57:59	2018-05-23 11:30:13
-8	Business News Readers	Readers of online business news content.	2016-05-26 14:57:59	2018-05-23 11:30:12
-12	Thrift Store Shoppers	Consumers shopping online for clothing at thrift stores and researching locations.	2016-05-26 14:57:59	2018-03-16 13:14:00
-13	Advertising Professionals	People who read advertising industry news.	2016-05-26 14:57:59	2018-05-23 11:30:12
+| id	| interest_name	| interest_summary	| created_at	| last_modified
+| ----| --------------| ------------------| ------------| -------
+| 1	| Fitness  Enthusiasts	| Consumers using fitness tracking apps and websites.	| 2016-05-26 14:57:59	| 2018-05-23 11:30:12
+| 2	| Gamers	| Consumers researching game reviews and cheat codes.	| 2016-05-26 14:57:59	| 2018-05-23 11:30:12
+| 3	| Car | Enthusiasts	Readers of automotive news and car reviews.	| 2016-05-26 14:57:59	| 2018-05-23 11:30:12
+| 4	| Luxury Retail | Researchers	Consumers researching luxury product reviews and gift ideas.	| 2016-05-26 14:57:59 | 2018-05-23 11:30:12
+| 5	| Brides & Wedding Planners	| People researching wedding ideas and vendors.	| 2016-05-26 14:57:59	| 2018-05-23 11:30:12
+| 6	| Vacation Planners	| Consumers reading reviews of vacation destinations and accommodations.	| 2016-05-26 14:57:59	| 2018-05-23 11:30:13
+| 7	| Motorcycle Enthusiasts	| Readers of motorcycle news and reviews.| 2016-05-26 14:57:59	| 2018-05-23 11:30:13
+| 8	| Business News Readers	| Readers of online business news content.	| 2016-05-26 14:57:59	| 2018-05-23 11:30:12
+| 12	| Thrift Store Shoppers	| Consumers shopping online for clothing at thrift stores and researching locations.	| 2016-05-26 14:57:59	| 2018-03-16 13:14:00
+| 13	| Advertising Professionals	| People who read advertising industry news.	| 2016-05-26 14:57:59	| 2018-05-23 11:30:12
 
 ## Interactive SQL Instance
 You can use the embedded DB Fiddle below to easily access these example datasets - this interactive session has everything you need to start solving these questions using SQL.
