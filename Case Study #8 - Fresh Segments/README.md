@@ -40,8 +40,10 @@ Each record in this table represents the performance of a specific interest_id b
 
 For example - let’s interpret the first row of the interest_metrics table together:
 
-_month	_year	month_year	interest_id	composition	index_value	ranking	percentile_ranking
-7	2018	07-2018	32486	11.89	6.19	1	99.86
+| _month	|_year	|month_year	|interest_id	|composition	|index_value	|ranking	|percentile_ranking
+| ------- |------ |---------- |------------ |------------ |------------ |-------- |-------------------- 
+| 7	| 2018	| 07-2018	| 32486	| 11.89	| 6.19	| 1	| 99.86
+
 In July 2018, the composition metric is 11.89, meaning that 11.89% of the client’s customer list interacted with the interest interest_id = 32486 - we can link interest_id to a separate mapping table to find the segment name called “Vacation Rental Accommodation Researchers”
 
 The index_value is 6.19, means that the composition value is 6.19x the average composition value for all Fresh Segments clients’ customer for this particular interest in the month of July 2018.
