@@ -1,20 +1,23 @@
--- A. Pizza Metrics
--- How many pizzas were ordered?
+### A. Pizza Metrics
+### 1. How many pizzas were ordered?
 
 ````sql
 select count(*)
 from customer_orders;
 ````
 
--- How many unique customer orders were made?
+###  2. How many unique customer orders were made?
+````sql
 select count(distinct(order_id)) as unique_order from customer_orders;
-
--- How many successful orders were delivered by each runner?
+````
+###  3. How many successful orders were delivered by each runner?
+````sql
 select count(*) 
 from runner_orders
 where pickup_time <> "";
-
--- How many of each type of pizza was delivered?
+````
+### 4. How many of each type of pizza was delivered?
+````sql
 select count(*), pizza_name
 from (
 	select co.*, ro.pickup_time, pn.pizza_name 
@@ -24,8 +27,9 @@ from (
 	where ro.pickup_time <> ""
     ) as subquery
 group by pizza_name;
-
--- How many Vegetarian and Meatlovers were ordered by each customer?
+````
+###  5. How many Vegetarian and Meatlovers were ordered by each customer?
+````sql
 select count(*), pizza_name
 from (
 	select co.*, ro.pickup_time, pn.pizza_name 
@@ -34,15 +38,17 @@ from (
 	join pizza_names as pn on co.pizza_id=pn.pizza_id
     ) as subquery
 group by pizza_name;
-
--- What was the maximum number of pizzas delivered in a single order?
+````
+### 6. What was the maximum number of pizzas delivered in a single order?
+````sql
 select count(*) as orders, order_id
 from customer_orders
 group by order_id
 order by orders desc
 limit 1;
-
--- For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+````
+### 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+````sql
 SELECT 
     customer_id,
     count_changes,
@@ -67,8 +73,9 @@ FROM (
     GROUP BY 
         customer_id
 ) as subquery2;
-
--- How many pizzas were delivered that had both exclusions and extras?
+````
+## 8. How many pizzas were delivered that had both exclusions and extras?
+````sql
 select additions, count(*) as additions_count
 from (
 	select co.*, ro.cancellation,
@@ -80,8 +87,9 @@ from (
 	where ro.cancellation is null
     ) subquery
 group by additions;
-
--- What was the total volume of pizzas ordered for each hour of the day?
+````
+### 9. What was the total volume of pizzas ordered for each hour of the day?
+````sql
 select
 	order_hour,
     count(order_id) as order_quant
@@ -96,8 +104,9 @@ group by
 	order_hour
 order by 
 	order_quant desc;
-
--- What was the volume of orders for each day of the week?
+````
+###  10. What was the volume of orders for each day of the week?
+````sql
 select 
 	weekday_name,
     count(*) as count
@@ -117,9 +126,11 @@ from(
 		end as weekday_name
 		from customer_orders as o) as subquery
 group by weekday_name;
+````
         
--- B. Runner and Customer Experience
--- How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
+###  B. Runner and Customer Experience
+###  1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
+````sql
 SELECT 
     CASE 
         WHEN registration_date >= '2021-01-01' AND registration_date < '2021-01-08' THEN 'first week'
@@ -131,8 +142,10 @@ FROM
     runners
 GROUP BY 
     registration_week;
+````
 
--- What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
+###  2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
+````sql
 select 
 runner_id, AVG(TIMESTAMPDIFF(MINUTE, order_time, pickup_time)) AS avg_pickup_delay_minutes
 from (
@@ -141,17 +154,25 @@ from (
 	join runner_orders as ro on co.order_id=ro.order_id
 	where ro.pickup_time <> 'null') as subquery
 GROUP BY ro.runner_id;
+````
 
-
+````sql
 select co.*, ro.runner_id, ro.pickup_time, (TIMESTAMPDIFF(MINUTE, order_time, pickup_time)) AS pickup_delay_minutes
 from customer_orders as co
 join runner_orders as ro on co.order_id=ro.order_id
 where ro.pickup_time <> 'null';
+````
 
--- Is there any relationship between the number of pizzas and how long the order takes to prepare?
+### 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
+````sql
 select * from customer_orders;
-select * from runner_orders;
+````
 
+````sql
+select * from runner_orders;
+````
+
+````sql
 select order_id, avg(pickup_delay_minutes) as prep_time, count(*) as pizzas, (prep_time/pizzas) as TPP
 from (
 	select co.*, ro.runner_id, ro.pickup_time, (TIMESTAMPDIFF(MINUTE, order_time, pickup_time)) AS pickup_delay_minutes
@@ -159,7 +180,9 @@ from (
 	join runner_orders as ro on co.order_id=ro.order_id
 	where ro.pickup_time <> 'null') subquery
 group by order_id;
+````
 
+````sql
 SELECT 
     order_id, 
     AVG(pickup_delay_minutes) AS prep_time, 
@@ -180,8 +203,10 @@ FROM (
 ) AS subquery
 GROUP BY 
     order_id;
+````
 
--- What was the average distance travelled for each customer?
+### 4. What was the average distance travelled for each customer?
+````sql
 select customer_id, round(avg(distance_km),2) as distance_kms from (
 	select co.*,CAST(SUBSTRING_INDEX(ro.distance, ' ', 1) AS DECIMAL(10, 2)) AS distance_km
 	from customer_orders as co
@@ -189,8 +214,10 @@ select customer_id, round(avg(distance_km),2) as distance_kms from (
 WHERE distance_km IS NOT NULL and distance_km > 0
 group by customer_id
 order by distance_kms desc;
+````
 
--- What was the difference between the longest and shortest delivery times for all orders?
+### 5. What was the difference between the longest and shortest delivery times for all orders?
+````sql
 select max(distance_kms) as longest, min(distance_kms) as shorterst, (max(distance_kms)-min(distance_kms)) as difference 
 from (
 	select customer_id, round(avg(distance_km),2) as distance_kms from (
@@ -200,8 +227,10 @@ from (
 	WHERE distance_km IS NOT NULL and distance_km > 0
 	group by customer_id
 	order by distance_kms desc) as subquery2;
+````
 
--- What was the average speed for each runner for each delivery and do you notice any trend for these values?
+### 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
+````sql
 select 
     runner_id,
     round(avg(distance_km),2) as distance_kms,
@@ -221,9 +250,15 @@ from (
 WHERE distance_km IS NOT NULL and distance_km > 0
 group by runner_id
 order by km_min desc;
+````
 
--- What is the successful delivery percentage for each runner?
-select runner_id, sum(not_cancelled) as deliver, sum(cancelled) as cancel, sum(not_cancelled)/(sum(not_cancelled)+sum(cancelled)) as prc_deliver
+###  7. What is the successful delivery percentage for each runner?
+````sql
+select
+runner_id,
+sum(not_cancelled) as deliver,
+sum(cancelled) as cancel,
+sum(not_cancelled)/(sum(not_cancelled)+sum(cancelled)) as prc_deliver
 from (
 Select *, 
 case when not_cancelled =1 then 0
@@ -237,9 +272,11 @@ from(
 	END AS not_cancelled
 	FROM runner_orders) subquery) subquery2
     group by runner_id;
+````
 
--- C. Ingredient Optimisation
--- What are the standard ingredients for each pizza?
+###  C. Ingredient Optimisation
+###  1. What are the standard ingredients for each pizza?
+````sql
 CREATE VIEW pizza_toppings_view AS
 SELECT 
     subquery.pizza_ID, 
@@ -253,7 +290,14 @@ FROM
     FROM
         pizza_recipes pr
     INNER JOIN
-        (SELECT 1 AS n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8) AS n
+        (SELECT 1 AS n
+		UNION ALL SELECT 2
+		UNION ALL SELECT 3
+		UNION ALL SELECT 4
+		UNION ALL SELECT 5
+		UNION ALL SELECT 6
+		UNION ALL SELECT 7
+		UNION ALL SELECT 8) AS n
         ON CHAR_LENGTH(pr.Toppings) - CHAR_LENGTH(REPLACE(pr.Toppings, ',', '')) >= n.n - 1
     ORDER BY
         pr.Pizza_ID, Topping_id) AS subquery
@@ -263,56 +307,73 @@ JOIN
     pizza_names AS pn ON subquery.pizza_ID = pn.pizza_ID
 ORDER BY 
     pizza_name;
+````
 
--- What was the most commonly added extra?
+###  2. What was the most commonly added extra?
+````sql
 select extras, Topping, count(*) as cantidad
 from(
 select subquery.Pizza_ID, subquery.Topping as Topping, pt.topping_name as extras
 from
 (SELECT pr.Pizza_ID,CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(pr.Toppings, ',', n.n), ',', -1) AS UNSIGNED) AS Topping
 FROM pizza_recipes pr INNER JOIN
-    (SELECT 1 AS n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8) AS n
+    (SELECT 1 AS n UNION ALL SELECT 2
+		UNION ALL SELECT 3
+		UNION ALL SELECT 4
+		UNION ALL SELECT 5
+		UNION ALL SELECT 6
+		UNION ALL SELECT 7
+		UNION ALL SELECT 8) AS n
     ON CHAR_LENGTH(pr.Toppings) - CHAR_LENGTH(REPLACE(pr.Toppings, ',', '')) >= n.n - 1
 ORDER BY pr.Pizza_ID, Topping) as subquery
 join pizza_toppings as pt on subquery.Topping=pt.topping_id) as subquery2
 group by extras, Topping
 order by cantidad desc;
+````
 
+````sql
 select extras, topping_name, count(*) as count 
 from customer_orders as co
 join pizza_toppings as pt on co.extras=pt.topping_id
 where extras >=1 
 group by extras,topping_name;
+````
 
--- What was the most common exclusion?
+###  3. What was the most common exclusion?
+````sql
 select co.exclusions, pt.topping_name, count(*) as count  
 from customer_orders as co
 join pizza_toppings as pt on co.exclusions=pt.topping_id
 where exclusions >=1
 group by co.exclusions,pt.topping_name;
+````
 
--- Generate an order item for each record in the customers_orders table in the format of one of the following:
--- Meat Lovers
--- Meat Lovers - Exclude Beef
--- Meat Lovers - Extra Bacon
--- Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
+### 4. Generate an order item for each record in the customers_orders table in the format of one of the following:
+* Meat Lovers
+* Meat Lovers - Exclude Beef
+* Meat Lovers - Extra Bacon
+* Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
+
+````sql
 SELECT co.*,
     CASE 
         WHEN pn.pizza_id = 1 AND co.exclusions = 3 THEN 'Meat Lovers without Beef'
         WHEN pn.pizza_id = 1 AND co.extras = 1 THEN 'Meat Lovers with Bacon'
         WHEN pn.pizza_id = 1 AND co.exclusions = 4 THEN 'Meat Lovers without Cheese'
-        when pn.pizza_id = 1 and co.exclusions = 4 or co.exclusions = 1 or co.extras = 6 or co.extras = 9 then "Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers"
+        when pn.pizza_id = 1 and co.exclusions = 4 or co.exclusions = 1 or co.extras = 6 or co.extras = 9
+		then "Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers"
         WHEN pn.pizza_id = 1 THEN 'Meat Lovers'
         WHEN pn.pizza_id = 2 THEN 'Vegetarian'
     END AS order_item
 FROM customer_orders AS co 
 JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id;
+````
 
--- Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
--- For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"
--- What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
------ pizza_name as pizza, pt.topping_name as topping
------ count(*) as quantity  
+### 5. Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
+* For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"
+### 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
+
+````sql
 SELECT 
     pizza,
     topping,
@@ -341,9 +402,11 @@ GROUP BY
     pizza, topping
 ORDER BY 
     request DESC;
+````
 
--- D. Pricing and Ratings
--- If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+###  D. Pricing and Ratings
+###  1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+````sql
 SELECT 
     pizza_name, 
     SUM(price) AS total_price
@@ -363,8 +426,12 @@ FROM
         pizza_names AS pn ON co.pizza_id = pn.pizza_id) AS subquery
 GROUP BY 
     pizza_name;
+````
 
--- What if there was an additional $1 charge for any pizza extras?
+## 2. What if there was an additional $1 charge for any pizza extras?
+* Add cheese is $1 extra
+
+````sql
 SELECT 
     pizza_name, 
     SUM(price) AS total_price,
@@ -390,10 +457,14 @@ FROM
         pizza_names AS pn ON co.pizza_id = pn.pizza_id) AS subquery
 GROUP BY 
     pizza_name;
+````
 
+````sql
 select * from pizza_toppings;
+````
 
 -- Add cheese is $1 extra
+````sql
 SELECT 
     pizza_name, 
     SUM(price) AS total_price,
@@ -419,20 +490,25 @@ FROM
         pizza_names AS pn ON co.pizza_id = pn.pizza_id) AS subquery
 GROUP BY 
     pizza_name;
+````
 
--- The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset 
--- generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
+###  3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
 
+````sql
 ALTER TABLE runner_orders
 ADD INDEX idx_order_id (order_id);
+````
 
+````sql
 CREATE TABLE runner_ratings (
     rating_id INT,
     order_id INT,
     customer_rating INT,
     FOREIGN KEY (order_id) REFERENCES runner_orders(order_id)
 );
+````
 
+````sql
 INSERT INTO runner_ratings (rating_id, order_id, customer_rating) VALUES
 (1, 1, 5),
 (2, 2, 4),
@@ -444,18 +520,23 @@ INSERT INTO runner_ratings (rating_id, order_id, customer_rating) VALUES
 (8, 8, 3),
 (9, 9, 5),
 (10, 10, 4);
-
+````
+````sql
 select * from runner_ratings;
+````
+### 4. Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
+* Customer_id
+* Order_id
+* Runner_id
+* Rating
+* Order_time
+* Pickup_time
+* Time between order and pickup
+* Delivery duration
+* Average speed
+* Total number of pizzas
 
--- Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
--- customer_id
--- order_id
--- runner_id
--- rating
--- order_time
--- pickup_time
--- Time between order and pickup
--- Delivery duration
+````sql
 SELECT 
     co.customer_id,
     co.order_id, 
@@ -485,10 +566,10 @@ GROUP BY
     ro.pickup_time, 
     distance, 
     duration;
+````
 
--- Average speed
--- Total number of pizzas
-SELECT 
+````sql
+**SELECT 
 AVG(speed_kmh) AS avg_speed_kmh,
 SUM(quantity) AS total_quantity
 FROM (
@@ -521,9 +602,10 @@ FROM (
     ro.duration, 
     distance
 ) AS subquery;
+````
+### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
 
--- If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled 
--- how much money does Pizza Runner have left over after these deliveries?
+````sql
 select sum(price) as price, sum(delivery) as delivery, sum(price+delivery) as total
 from (
 	select co.*, 
@@ -536,11 +618,12 @@ from (
 	from customer_orders as co
 	join runner_orders as ro on co.order_id=ro.order_id
     ) as subquery;
+````
 
+###  E. Bonus Questions
+###  If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 
--- E. Bonus Questions
--- If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen 
--- if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
+````sql
 INSERT INTO pizza_recipes
   (pizza_id, toppings)
 VALUES
@@ -550,7 +633,9 @@ insert into pizza_names
 	(pizza_id, pizza_name)
 VALUES
 	(3, 'Supreme');
+````
 
+````sql
 CREATE VIEW pizza_toppings_view_supreme AS
 SELECT 
     subquery.pizza_ID, 
@@ -564,7 +649,18 @@ FROM
     FROM
         pizza_recipes pr
     INNER JOIN
-        (SELECT 1 AS n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12) AS n
+        (SELECT 1 AS n
+		UNION ALL SELECT 2
+		UNION ALL SELECT 3
+		UNION ALL SELECT 4
+		UNION ALL SELECT 5
+		UNION ALL SELECT 6
+		UNION ALL SELECT 7
+		UNION ALL SELECT 8
+		UNION ALL SELECT 9
+		UNION ALL SELECT 10
+		UNION ALL SELECT 11
+		UNION ALL SELECT 12) AS n
         ON CHAR_LENGTH(pr.Toppings) - CHAR_LENGTH(REPLACE(pr.Toppings, ',', '')) >= n.n - 1
     ORDER BY
         pr.Pizza_ID, Topping_id) AS subquery
@@ -574,5 +670,8 @@ JOIN
     pizza_names AS pn ON subquery.pizza_ID = pn.pizza_ID
 ORDER BY 
     pizza_name;
-    
+````
+
+````sql
 SELECT * FROM pizza_toppings_view_supreme;
+````
