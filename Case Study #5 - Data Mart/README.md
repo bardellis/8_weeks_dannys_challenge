@@ -88,5 +88,8 @@ This case study actually is based off a real life change in Australia retailers 
 
 Analysis which is related to certain key events which can have a significant impact on sales or engagement metrics is always a part of the data analytics menu. Learning how to approach these types of problems is a super valuable lesson and hopefully these ideas can help you next time you’re faced with a tough problem like this in the workplace!
 
-Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #6!
+***
+
+## Solution
+[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%235%20-%20Data%20Mart/solution.md)
 
