@@ -51,3 +51,5 @@ This case study should reflect realistic questions we usually focus on for all p
 
 Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #4!
 
+## Solution
+[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%231%20-%20Danny's%20Diner/solutions.md)
