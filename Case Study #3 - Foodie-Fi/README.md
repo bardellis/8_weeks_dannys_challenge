@@ -49,7 +49,5 @@ The following are open ended questions which might be asked during a technical i
 ### Conclusion
 This case study should reflect realistic questions we usually focus on for all product related analytics requests in a wide variety of industries, especially in the digital space!
 
-Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #4!
-
 ## Solution
-[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%231%20-%20Danny's%20Diner/solutions.md)
+[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%233%20-%20Foodie-Fi/solution.md)
