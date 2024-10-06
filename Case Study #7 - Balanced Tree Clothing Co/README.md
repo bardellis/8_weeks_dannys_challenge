@@ -84,5 +84,6 @@ Being able to navigate your way around a product hierarchy and understand the di
 
 Hopefully these questions helped provide some exposure to the type of analysis we perform daily in these sorts of roles!
 
-Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #8!
-
+***
+### Solution
+[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%237%20-%20Balanced%20Tree%20Clothing%20Co/solution.md)
