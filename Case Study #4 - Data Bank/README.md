@@ -61,4 +61,5 @@ The Data Bank team wants you to use the outputs generated from the above section
 ### Conclusion
 This case study aims to mimic traditional banking style transactions data but with a twist - hopefully it can give you some insight into the types of datasets you might encounter in a customer banking scenario.
 
-Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #5!
+## Solution
+[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%234%20-%20Data%20Bank/solution.md)
