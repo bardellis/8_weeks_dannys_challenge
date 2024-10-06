@@ -1,4 +1,4 @@
-# 🍊 Case Study #8 - Fresh Segments
+# Case Study #8 - Fresh Segments
 
 <img width="400px"  src="https://8weeksqlchallenge.com/images/case-study-designs/8.png" />
 
