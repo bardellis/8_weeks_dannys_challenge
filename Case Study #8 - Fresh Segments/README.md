@@ -93,7 +93,8 @@ Which 5 interests had the lowest average ranking value?
 Which 5 interests had the largest standard deviation in their percentile_ranking value?
 For the 5 interests found in the previous question - what was minimum and maximum percentile_ranking values for each interest and its corresponding year_month value? Can you describe what is happening for these 5 interests?
 How would you describe our customers in this segment based off their composition and ranking values? What sort of products or services should we show to these customers and what should we avoid?
-Index Analysis
+
+## Index Analysis
 The index_value is a measure which can be used to reverse calculate the average composition for Fresh Segments’ clients.
 
 Average composition can be calculated by dividing the composition column by the index_value column rounded to 2 decimal places.
@@ -118,48 +119,12 @@ month_year	interest_name	max_index_composition	3_month_moving_avg	1_month_ago	2_
 2019-06-01	Las Vegas Trip Planners	2.77	4.49	Readers of Honduran Content: 4.41	Solar Energy Researchers: 6.28
 2019-07-01	Las Vegas Trip Planners	2.82	3.33	Las Vegas Trip Planners: 2.77	Readers of Honduran Content: 4.41
 2019-08-01	Cosmetics and Beauty Shoppers	2.73	2.77	Las Vegas Trip Planners: 2.82	Las Vegas Trip Planners: 2.77
-Conclusion
+
+## Conclusion
 You have probably come across this concept of customer segments or marketing segments in your everyday life, maybe without you even noticing it!
-
 Segments or audiences are super popular in the digital marketing space and using these interests or traits of customers is a mainstay of massive businesses like Google, Facebook, Instagram, LinkedIn and other social media where there are targeted advertising.
-
 Traditional businesses such as this client for Fresh Segments usually upload their customer emails or matched cookies into various digital marketing systems in order to generate some sort of match, usually using some machine learning methods, to other similar customers with the same interests.
-
 Hopefully this case study helps you think about how these index metrics and compositions can be used for digital marketing!
-
-Official Solutions
-If you’d like to see the official code solutions and explanations for this case study and a whole lot more, please consider joining me for the Serious SQL course - you’ll get access to all course materials and I’m on hand to answer all of your additional SQL questions directly!
-
-Serious SQL is priced at $49USD and $29 for students and includes access to all written course content, community events as well as live and recorded SQL training videos!
-
-Please send an email to support@datawithdanny.com from your educational email or include your enrolment details or student identification for a speedy response!
-
-Community Solutions
-This section will be updated in the future with any community member solutions with a link to their respective GitHub repos!
-
-Final Thoughts
-The 8 Week SQL Challenge is proudly brought to you by me - Danny Ma and the Data With Danny virtual data apprenticeship program.
-
-Students or anyone undertaking further studies are eligible for a $20USD student discount off the price of Serious SQL please send an email to support@datawithdanny.com from your education email or include information about your enrolment for a fast response!
-
-We have a large student community active on the official DWD Discord server with regular live events, trainings and workshops available to all Data With Danny students, plus early discounted access to all future paid courses.
-
-There are also opportunities for 1:1 mentoring, resume reviews, interview training and more from myself or others in the DWD Mentor Team.
-
-From your friendly data mentor, Danny :)
-
-All 8 Week SQL Challenge Case Studies
-All of the 8 Week SQL Challenge case studies can be found below:
-
-Case Study #1 - Danny's Diner
-Case Study #2 - Pizza Runner
-Case Study #3 - Foodie-Fi
-Case Study #4 - Data Bank
-Case Study #5 - Data Mart
-Case Study #6 - Clique Bait
-Case Study #7 - Balanced Tree Clothing Co.
-Case Study #8 - Fresh Segments
-Share: Twitter, Facebook
 
 ***
 ### Solution
