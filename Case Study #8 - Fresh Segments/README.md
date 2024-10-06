@@ -158,3 +158,6 @@ Case Study #7 - Balanced Tree Clothing Co.
 Case Study #8 - Fresh Segments
 Share: Twitter, Facebook
 
+***
+### Solution
+[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%238%20-%20Fresh%20Segments/solution.md)
