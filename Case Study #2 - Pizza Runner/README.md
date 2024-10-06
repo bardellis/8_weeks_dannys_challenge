@@ -77,5 +77,5 @@ I hope there were enough case study questions to keep you occupied - I kinda wen
 Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #3!
 
 ## Solution
-[click here]https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%232%20-%20Pizza%20Runner/solutions.md
+[click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%232%20-%20Pizza%20Runner/solutions.md)
 
