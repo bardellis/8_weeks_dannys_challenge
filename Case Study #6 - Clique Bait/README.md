@@ -71,4 +71,7 @@ This case study is based off my many years working with Digital datasets in cons
 
 Campaign analysis is almost everywhere in the data world, especially in marketing, digital, UX and retail industries - and being able to analyse views, clicks and other digital behaviour is a critical skill to have in your toolbelt as a data professional!
 
-Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #7!
+
+***
+### Solution
+[Click here](https://github.com/bardellis/8_weeks_dannys_challenge/blob/main/Case%20Study%20%236%20-%20Clique%20Bait/solution.md)
