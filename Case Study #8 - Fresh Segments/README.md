@@ -50,6 +50,7 @@ The index_value is 6.19, means that the composition value is 6.19x the average c
 
 The ranking and percentage_ranking relates to the order of index_value records in each month year.
 
+<p align="center">
 ## Interest Map
 This mapping table links the interest_id with their relevant interest information. You will need to join this table onto the previous interest_details table to obtain the interest_name as well as any details about the summary information.
 
