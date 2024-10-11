@@ -1,14 +1,16 @@
--- 1. Data Cleansing Steps
-/*In a single query, perform the following operations and generate a new table in the data_mart schema named clean_weekly_sales:
-Convert the week_date to a DATE format
-Add a week_number as the second column for each week_date value, for example any value from the 1st of January to 7th of January will be 1, 8th to 14th will be 2 etc
-Add a month_number with the calendar month for each week_date value as the 3rd column
-Add a calendar_year column as the 4th column containing either 2018, 2019 or 2020 values
-Add a new column called age_band after the original segment column using the following mapping on the number inside the segment value*/
--- segment age_band
--- 1 Young Adults
--- 2 Middle Aged
--- 3 or 4 Retirees
+## 1. Data Cleansing Steps
+In a single query, perform the following operations and generate a new table in the data_mart schema named clean_weekly_sales:
+*Convert the week_date to a DATE format
+*Add a week_number as the second column for each week_date value, for example any value from the 1st of January to 7th of January will be 1, 8th to 14th will be 2 etc
+*Add a month_number with the calendar month for each week_date value as the 3rd column
+*Add a calendar_year column as the 4th column containing either 2018, 2019 or 2020 values
+*Add a new column called age_band after the original segment column using the following mapping on the number inside the segment value*/
+
+| segment |age_band
+|--------|-------
+| 1 |Young Adults
+| 2 |Middle Aged
+| 3 or 4 |Retirees
 
 	DROP TABLE IF EXISTS data_mart.clean_weekly_sales;
 	
@@ -87,7 +89,7 @@ Add a new column called age_band after the original segment column using the fol
 	UPDATE clean_weekly_sales
 	SET avg_transaction = ROUND(sales / transactions, 2);
 
--- 2. Data Exploration
+## 2. Data Exploration
 /*What day of the week is used for each week_date value?
 What range of week numbers are missing from the dataset?
 How many total transactions were there for each year in the dataset?
@@ -314,7 +316,7 @@ select
 
 
 -- -----------------------------------------------------------------------------------------------------------------------------------------------
--- 3. Before & After Analysis
+## 3. Before & After Analysis
 /* This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
 Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.
 We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before
@@ -433,7 +435,7 @@ SELECT
 
 
 -- -------------------------------------------------------------------------------------------------------------
--- 4. Bonus Question
+## 4. Bonus Question
 /*Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
 region
 platform
@@ -482,8 +484,8 @@ Do you have any further recommendations for Danny’s team at Data Mart or any i
 
 USE data_mart;
 
--- Conclusion
-/*This case study actually is based off a real life change in Australia retailers where plastic bags were no longer provided for free - as you can expect, 
+## Conclusion
+This case study actually is based off a real life change in Australia retailers where plastic bags were no longer provided for free - as you can expect, 
 some customers would have changed their shopping behaviour because of this change!
 Analysis which is related to certain key events which can have a significant impact on sales or engagement metrics is always a part of the data analytics menu. 
 Learning how to approach these types of problems is a super valuable lesson and hopefully these ideas can help you next time you’re faced with a tough problem like this in the workplace!
