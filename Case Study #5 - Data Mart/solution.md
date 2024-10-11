@@ -13,10 +13,6 @@ In a single query, perform the following operations and generate a new table in 
 | 3 or 4 |Retirees
 
 
-| segment |demographic
-|--------|-------
-| C |Couples
-| F |Families
 
 	DROP TABLE IF EXISTS data_mart.clean_weekly_sales;
 	
