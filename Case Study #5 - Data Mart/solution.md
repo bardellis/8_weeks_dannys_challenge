@@ -368,8 +368,9 @@ Using this analysis approach - answer the following questions:
 				) AS subquery
 			) AS subquery2;
 ````			
-            		-- Before(Millons)		After(Millons)		Growth(Millons)		%_increase
-			-- 2345.88			2334.91			-10.97			-%0.47
+            		| Before(Millons)	|	After(Millons)	|	Growth(Millons)	|	%_increase|
+	      		|--------------|------------------|----------------|--------------|
+			| 2345.88	|		2334.91		|	-10.97		|	-%0.47|
 
 2. What about the entire 12 weeks before and after?
 ````sql
@@ -395,17 +396,16 @@ Using this analysis approach - answer the following questions:
 				) AS subquery
 			) AS subquery2;
 ````
-            		-- Before(Millons)		After(Millons)		Growth(Millons)		%_increase
-			-- 7126.27	
+
    
 4. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?*/
 ````sql
 SELECT 
-			year_number,
-            Sales_in_M_Before,
-			Sales_in_M_After,
-			(Sales_in_M_After-Sales_in_M_Before) AS growth_reduction_in_M,
-			ROUND((Sales_in_M_After-Sales_in_M_Before) / Sales_in_M_Before * 100, 2) AS PCT_sales
+year_number,
+Sales_in_M_Before,
+Sales_in_M_After,
+(Sales_in_M_After-Sales_in_M_Before) AS growth_reduction_in_M,
+ROUND((Sales_in_M_After-Sales_in_M_Before) / Sales_in_M_Before * 100, 2) AS PCT_sales
 			FROM (
 				SELECT
 					year_number,
@@ -431,10 +431,12 @@ SELECT
                 group by year_number
 			) AS subquery2;
 ````
-            		-- 	Before(Millons)		After(Millons)		Growth(Millons)			%_increase
-			-- 20	7126.27			6973.95			-152.32				-2.14
-			-- 19	6883.39			6862.65			-20.74				-0.30
-			-- 18	6396.56			6500.82			104.26				1.63
+
+| Before(Millons)|After(Millons)|Growth(Millons)|%_increase
+|--------------|---------------|------------|---
+|7126.27	|6973.95	|-152.32	|-2.14
+|6883.39	|6862.65	|-20.74		|-0.30
+|6396.56	|6500.82	|104.26		|1.63
 
 
 ## 4. Bonus Question
@@ -444,8 +446,7 @@ Which areas of the business have the highest negative impact in sales metrics pe
 * age_band
 * demographic
 * customer_type
-
-Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?*/
+Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?
 
 ````sql
 			SELECT 
@@ -481,13 +482,13 @@ Do you have any further recommendations for Danny’s team at Data Mart or any i
 			group by platform, age_band, demographic, customer_type
             order by Total_growth;
 ````
-                -- platform  	age_band	demographic	customer_type	OCEANIA 	ASIA 		AFRICA 		USA		CANADA		S.AMERICA 	EUROPE		TOTAL
-           	-- Retail	Unknown		Unknown		Guest		-32.85		-28.43		-8.23		-7.11		-4.20		-4.47		2.38		-82.91
-		-- Retail	Retirees	Couples		Existing	-11.87		-9.53		-0.70		-1.18		-1.47		-0.20		0.95		-24.00
-           	-- Retail	Middle Aged	Families	Existing	-9.97		-5.99		-3.89		-1.83		-1.03		-0.03		0.09		-22.65
 
+| platform | age_band |demographic | customer_type | OCEANIA | ASIA | AFRICA | ASIA | CANADA | S.AMERICA | EUROPE | TOTAL
+|----------|----------|------------|---------------|---------|------|--------|------|--------|-----------|--------|-------
+| Retail |Unknown	|Unknown	|Guest		|-32.85		|-28.43		|-8.23		|-7.11	|-4.20	|-4.47	|2.38	|-82.91
+| Retail | Retirees	|Couples	|Existing	|-11.87		|-9.53		|-0.70		|-1.18	|-1.47	|-0.20	|0.95	|-24.00
+| Retail |Middle Aged	|Families	|Existing	|-9.97		|-5.99		|-3.89		|-1.83	|-1.03	|-0.03	|0.09	|-22.65
 
-USE data_mart;
 
 ## Conclusion
 This case study actually is based off a real life change in Australia retailers where plastic bags were no longer provided for free - as you can expect, 
