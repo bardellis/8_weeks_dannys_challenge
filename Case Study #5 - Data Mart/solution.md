@@ -215,7 +215,7 @@ Mapping segment a age_band
 			year_number, month_number;
 ````
 
-|Y	|M	|Retail	|Shopify
+|Year	|Month	|Retail	|Shopify
 |-------|-------|-------|----
 |18	|3	|97.92	|2.08
 |18	|4	|97.93	|2.07
