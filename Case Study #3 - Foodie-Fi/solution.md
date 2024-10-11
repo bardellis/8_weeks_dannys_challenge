@@ -1,7 +1,5 @@
--- Case Study Questions
--- This case study is split into an initial data understanding question before diving straight into data analysis questions before finishing with 1 single extension challenge.
--- A. Customer Journey
--- Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
+A. Customer Journey
+Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
 
 ````sql
 select *, 
