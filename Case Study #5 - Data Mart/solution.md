@@ -13,10 +13,10 @@ In a single query, perform the following operations and generate a new table in 
 | 3 or 4 |Retirees
 
 
+````sql
+DROP TABLE IF EXISTS data_mart.clean_weekly_sales;
 
-	DROP TABLE IF EXISTS data_mart.clean_weekly_sales;
-	
-    CREATE TABLE clean_weekly_sales (
+CREATE TABLE clean_weekly_sales (
 		week_date VARCHAR(7) NOT NULL,
 		date_format DATE,
 		segment VARCHAR(4), -- Asumiendo que segment existe en la tabla original
@@ -33,13 +33,15 @@ In a single query, perform the following operations and generate a new table in 
         customer_type VARCHAR(8)
 	);
 
-	INSERT INTO clean_weekly_sales (week_date, segment, sales, transactions, platform, region, customer_type)
+INSERT INTO clean_weekly_sales (week_date, segment, sales, transactions, platform, region, customer_type)
 	SELECT week_date, segment, sales, transactions, platform, region, customer_type
 	FROM weekly_sales;
+````
 
---------------------------------------------------------------
--- Agregar day_number, month_number, year_number
-	UPDATE clean_weekly_sales
+Add day_number, month_number, year_number
+
+````sql
+ UPDATE clean_weekly_sales
 	SET 
 		day_number = CAST(SUBSTRING_INDEX(week_date, '/', 1) AS UNSIGNED),
 		month_number = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(week_date, '/', 2), '/', -1) AS UNSIGNED),
@@ -56,8 +58,9 @@ In a single query, perform the following operations and generate a new table in 
     UPDATE clean_weekly_sales
 	SET date_format = STR_TO_DATE(week_date, '%d/%m/%y');
 
-----------------------------------------------------------------
--- Mapear segment a age_band
+Mapping segment a age_band
+
+````sql
 	UPDATE clean_weekly_sales
 	SET age_band =
 		CASE
@@ -67,16 +70,15 @@ In a single query, perform the following operations and generate a new table in 
 			WHEN segment LIKE '%4' THEN 'Retirees'     
 			ELSE 'Unknown'
 		END;
-
-----------------------------------------------------------------------------------------------------------
-*Add a new demographic column using the following mapping for the first letter in the segment values:
+````
+* Add a new demographic column using the following mapping for the first letter in the segment values:
 | segment |age_band
 |--------|-------
 | 1 |Young Adults
 | 2 |Middle Aged
 | 3 or 4 |Retirees
 
--- segment demographic-- C Couples-- F Families
+````sql
 	UPDATE clean_weekly_sales
 	SET demographic =
 		CASE
@@ -85,32 +87,25 @@ In a single query, perform the following operations and generate a new table in 
 			ELSE 'Unknown'
 		END;
 
-----------------------------------------------------------------------------------------------------------------------------------------------------
--- /*Ensure all null string values with an "unknown" string value in the original segment column as well as the new age_band and demographic columns
+````
+
+*Ensure all null string values with an "unknown" string value in the original segment column as well as the new age_band and demographic columns
+````sql
 	select segment, age_band, demographic, count(*)
 	FROM clean_weekly_sales
 	Where segment = 'null'
 	GROUP BY segment, age_band, demographic;
+````
+*Generate a new avg_transaction column as the sales value divided by transactions rounded to 2 decimal places for each record
 
----------------------------------------------------------------------------------------------------------------------------------
--- Generate a new avg_transaction column as the sales value divided by transactions rounded to 2 decimal places for each record*/
+````sql
 	UPDATE clean_weekly_sales
 	SET avg_transaction = ROUND(sales / transactions, 2);
 
 ## 2. Data Exploration
-/*What day of the week is used for each week_date value?
-What range of week numbers are missing from the dataset?
-How many total transactions were there for each year in the dataset?
-What is the total sales for each region for each month?
-What is the total count of transactions for each platform
-What is the percentage of sales for Retail vs Shopify for each month?
-What is the percentage of sales by demographic for each year in the dataset?
-Which age_band and demographic values contribute the most to Retail sales?
-Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? 
-If not - how would you calculate it instead?*/
+1. What day of the week is used for each week_date value?
 
---------------------------------------------------------------------
--- What day of the week is used for each week_date value?
+````sql
 	ALTER TABLE clean_weekly_sales
 	ADD COLUMN week_day VARCHAR(20);
 	
@@ -120,9 +115,10 @@ If not - how would you calculate it instead?*/
     select week_day, count(*)
 	from clean_weekly_sales
 	group by week_day; -- all dates are mondays 
+````
 
----------------------------------------------------------------------
--- What range of week numbers are missing from the dataset?
+2. What range of week numbers are missing from the dataset?
+````sql
 		ALTER TABLE clean_weekly_sales
 		ADD COLUMN week_number VARCHAR(20);
 
@@ -132,9 +128,9 @@ If not - how would you calculate it instead?*/
 		from clean_weekly_sales
 		group by week_number
 		order by week_number asc;
-
----------------------------------------------------------------------- 
--- What range of week numbers are missing from the dataset?
+````
+3. How many total transactions were there for each year in the dataset?
+````sql
 		WITH RECURSIVE Weeks AS (
 			SELECT 1 AS week_num
 			UNION ALL
@@ -150,27 +146,33 @@ If not - how would you calculate it instead?*/
 		WHERE existing_weeks.week_number IS NULL
 		ORDER BY missing_week_number;
 
--------------------------------------------------------------------------
--- How many total transactions were there for each year in the dataset?
+
+
+5. What is the total sales for each region for each month?
+
+````sql
 		select year_number, count(*)
 		from clean_weekly_sales
 		group by year_number
 		order by year_number asc;
+````
 		-- 18	5698
 		-- 19	5708
 		-- 20	5711
 
-------------------------------------------------------------------------
--- What is the total count of transactions for each platform
+  
+6. What is the total count of transactions for each platform
+````sql
 		select platform, count(*) as quantity
 		from weekly_sales
 		group by platform
 		order by quantity asc;
+````
 		-- Shopify	8549
 		-- Retail	8568
 
--------------------------------------------------------------------------
--- What is the percentage of sales for Retail vs Shopify for each month?
+7. What is the percentage of sales for Retail vs Shopify for each month?
+````sql
         select
 			year_number, month_number, 
 			max(case when platform = 'Retail' then percentage_sales else 0 end) as '%Retail',
@@ -204,7 +206,7 @@ If not - how would you calculate it instead?*/
 			year_number, month_number 
 			ORDER BY
 			year_number, month_number;
-			
+````
             -- Y	M	Retail  Shopify
 			-- 18	3	97.92	2.08
 			-- 18	4	97.93	2.07
@@ -226,9 +228,10 @@ If not - how would you calculate it instead?*/
 			-- 20	6	96.80	3.20
 			-- 20	7	96.67	3.33
 			-- 20	8	96.51	3.49
+   
+7. What is the percentage of sales by demographic for each year in the dataset?
 
-----------------------------------------------------------------------------------
--- What is the percentage of sales by demographic for each year in the dataset?
+````sql
 select
 			year_number, 
 			max(case when region = 'OCEANIA' then percentage_sales else 0 end) as '%OCEANIA',
@@ -265,14 +268,14 @@ select
 			year_number 
 			ORDER BY
 			year_number;
-            
+````
             	-- year_number %OCEANIA %AFRICA %ASIA 	%USA 	%CANADA %S.AMIRICA 	%EUROPE
             	-- 18		32.49	24.59	22.25	9.76	6.12	3.02		1.77
 		-- 19		32.82	24.44	22.37	9.64	6.14	2.98		1.61
 		-- 20		32.89	24.18	22.84	9.53	5.99	2.99		1.58
-
-----------------------------------------------------------------------------------
--- Which age_band and demographic values contribute the most to Retail sales?
+  
+8. Which age_band and demographic values contribute the most to Retail sales?
+````sql
 			SELECT
 				age_band,
 				percentage_total_sales
@@ -298,16 +301,15 @@ select
 				age_band, platform, total_retail_sales.total_sales_retail
 			ORDER BY
 				total_sales DESC) subquery;
-			
+````		
             		-- Unknown		40.52
 			-- Retirees		32.80
 			-- Middle Aged		15.66
 			-- Young Adults		11.03
 
-
--- ------------------------------------------------------------------------------------------------------------------
--- Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? 
-		SELECT
+9. Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?*/
+  ````sql
+SELECT
 			year_number, 
 			round(max(CASE WHEN platform = 'Shopify' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Shopify,
             round(max(CASE WHEN platform = 'Retail' THEN avg_transaction_size ELSE 0 END), 2) AS AVG_Retail
@@ -316,26 +318,21 @@ select
 			from clean_weekly_sales
 			group by year_number, platform) subquery
             group by year_number;
-
+````
 			-- year_number 		AVG.Retail 	AVG.Shopify
 			-- 20			40.65		174.89
 			-- 19			41.97		177.58
 			-- 18			42.91		188.29
 
-
--- -----------------------------------------------------------------------------------------------------------------------------------------------
 ## 3. Before & After Analysis
-/* This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
+This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
+
 Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.
 We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before
-Using this analysis approach - answer the following questions:
-What is the total sales for the 4 weeks before and after 2020-06-15? 
-What is the growth or reduction rate in actual values and percentage of sales?
-What about the entire 12 weeks before and after?
-How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?*/
 
--- -----------------------------------------------------------------------
--- What is the total sales for the 4 weeks before and after 2020-06-15?
+Using this analysis approach - answer the following questions:
+1.a What is the total sales for the 4 weeks before and after 2020-06-15? 
+````sql
 			SELECT 'Before' AS period, round(SUM(sales)/1000000,2) AS sales_in_M
 			FROM clean_weekly_sales
 			WHERE date_format BETWEEN '2020-05-18' AND '2020-06-14'
@@ -343,13 +340,12 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 			SELECT 'After' AS period, round(SUM(sales)/1000000,2) AS sales_in_M
 			FROM clean_weekly_sales
 			WHERE date_format BETWEEN '2020-06-16' AND '2020-07-13';
-
+````
 			-- Before 	(millons)	2345.88
 			-- After 	(millons) 	2334.91
 
-
--- --------------------------------------------------------------------------------
--- What is the growth or reduction rate in actual values and percentage of sales?
+1.b What is the growth or reduction rate in actual values and percentage of sales?
+````sql
 			SELECT 
 			Sales_in_M_Before,
 			Sales_in_M_After,
@@ -371,13 +367,12 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 					WHERE date_format BETWEEN '2020-06-16' AND '2020-07-13'
 				) AS subquery
 			) AS subquery2;
-			
+````			
             		-- Before(Millons)		After(Millons)		Growth(Millons)		%_increase
 			-- 2345.88			2334.91			-10.97			-%0.47
 
-
--- ---------------------------------------------------
--- What about the entire 12 weeks before and after?
+2. What about the entire 12 weeks before and after?
+````sql
 			SELECT 
 			Sales_in_M_Before,
 			Sales_in_M_After,
@@ -399,13 +394,12 @@ How do the sale metrics for these 2 periods before and after compare with the pr
 					WHERE date_format BETWEEN '2020-06-15' AND '2020-09-07'
 				) AS subquery
 			) AS subquery2;
-
+````
             		-- Before(Millons)		After(Millons)		Growth(Millons)		%_increase
-			-- 7126.27			6973.95			-152.32			-%2.14
-	
-
--- -------------------------------------------------------------------------------------------------------------
--- How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019
+			-- 7126.27	
+   
+4. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?*/
+````sql
 SELECT 
 			year_number,
             Sales_in_M_Before,
@@ -436,22 +430,24 @@ SELECT
 				) AS subquery
                 group by year_number
 			) AS subquery2;
+````
             		-- 	Before(Millons)		After(Millons)		Growth(Millons)			%_increase
 			-- 20	7126.27			6973.95			-152.32				-2.14
 			-- 19	6883.39			6862.65			-20.74				-0.30
 			-- 18	6396.56			6500.82			104.26				1.63
 
 
--- -------------------------------------------------------------------------------------------------------------
 ## 4. Bonus Question
-/*Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
-region
-platform
-age_band
-demographic
-customer_type
+Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
+* region
+* platform
+* age_band
+* demographic
+* customer_type
+
 Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?*/
 
+````sql
 			SELECT 
 			platform, age_band, demographic, customer_type,
 			sum(case when region = 'OCEANIA' then (Sales_in_M_After-Sales_in_M_Before) else 0 end) as 'OCEANIA',
@@ -484,6 +480,7 @@ Do you have any further recommendations for Danny’s team at Data Mart or any i
 			) AS subquery2
 			group by platform, age_band, demographic, customer_type
             order by Total_growth;
+````
                 -- platform  	age_band	demographic	customer_type	OCEANIA 	ASIA 		AFRICA 		USA		CANADA		S.AMERICA 	EUROPE		TOTAL
            	-- Retail	Unknown		Unknown		Guest		-32.85		-28.43		-8.23		-7.11		-4.20		-4.47		2.38		-82.91
 		-- Retail	Retirees	Couples		Existing	-11.87		-9.53		-0.70		-1.18		-1.47		-0.20		0.95		-24.00
