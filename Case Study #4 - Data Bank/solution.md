@@ -1,7 +1,6 @@
--- Case Study Questions
--- The following case study questions include some general data exploration analysis for the nodes and transactions before diving right into the core business questions and finishes with a challenging final request!
--- A. Customer Nodes Exploration
--- How many unique nodes are there on the Data Bank system?
+## A. Customer Nodes Exploration
+1. How many unique nodes are there on the Data Bank system?
+
 select count(distinct(node_id)) as nodes 
 from customer_nodes;
 
