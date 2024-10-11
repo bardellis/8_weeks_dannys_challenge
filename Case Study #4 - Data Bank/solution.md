@@ -1,9 +1,11 @@
 ## A. Customer Nodes Exploration
 1. How many unique nodes are there on the Data Bank system?
 
+````sql
 select count(distinct(node_id)) as nodes 
 from customer_nodes;
-
+````
+````sql
 select 
 IFNULL(node_id, 'Total') AS nodes,
 count(*) as clients
@@ -11,14 +13,16 @@ from customer_nodes
 group by node_id
 WITH ROLLUP;
 
--- What is the number of nodes per region?
+2. What is the number of nodes per region?
 select 
 IFNULL(region_id, 'Total') AS regions,
 count(*) as nodes
 from customer_nodes 
 group by region_id
 WITH ROLLUP;
+````
 
+````sql
 SELECT 
     ifnull(region_name, 'Total') as Region,
     SUM(CASE WHEN node_id = 1 THEN 1 ELSE 0 END) AS node1,
@@ -33,8 +37,12 @@ join regions as r on c.region_id=r.region_id
 GROUP BY 
     region_name
 WITH ROLLUP;
+````
 
--- How many customers are allocated to each region?
+
+3. How many customers are allocated to each region?
+
+````sql
 SELECT 
     ifnull(region_name, 'Total') as Region,
     COUNT(*) AS Total
@@ -44,20 +52,18 @@ join regions as r on c.region_id=r.region_id
 GROUP BY 
     region_name
 WITH ROLLUP;
+````
+4. How many days on average are customers reallocated to a different node?
 
--- How many days on average are customers reallocated to a different node?
-# there was an error in one of the dates that must to be solved
-# UPDATE customer_nodes
-# SET customer_nodes.end_date = '2020-12-31'
-# WHERE customer_nodes.end_date = '9999-12-31';
-
+````sql
 select node_id, round(avg(days),2) as days_realloc from(
 SELECT customer_id, node_id, c.region_id, end_date, start_date, DATEDIFF(end_date, start_date) AS days 
 FROM customer_nodes as c
 join regions  as r on c.region_id=r.region_id
 ) subquery group by node_id;
-
--- What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
+````
+5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
+````sql
 WITH RankedRows AS (
     SELECT
         ROW_NUMBER() OVER (PARTITION BY region ORDER BY days_realloc) AS row_num,
@@ -135,20 +141,26 @@ SELECT r.customer_id, r.region, r.days_realloc, r.row_num as 'row_num_95th'
 FROM RankedRows r
 JOIN MedianRowNum m
 ON r.region = m.region AND r.row_num = m.median_row_num;
+````
 
+## B. Customer Transactions
+1. What is the unique count and total amount for each transaction type?
 
--- B. Customer Transactions
--- What is the unique count and total amount for each transaction type?
+````sql
 select txn_type, count(*) as deposits, sum(txn_amount) as amounts
 FROM customer_transactions
 group by txn_type;
+````
+2. What is the average total historical deposit counts and amounts for all customers?
 
--- What is the average total historical deposit counts and amounts for all customers?
+````sql
 select count(customer_id) as deposits, avg(txn_amount) as avg_amount
 FROM customer_transactions
 where txn_type = 'deposit';
+````
+3. For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
 
--- For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
+````sql
 select sum(conditions) as customers
 from(
 SELECT 
@@ -173,9 +185,11 @@ FROM (
 ) subquery
 GROUP BY 
     customer, months) subquery2;
+````
 
+4. What is the closing balance for each customer at the end of the month?
 
--- What is the closing balance for each customer at the end of the month?
+````sql
 CREATE VIEW customer_balance AS 
 select customer_id as customer,
     MAX(CASE WHEN rolling_total_1 = 0 THEN 0 ELSE rolling_total_1 END) AS rolling_total_m1,
@@ -202,8 +216,11 @@ FROM(
             GROUP BY customer_id, MONTH(txn_date))subquery
             GROUP BY customer_id) subquery2
             GROUP BY customer_id;
+````
 
--- What is the percentage of customers who increase their closing balance by more than 5%?
+5. What is the percentage of customers who increase their closing balance by more than 5%?
+
+````sql
 WITH classified_customers AS (
     SELECT *, 
            ROUND((rolling_total_m1 / rolling_total_m4) * 100, 2) AS increase_percentage,
@@ -220,16 +237,16 @@ SELECT
     (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM classified_customers)) AS percentage
 FROM classified_customers
 GROUP BY increase;
+````
 
-
--- C. Data Allocation Challenge
--- To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
--- Option 1: data is allocated based off the amount of money at the end of the previous month
--- Option 2: data is allocated on the average amount of money kept in the account in the previous 30 days
--- Option 3: data is updated real-time
--- For this multi-part challenge question - you have been requested to generate the following data elements to help the Data Bank team estimate how much data will need to be provisioned for each option:
--- running customer balance column that includes the impact each transaction
-
+## C. Data Allocation Challenge
+To test out a few different hypotheses - the Data Bank team wants to run an experiment where different groups of customers would be allocated data using 3 different options:
+* Option 1: data is allocated based off the amount of money at the end of the previous month
+* Option 2: data is allocated on the average amount of money kept in the account in the previous 30 days
+* Option 3: data is updated real-time
+* For this multi-part challenge question - you have been requested to generate the following data elements to help the Data Bank team estimate how much data will need to be provisioned for each option:
+* running customer balance column that includes the impact each transaction
+````sql
 SELECT 
     customer_id, 
     txn_date, 
@@ -247,7 +264,8 @@ FROM
 ORDER BY 
     customer_id, txn_date;
 
--- customer balance at the end of each month
+* customer balance at the end of each month
+````sql
 SELECT 
     customer_id,
     LAST_DAY(txn_date) AS month_end_date,
@@ -271,7 +289,9 @@ FROM (
 WHERE txn_date = LAST_DAY(txn_date)
 ORDER BY customer_id, month_end_date;
 
--- minimum, average and maximum values of the running balance for each customer
+* minimum, average and maximum values of the running balance for each customer
+
+````sql
 SELECT 
     customer_id,
     MIN(running_balance) AS min_balance,
@@ -300,8 +320,11 @@ FROM (
 ) AS RunningBalances
 GROUP BY 
     customer_id;
+````
 
--- Using all of the data available - how much data would have been required for each option on a monthly basis?
+* Using all of the data available - how much data would have been required for each option on a monthly basis?
+
+````sql
 SELECT
     MONTH(txn_date) AS months,
     COUNT(txn_amount) AS count
@@ -311,16 +334,19 @@ WHERE
     txn_type = 'deposit' OR txn_type = 'withdrawal'
 GROUP BY
     months;
+````
+## D. Extra Challenge
+The Data Bank team wants to try another option which is a bit more difficult to implement - they want to calculate data growth using an interest calculation,
+just like in a traditional savings account you might have with a bank. 
 
--- D. Extra Challenge
--- Data Bank wants to try another option which is a bit more difficult to implement - they want to calculate data growth using an interest calculation, 
--- just like in a traditional savings account you might have with a bank.
--- If the annual interest rate is set at 6% and the Data Bank team wants to reward its customers by increasing their data allocation based off the interest calculated on a daily basis at the end of each day, 
--- how much data would be required for this option on a monthly basis?
+If the annual interest rate is set at 6% and the Data Bank team wants to reward its customers by increasing their data allocation based off the interest
+calculated on a daily basis at the end of each day, how much data would be required for this option on a monthly basis?
 
--- Special notes:
--- Data Bank wants an initial calculation which does not allow for compounding interest, however they may also be interested in a daily compounding interest calculation so you can try to perform this calculation if you have the stamina!
--- Assuming an initial data allocation of 100 units for simplicity
+Special notes:
+* Data Bank wants an initial calculation which does not allow for compounding interest, however they may also be interested in a daily compounding interest calculation so you can try to perform this calculation if you have the stamina!
+
+Assuming an initial data allocation of 100 units for simplicity
+````sql
 WITH DataAllocations AS (
     SELECT 
         customer_id,
@@ -345,7 +371,8 @@ SELECT
 FROM 
     InterestCalculation;
 
--- Assuming an initial data allocation of 100 units for simplicity
+Assuming an initial data allocation of 100 units for simplicity
+````sql
 WITH DataAllocations AS (
     SELECT 
         customer_id,
@@ -369,8 +396,8 @@ SELECT
     round(allocation_after_one_month,2) as allocation_after_one_month
 FROM 
     CompoundingInterestCalculation;
-
--- Extension Request
--- The Data Bank team wants you to use the outputs generated from the above sections to create a quick Powerpoint presentation which will be used as marketing materials for both external investors who might want to buy Data Bank shares and new prospective customers who might want to bank with Data Bank.
--- Using the outputs generated from the customer node questions, generate a few headline insights which Data Bank might use to market it’s world-leading security features to potential investors and customers.
--- With the transaction analysis - prepare a 1 page presentation slide which contains all the relevant information about the various options for the data provisioning so the Data Bank management team can make an informed decision.
+````
+## Extension Request
+The Data Bank team wants you to use the outputs generated from the above sections to create a quick Powerpoint presentation which will be used as marketing materials for both external investors who might want to buy Data Bank shares and new prospective customers who might want to bank with Data Bank.
+1. Using the outputs generated from the customer node questions, generate a few headline insights which Data Bank might use to market it’s world-leading security features to potential investors and customers.
+2. With the transaction analysis - prepare a 1 page presentation slide which contains all the relevant information about the various options for the data provisioning so the Data Bank management team can make an informed decision.
