@@ -319,6 +319,12 @@ SELECT
 			group by year_number, platform) subquery
             group by year_number;
 ````
+
+| segment |age_band
+|--------|-------
+| 1 |Young Adults
+| 2 |Middle Aged
+| 3 or 4 |Retirees
 			-- year_number 		AVG.Retail 	AVG.Shopify
 			-- 20			40.65		174.89
 			-- 19			41.97		177.58
@@ -331,7 +337,9 @@ Taking the week_date value of 2020-06-15 as the baseline week where the Data Mar
 We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before
 
 Using this analysis approach - answer the following questions:
-1.a What is the total sales for the 4 weeks before and after 2020-06-15? 
+
+1.a What is the total sales for the 4 weeks before and after 2020-06-15?
+
 ````sql
 			SELECT 'Before' AS period, round(SUM(sales)/1000000,2) AS sales_in_M
 			FROM clean_weekly_sales
@@ -341,8 +349,10 @@ Using this analysis approach - answer the following questions:
 			FROM clean_weekly_sales
 			WHERE date_format BETWEEN '2020-06-16' AND '2020-07-13';
 ````
-			-- Before 	(millons)	2345.88
-			-- After 	(millons) 	2334.91
+
+|Before(millons)|	2345.88
+|---------------|--------------
+|After(millons)| 	2334.91
 
 1.b What is the growth or reduction rate in actual values and percentage of sales?
 ````sql
@@ -367,10 +377,11 @@ Using this analysis approach - answer the following questions:
 					WHERE date_format BETWEEN '2020-06-16' AND '2020-07-13'
 				) AS subquery
 			) AS subquery2;
-````			
-            		| Before(Millons)	|	After(Millons)	|	Growth(Millons)	|	%_increase|
-	      		|--------------|------------------|----------------|--------------|
-			| 2345.88	|		2334.91		|	-10.97		|	-%0.47|
+````
+
+| Before(Millons)|After(Millons)|Growth(Millons)|%_increase
+|----------------|--------------|---------------|-----------------
+| 2345.88	|2334.91	|-10.97		|-%0.47
 
 2. What about the entire 12 weeks before and after?
 ````sql
