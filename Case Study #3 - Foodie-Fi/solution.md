@@ -327,7 +327,7 @@ FROM (
 GROUP BY n_month WITH ROLLUP;
 ````
 
-2 What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
+2. What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
 
 ````sql
 SELECT
