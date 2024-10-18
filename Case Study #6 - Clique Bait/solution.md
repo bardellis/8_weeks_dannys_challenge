@@ -57,13 +57,15 @@
 		from (select e.visit_id as visits, i.event_name as event_name from events as e
 		join event_identifier as i on i.event_type=e.event_type) subquery
 		group by i.event_name;
-````				
-		-- Event_name 		|	Visits
-		-- Page View		|	20928
-		-- Add to Cart		|	8451
-		-- Purchase		|	1777
-		-- Ad Impression	|	876
-		-- Ad Click		|	702
+````
+	
+		|Event_name 	|	Visits
+  		|---------------|-----------------
+		|Page View	|	20928
+		|Add to Cart	|	8451
+		|Purchase	|	1777
+		|Ad Impression	|	876
+		|Ad Click	|	702
 
 
 8. What is the percentage of visits which have a purchase event?
