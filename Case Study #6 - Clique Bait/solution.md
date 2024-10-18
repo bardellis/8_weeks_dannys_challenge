@@ -143,11 +143,13 @@
 		group by page_name
 		Order by visits
 		limit 3;
-````				
-		-- Page			|	visits
-		-- Black Truffle	|	1469
-		-- Tuna			|	1515
-		-- Abalone		|	1525
+````
+
+| Page		|	visits
+|---------------|---------------
+| Black Truffle	|	1469
+| Tuna		|	1515
+| Abalone	|	1525
 
 
 9. What is the number of views and cart adds for each product category?
@@ -164,11 +166,14 @@
 			  AND p.page_name NOT IN ('Home Page', 'All Products', 'Checkout')
 			GROUP BY p.product_category
 			ORDER BY p.product_category;
-````				
-			-- Category		|	Page_v	|	Add_to cart
-			-- Luxury		|	3032	|	1870
-			-- Shellfish		|	6204	|	3792
-			-- Fish			|	4633	|	2789
+````
+			
+| Category		|	Page_v	|	Add_to cart
+|-----------------------|---------------|--------------------------
+| Luxury		|	3032	|	1870
+| Shellfish		|	6204	|	3792
+| Fish			|	4633	|	2789
+
 
 9 What are the top 3 products by purchases?
 ````sql			
@@ -196,10 +201,12 @@
 					order by sales desc
 					limit 3;
 ````			
-				-- product_id		|	sales
-				-- 7			|	754
-				-- 9			|	726
-				-- 8			|	719
+| product_id		|	sales
+|-----------------------|----------------------
+| 7			|	754
+| 9			|	726|
+| 8			|	719
+
 
 ## 3. Product Funnel Analysis
 1. Using a single SQL query - create a new output table which has the following details:
