@@ -41,7 +41,7 @@
 		GROUP BY subquery.month_number
 		order by month_number asc;
 ````
-|---------------|--------------
+
 | Month 	|	Visits
 |---------------|--------------
 | 1		|	8112
