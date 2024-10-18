@@ -18,7 +18,6 @@
 			) AS subquery;
 ````
 
-
 5. What is the unique number of visits by all users per month?
 ````sql
 		ALTER TABLE events
@@ -41,14 +40,15 @@
 		) AS subquery
 		GROUP BY subquery.month_number
 		order by month_number asc;
-````				
-		| Month 	|	Visits
-		|---------------|--------------
-		| 1		|	8112
-		| 2		|	13645
-		| 3		|	8255
-		| 4		|	2311
-		| 5		|	411
+````
+|---------------|--------------
+| Month 	|	Visits
+|---------------|--------------
+| 1		|	8112
+| 2		|	13645
+| 3		|	8255
+| 4		|	2311
+| 5		|	411
 
 
 7. What is the number of events for each event type?
