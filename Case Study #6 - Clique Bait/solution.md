@@ -39,15 +39,16 @@
 		GROUP BY subquery.month_number
 		order by month_number asc;
 		
-		-- Month 	|	Visits
-		-- 1		|	8112
-		-- 2		|	13645
-		-- 3		|	8255
-		-- 4		|	2311
-		-- 5		|	411
+		| Month 	|	Visits
+		|---------------|-----
+		| 1		|	8112
+		| 2		|	13645
+		| 3		|	8255
+		| 4		|	2311
+		| 5		|	411
 
 
-6. What is the number of events for each event type?
+7. What is the number of events for each event type?
 
 		select event_name, count(visits) as visits
 		from (select e.visit_id as visits, i.event_name as event_name from events as e
@@ -62,7 +63,7 @@
 		-- Ad Click		|	702
 
 
-7. What is the percentage of visits which have a purchase event?
+8. What is the percentage of visits which have a purchase event?
 
    		SELECT 
 			e.event_name, 
