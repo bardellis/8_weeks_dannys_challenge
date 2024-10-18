@@ -1,14 +1,14 @@
 ## 2. Digital Analysis
 1. Using the available datasets - answer the following questions using a single query for each one:
-2. How many users are there?
+2. How many users are there? 500
 
 ````sql
 		SELECT COUNT(DISTINCT user_id) AS users
 		FROM users;
 ````
-500
 
-4. How many cookies does each user have on average?
+
+4. How many cookies does each user have on average? 3.56
 ````sql
 		SELECT ROUND(AVG(cookies), 2) AS avg_cookies
 		FROM (
@@ -17,7 +17,7 @@
 			GROUP BY user_id
 			) AS subquery;
 ````
-			-- 3.56
+
 
 5. What is the unique number of visits by all users per month?
 ````sql
@@ -43,7 +43,7 @@
 		order by month_number asc;
 ````				
 		| Month 	|	Visits
-		|---------------|-----
+		|---------------|--------------
 		| 1		|	8112
 		| 2		|	13645
 		| 3		|	8255
