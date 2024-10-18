@@ -2,22 +2,25 @@
 1. Using the available datasets - answer the following questions using a single query for each one:
 2. How many users are there?
 
+````sql
 		SELECT COUNT(DISTINCT user_id) AS users
 		FROM users;
-        -- 500
+````
+500
 
 4. How many cookies does each user have on average?
-
+````sql
 		SELECT ROUND(AVG(cookies), 2) AS avg_cookies
 		FROM (
 			SELECT user_id, COUNT(cookie_id) AS cookies
 			FROM users
 			GROUP BY user_id
 			) AS subquery;
+````
 			-- 3.56
 
 5. What is the unique number of visits by all users per month?
-
+````sql
 		ALTER TABLE events
 		ADD COLUMN month_number INT;
 		
@@ -38,7 +41,7 @@
 		) AS subquery
 		GROUP BY subquery.month_number
 		order by month_number asc;
-		
+````				
 		| Month 	|	Visits
 		|---------------|-----
 		| 1		|	8112
@@ -49,12 +52,12 @@
 
 
 7. What is the number of events for each event type?
-
+````sql
 		select event_name, count(visits) as visits
 		from (select e.visit_id as visits, i.event_name as event_name from events as e
 		join event_identifier as i on i.event_type=e.event_type) subquery
 		group by i.event_name;
-		
+````				
 		-- Event_name 		|	Visits
 		-- Page View		|	20928
 		-- Add to Cart		|	8451
@@ -64,7 +67,7 @@
 
 
 8. What is the percentage of visits which have a purchase event?
-
+````sql
    		SELECT 
 			e.event_name, 
 			COUNT(*) AS visits, 
@@ -75,7 +78,7 @@
 			event_identifier AS i ON i.event_type = e.event_type
 		GROUP BY 
 			e.event_name;
-		
+````				
 		-- events			|	visits	|	%
 		-- Page View			|	20928	|	0.64
 		-- Add to Cart			|	8451	|	0.26
@@ -85,7 +88,7 @@
 		
 
 6. What is the percentage of visits which view the checkout page but do not have a purchase event?
-
+````sql
 		WITH event_counts AS (
 			SELECT
 				e.visit_id,
@@ -116,14 +119,14 @@
 		FROM event_conditions
 		GROUP BY event_condition
 		ORDER BY event_condition;
-		
+````				
 		-- event_condition		|	visits	|	percentage
 		-- checkout-no_purchase		|	326	|	9.15
 		-- others			|	3238	|	90.85  
 
             
 8. What are the top 3 pages by number of views?
-   
+````sql
 		select page_name, count(*) as visits
 		from (
 			select p.page_name, e.visit_id from events as e
@@ -133,7 +136,7 @@
 		group by page_name
 		Order by visits
 		limit 3;
-		
+````				
 		-- Page			|	visits
 		-- Black Truffle	|	1469
 		-- Tuna			|	1515
@@ -141,7 +144,7 @@
 
 
 9. What is the number of views and cart adds for each product category?
-
+````sql
 
 			SELECT 
 				p.product_category,
@@ -154,14 +157,14 @@
 			  AND p.page_name NOT IN ('Home Page', 'All Products', 'Checkout')
 			GROUP BY p.product_category
 			ORDER BY p.product_category;
-			
+````				
 			-- Category		|	Page_v	|	Add_to cart
 			-- Luxury		|	3032	|	1870
 			-- Shellfish		|	6204	|	3792
 			-- Fish			|	4633	|	2789
 
 9 What are the top 3 products by purchases?
-			
+````sql			
    			WITH purchases AS (
 				SELECT DISTINCT visit_id
 				FROM events AS e
@@ -185,7 +188,7 @@
 					GROUP BY product_id
 					order by sales desc
 					limit 3;
-				
+````			
 				-- product_id		|	sales
 				-- 7			|	754
 				-- 9			|	726
@@ -197,7 +200,7 @@
 3. How many times was each product added to cart?
 4. How many times was each product added to a cart but not purchased (abandoned)?
 5. How many times was each product purchased?
-   
+ ````sql  
 				CREATE TABLE IF NOT EXISTS product_metrics (
 					product_id INT PRIMARY KEY,
 					views INT DEFAULT 0,
@@ -229,7 +232,7 @@
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
                 		WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_id;
-				
+	````					
 				-- product_id 		| views 	| added_to_cart		| purchased 	| abandoned
 				-- 4			| 1563		| 946			| 697		| 249
 				-- 7			| 1547		| 968			| 754		| 214
@@ -243,7 +246,7 @@
 
 
 Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
-
+````sql
 		CREATE TABLE IF NOT EXISTS product_category_metrics (
 					product_category VARCHAR(9) PRIMARY KEY,
 					views INT DEFAULT 0,
@@ -275,7 +278,7 @@ Additionally, create another table which further aggregates the data for the abo
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
 				WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_category;
-				
+````						
 				-- Category		|	views 	|	added_to_cart	| 	purchased 	| 	abandoned
 				-- Fish			| 	4633	|	2789		| 	2115		| 	674
 				-- Luxury		| 	3032	|	1870		| 	1404		| 	466
@@ -284,6 +287,7 @@ Additionally, create another table which further aggregates the data for the abo
 
  Use your 2 new output tables - answer the following questions:
 1. Which product had the most views, cart adds and purchases?
+````sql
 				SELECT product_id, 
 					   views, 
 					   added_to_cart, 
@@ -293,12 +297,13 @@ Additionally, create another table which further aggregates the data for the abo
 				GROUP BY product_id, views, added_to_cart, purchased
 				ORDER BY totals DESC
 				LIMIT 1;
-				
+````						
 				-- product_id	| views		| cart_adds		| purchases		| totals
                 		-- 7		| 1547		| 968			| 754			| 3269
 
 
 2. Which product was most likely to be abandoned?
+````sql
 				SELECT product_id, 
 					   abandoned, 
 					   added_to_cart, 
@@ -306,12 +311,13 @@ Additionally, create another table which further aggregates the data for the abo
 				FROM product_metrics
                 		order by probability_of_aband desc
                 		limit 1;
-				
+````						
 				-- product_id	| cart_adds 	| 	abandoned 	| 	probability_of_abandone
 				-- 4		| 249		|	946		|	0.2632
 
 
 3. Which product had the highest view to purchase percentage?
+````sql
 				SELECT product_id, 
 					   views, 
 					   purchased, 
@@ -319,12 +325,13 @@ Additionally, create another table which further aggregates the data for the abo
 				FROM product_metrics
                 		order by probability_view_to_purchase desc
                 		limit 1;
-				
+````						
 				-- product_id	| views		| 	purchased 	| 	probability_view_to_purchase
 				-- 4		| 1563		|	697		|	0.4874
 
 
 4. What is the average conversion rate from view to cart add?
+````sql
 				SELECT product_id, 
 					   views, 
 					   added_to_cart, 
@@ -332,15 +339,16 @@ Additionally, create another table which further aggregates the data for the abo
 				FROM product_metrics
                 		order by probability_view_to_added_to_cart desc
                 		limit 1;
-				
+````						
 				-- product_id	| 	views	| 	added_to_cart 	| 	probability_view_to_added_to_cart
 				-- 5		|	1469	|	924		|	0.6290
 
 
 5. What is the average conversion rate from cart add to purchase?
+````sql
 				SELECT avg(purchased) as puchased_avg, avg(added_to_cart) as cart_added_avg, avg(purchased/added_to_cart) AS conversion_purchase_added_to_cart
 				FROM product_metrics;
-                		
+   ````		             		
 				-- purchased	|	cart_added	| 	conversion
                 		-- 713.00	|	939.00		|	0.759
 				
@@ -356,7 +364,7 @@ Generate a table that has 1 single row for every unique visit_id record and has 
 	* campaign_name: map the visit to a campaign if the visit_start_time falls between the start_date and end_date
 	* impression: count of ad impressions for each visit
 	* click: count of ad clicks for each visit
-    
+   ````sql 
 				WITH campaigns AS (
 				select visit_id, user_id, event_time, page_name, count(*) as visits 
 				from events as e 
@@ -432,7 +440,7 @@ Generate a table that has 1 single row for every unique visit_id record and has 
 					clicks AS k ON c.visit_id = k.visit_id
 				GROUP BY 
 					c.visit_id, c.user_id, c.event_time, n.campaign_name;
-				
+````				
 				-- visit_id 	|	user_id	|	event_date 	|	Campaign				|	purchases 	|	cart_adds 	|	page_visited 	|	clicks
 				-- 0fc437	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	6		|	9		|	8
 				-- ccf365	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	3		|	5		|	4
