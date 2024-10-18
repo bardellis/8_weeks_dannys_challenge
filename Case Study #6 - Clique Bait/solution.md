@@ -80,13 +80,16 @@
 			event_identifier AS i ON i.event_type = e.event_type
 		GROUP BY 
 			e.event_name;
-````				
-		-- events			|	visits	|	%
-		-- Page View			|	20928	|	0.64
-		-- Add to Cart			|	8451	|	0.26
-		-- Purchase			|	1777	|	0.05
-		-- Ad Impression		|	876	|	0.03
-		-- Ad Click			|	702	|	0.02
+````
+
+| events		|	visits	|	%
+|-----------------------|---------------|---------------
+| Page View		|	20928	|	0.64
+| Add to Cart		|	8451	|	0.26
+| Purchase		|	1777	|	0.05
+| Ad Impression		|	876	|	0.03
+| Ad Impression		|	876	|	0.03
+| Ad Click		|	702	|	0.02
 		
 
 6. What is the percentage of visits which view the checkout page but do not have a purchase event?
