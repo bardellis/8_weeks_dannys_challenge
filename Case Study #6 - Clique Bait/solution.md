@@ -124,12 +124,14 @@
 		FROM event_conditions
 		GROUP BY event_condition
 		ORDER BY event_condition;
-````				
-		-- event_condition		|	visits	|	percentage
-		-- checkout-no_purchase		|	326	|	9.15
-		-- others			|	3238	|	90.85  
+````
+			
+| event_condition		|	visits	|	percentage
+|-------------------------------|---------------|------------------------
+| checkout-no_purchase		|	326	|	9.15
+| others			|	3238	|	90.85  
 
-            
+	    
 8. What are the top 3 pages by number of views?
 ````sql
 		select page_name, count(*) as visits
