@@ -298,13 +298,6 @@ Additionally, create another table which further aggregates the data for the abo
 				WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_category;
 ````
-		
-| product_id		|	sales
-|-----------------------|----------------------
-| 7			|	754
-| 9			|	726
-| 8			|	719
-
 				
 | Category		|	views 	|	added_to_cart	| 	purchased 	| 	abandoned
 |-----------------------|---------------|-----------------------|-----------------------|-------------------			
@@ -327,9 +320,9 @@ Additionally, create another table which further aggregates the data for the abo
 				ORDER BY totals DESC
 				LIMIT 1;
 ````						
-				| product_id	| views		| cart_adds		| purchases		| totals
-                		|---------------|---------------|-----------------------|-----------------------|--------------		
-		  		| 7		| 1547		| 968			| 754			| 3269
+| product_id	| views		| cart_adds		| purchases		| totals
+|---------------|---------------|-----------------------|-----------------------|--------------		
+| 7		| 1547		| 968			| 754			| 3269
 
 
 2. Which product was most likely to be abandoned?
@@ -343,9 +336,9 @@ Additionally, create another table which further aggregates the data for the abo
                 		order by probability_of_aband desc
                 		limit 1;
 ````						
-				| product_id	| cart_adds 	| 	abandoned 	| 	probability_of_abandone
-    				|--------------|----------------|---------------------|---------------
-				| 4		| 249		|	946		|	0.2632
+| product_id	| cart_adds 	| 	abandoned 	| 	probability_of_abandone
+|--------------|----------------|---------------------|---------------
+| 4		| 249		|	946		|	0.2632
 
 
 3. Which product had the highest view to purchase percentage?
@@ -360,9 +353,9 @@ Additionally, create another table which further aggregates the data for the abo
                 		limit 1;
 ````
 					
-				| product_id	| views		| 	purchased 	| 	probability_view_to_purchase
-    				|---------------|---------------|-----------------------|----------------------------------
-				| 4		| 1563		|	697		|	0.4874
+| product_id	| views		| 	purchased 	| 	probability_view_to_purchase
+|---------------|---------------|-----------------------|----------------------------------
+| 4		| 1563		|	697		|	0.4874
 
 
 4. What is the average conversion rate from view to cart add?
@@ -375,9 +368,9 @@ Additionally, create another table which further aggregates the data for the abo
                 		order by probability_view_to_added_to_cart desc
                 		limit 1;
 ````						
-				| product_id	| 	views	| 	added_to_cart 	| 	probability_view_to_added_to_cart
-				|---------------|----------------|---------------------|------------------
-    				| 5		|	1469	|	924		|	0.6290
+| product_id	| 	views	| 	added_to_cart 	| 	probability_view_to_added_to_cart
+|---------------|---------------|-----------------------|------------------
+| 5		|	1469	|	924		|	0.6290
 
 
 5. What is the average conversion rate from cart add to purchase?
@@ -385,9 +378,9 @@ Additionally, create another table which further aggregates the data for the abo
 				SELECT avg(purchased) as puchased_avg, avg(added_to_cart) as cart_added_avg, avg(purchased/added_to_cart) AS conversion_purchase_added_to_cart
 				FROM product_metrics;
    ````		             		
-				| purchased	|	cart_added	| 	conversion
-    				|--------------|-------------------------|----------------
-                		| 713.00	|	939.00		|	0.759
+| purchased	|	cart_added	| 	conversion
+|---------------|-----------------------|----------------
+| 713.00	|	939.00		|	0.759
 				
                    
 ## 4. Campaigns Analysis
@@ -479,14 +472,14 @@ Generate a table that has 1 single row for every unique visit_id record and has 
 				GROUP BY 
 					c.visit_id, c.user_id, c.event_time, n.campaign_name;
 ````				
-				| visit_id 	|	user_id	|	event_date 	|	Campaign				|	purchases 	|	cart_adds 	|	page_visited 	|	clicks
-				|---------------|--------------|---------------------|-------------------------------------------------|------------------------|----------------------|-----------------------|-----------------			
-    				| 0fc437	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	6		|	9		|	8
-				| ccf365	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	3		|	5		|	4
-				| c5c0ee	|	2	|	2020-01-18 	|	25% Off - Living The Lux Life		|	0		|	0		|	0		|	0
-				| d58cbd	|	2	|	2020-01-18 	|	25% Off - Living The Lux Life		|	0		|	4		|	6		|	5
-				| 25502e	|	3	|	2020-02-21  	|	Half Off - Treat Your Shellf(ish)	|	0		|	0		|	0		|	0
-				| 9a2f24	|	3	|	2020-02-21 	|	Half Off - Treat Your Shellf(ish)	|	1		|	2		|	5		|	4
+| visit_id 	|	user_id	|	event_date 	|	Campaign				|	purchases 	|	cart_adds 	|	page_visited 	|	clicks
+|---------------|---------------|-----------------------|-----------------------------------------------|-----------------------|-----------------------|-----------------------|-----------------			
+| 0fc437	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	6		|	9		|	8
+| ccf365	|	1	|	2020-02-04 	|	Half Off - Treat Your Shellf(ish)	|	1		|	3		|	5		|	4
+| c5c0ee	|	2	|	2020-01-18 	|	25% Off - Living The Lux Life		|	0		|	0		|	0		|	0
+| d58cbd	|	2	|	2020-01-18 	|	25% Off - Living The Lux Life		|	0		|	4		|	6		|	5
+| 25502e	|	3	|	2020-02-21  	|	Half Off - Treat Your Shellf(ish)	|	0		|	0		|	0		|	0
+| 9a2f24	|	3	|	2020-02-21 	|	Half Off - Treat Your Shellf(ish)	|	1		|	2		|	5		|	4
 
     
 
