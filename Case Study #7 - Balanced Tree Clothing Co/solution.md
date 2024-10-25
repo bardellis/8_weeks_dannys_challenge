@@ -679,6 +679,5 @@ Penetration for Each Product
 			FROM sales AS s
 			JOIN product_details AS p ON s.prod_id = p.product_id
 			WHERE DATE(start_txn_time) BETWEEN start_date AND end_date
-			GROUP BY product_name;
-			
+			GROUP BY product_name;			
 ````
