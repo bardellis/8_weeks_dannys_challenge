@@ -306,7 +306,15 @@ Additionally, create another table which further aggregates the data for the abo
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
 				WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_category;
-````						
+````
+		
+| product_id		|	sales
+|-----------------------|----------------------
+| 7			|	754
+| 9			|	726
+| 8			|	719
+
+				
 				| Category		|	views 	|	added_to_cart	| 	purchased 	| 	abandoned
 				|-----------------------|---------------|-----------------------|-----------------------|-------------------			
     				| Fish			| 	4633	|	2789		| 	2115		| 	674
