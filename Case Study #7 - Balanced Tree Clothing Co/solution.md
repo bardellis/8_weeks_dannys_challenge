@@ -1,29 +1,38 @@
 
-## A. High Level Sales Analysis
+### A. High Level Sales Analysis
 1. What was the total quantity sold for all products?
+````sql
 		select sum(qty) as quantity from sales; -- 45216
-        
-2. What is the total generated revenue for all products before discounts?
+````
+ 
+3. What is the total generated revenue for all products before discounts?
+````sql
 		select sum(qty*price) as revenue from sales; -- 1.289.453
-        
-3. What was the total discount amount for all products?
+````
+ 
+4. What was the total discount amount for all products?
+````sql
 		select sum((qty*price)*discount/100) as discount from sales; -- 156.229
+````
 
-##B. Transaction Analysis
+### B. Transaction Analysis
 1. How many unique transactions were there?
+````sql
 		select count(distinct(txn_id)) as transactions from sales; -- 2500
-
+````
 
 2. What is the average unique products purchased in each transaction?
+````sql
 		select avg(unique_products) as avg_unique_prod 
 		from (
 			select txn_id as transaction, count(distinct(prod_id)) as unique_products
 			from sales
 			group by txn_id
 		) subquery; -- 6.04
-
+````
 
 3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?
+````sql
 with RevenuePerTransaction as (
 	SELECT 
 	RANK() OVER (ORDER BY total_revenue asc) AS ranking,
@@ -53,12 +62,15 @@ with RevenuePerTransaction as (
 		MIN(CASE WHEN ranking >= CEIL(0.25 * @total_rows) THEN total_revenue END) AS p25,
 		MIN(CASE WHEN ranking >= CEIL(0.50 * @total_rows) THEN total_revenue END) AS p50,
 		MIN(CASE WHEN ranking >= CEIL(0.75 * @total_rows) THEN total_revenue END) AS p75
-	FROM RankedRevenue; 
+	FROM RankedRevenue;
+````
+
     -- | Perc.25		|	Perc.50			|	Perc.75
     -- | 326.18			|	441.00			|	572.75
 
 
-4. What is the average discount value per transaction?
+5. What is the average discount value per transaction?
+````sql
 		select round(avg(total_discount),2) as avg_descount
 		from(
 			select txn_id, sum(discount) as total_discount 
@@ -73,10 +85,12 @@ with RevenuePerTransaction as (
 			) as discount_per_product
 			group by txn_id
 		) as discounts_per_transation; -- 62,49
+````
 
 
-5. What is the percentage split of all transactions for members vs non-members?
-		select 
+6. What is the percentage split of all transactions for members vs non-members?
+````sql
+  	select 
 			case when members=1 then 'member' else 'non-member' end as client_type,
 			qty_member,
 			qty_total, 
@@ -87,12 +101,15 @@ with RevenuePerTransaction as (
 					(select count(*) from sales) as qty_total
 					from sales
 				group by members)
-		subquery; 
+		subquery;
+````
+
         -- members		9061	15095	0.60
 		-- non-members	6034	15095	0.40
 
 
-6. What is the average revenue for member transactions and non-member transactions?
+7. What is the average revenue for member transactions and non-member transactions?
+````sql
 		select 
 			case when members=1 then 'member' else 'non-member' end as client_type,
             round(avg(revenue),2) as avg_revenue 
@@ -107,12 +124,16 @@ with RevenuePerTransaction as (
 			order by txn_id, prod_id)
 		subquery
         group by client_type;
+   ````
+   
 		-- non-member	74.54
 		-- member		75.43
 
 
-C. Product Analysis
+### C. Product Analysis
 1. What are the top 3 products by total revenue before discount?
+
+````sql
 		select 
 			s.prod_id,
 			p.product_name,
@@ -122,13 +143,17 @@ C. Product Analysis
 			group by prod_id, product_name
 			order by rev_bef_desc desc
 			limit 3;
+````
+
 			-- Prod_id	| 	Product_name					|	Revenue before descount
 			-- 2a2353	|	Blue Polo Shirt - Mens			|	217.683
 			-- 9ec847	|	Grey Fashion Jacket - Womens	|	209.304
 			-- 5d267b	|	White Tee Shirt - Mens			|	152.000
 
 
-2. What is the total quantity, revenue and discount for each segment?
+3. What is the total quantity, revenue and discount for each segment?
+
+````sql
 		select 
 			p.segment_name as segment,
 			sum(qty) AS quantity,
@@ -137,6 +162,8 @@ C. Product Analysis
 		from sales as s
 			join product_details as p on s.prod_id=p.product_id
 			group by segment;
+````
+
 			-- segment	|	quantity	|	revenue		|	discount
 			-- Jeans	|	11349		|	183006.03	|	25343.97
 			-- Shirt	|	11265		|	356548.73	|	49594.27
@@ -144,7 +171,10 @@ C. Product Analysis
 			-- Jacket	|	11385		|	322705.54	|	44277.46
 
 
-3. What is the top selling product for each segment?
+4. What is the top selling product for each segment?
+
+````sql
+
 		select 
 			p.product_id as product_id,
             p.product_name as product,
@@ -153,11 +183,15 @@ C. Product Analysis
 			join product_details as p on s.prod_id=p.product_id
 			group by product, product_id
             order by sales desc
-            limit 1; 
+            limit 1;
+````
+
             -- Grey Fashion Jacket - Womens	3876
 
 
-4. What is the total quantity, revenue and discount for each category?
+5. What is the total quantity, revenue and discount for each category?
+
+````sql
 		select 
 			p.category_name as category,
 			sum(qty) AS quantity,
@@ -166,12 +200,16 @@ C. Product Analysis
 		from sales as s
 			join product_details as p on s.prod_id=p.product_id
 			group by category;
+````
+
 			-- category | quantity	|	revenue		|	discount
 			-- Womens	|	22734	|	505711.57	|	69621.43
 			-- Mens		|	22482	|	627512.29	|	86607.71
 
 
-5. What is the top selling product for each category?
+6. What is the top selling product for each category?
+
+````sql
 		WITH RankedProducts AS (
 			SELECT 
 				p.product_name AS product,
@@ -192,11 +230,15 @@ C. Product Analysis
 			RankedProducts
 		WHERE 
 			ranking = 1;
+````
+
 		-- Blue Polo Shirt - Mens		| 	Mens	| 	3819
 		-- Grey Fashion Jacket - Womens	| 	Womens	| 	3876
 
 
-6. What is the percentage split of revenue by product for each segment?
+7. What is the percentage split of revenue by product for each segment?
+
+````sql
 		WITH product_revenue AS (
 			SELECT 
 				p.segment_id,
@@ -226,6 +268,8 @@ C. Product Analysis
 		FROM product_revenue AS p
 		JOIN segment_revenue AS s ON p.segment_id = s.segment_id
 		order by segment, segment_prc desc;
+````
+
 		-- Segment	|	prod_id	|	product								revenue		pct
 		-- Jacket	|	9ec847	|	Grey Fashion Jacket - Womens		183912.12	0.57
 		-- Jacket	|	d5e9a6	|	Khaki Suit Jacket - Womens			76052.95	0.24
@@ -244,7 +288,10 @@ C. Product Analysis
 		-- Socks	|	b9a74d	|	White Striped Socks - Mens			54724.19	0.20
 
 
-7. What is the percentage split of revenue by segment for each category?
+8. What is the percentage split of revenue by segment for each category?
+
+````sql
+
 		WITH segment_revenue AS (
 			SELECT 
 				p.segment_id as segment_id,
@@ -272,6 +319,8 @@ C. Product Analysis
 		FROM segment_revenue AS s
 		JOIN category_revenue AS c ON s.category_id = c.category_id
 		order by segment, category_prc desc;
+````
+
 		-- Category	|	Segment	|	revenue		|	pct
 		-- Womens	|	Jacket	|	322705.54	|	0.64
 		-- Womens	|	Jeans	|	183006.03	|	0.36
@@ -279,7 +328,10 @@ C. Product Analysis
 		-- Mens		|	Socks	|	270963.56	|	0.43
 
 
-8. What is the percentage split of total revenue by category?
+9. What is the percentage split of total revenue by category?
+
+````sql
+
 			select 
             category, 
             category_revenue, 
@@ -293,12 +345,15 @@ C. Product Analysis
 				JOIN product_details AS p ON s.prod_id = p.product_id
 				GROUP BY category_id, category) 
 			subquery;
+````
 			-- category	|	revenue		|	prc_total
 			-- Womens	|	505711.57	|	0.446259
 			-- Mens		|	627512.29	|	0.553741
 
 
-9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+10. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+
+````sql
 		SELECT
 			s.prod_id,
 			p.product_name AS product,
@@ -313,6 +368,8 @@ C. Product Analysis
 		JOIN product_details AS p ON s.prod_id = p.product_id
 		GROUP BY s.prod_id, p.product_name
 		ORDER BY penetration DESC;
+````
+
 		-- c4a632	Navy Oversized Jeans - Womens		1274	0.51
 		-- 5d267b	White Tee Shirt - Mens				1268	0.51
 		-- 2a2353	Blue Polo Shirt - Mens				1268	0.51
@@ -327,9 +384,10 @@ C. Product Analysis
 		-- c8d436	Teal Button Up Shirt - Mens			1242	0.50
 
 
-10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
+11. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
 * Using a Common Table Expression (CTE) to filter transactions with at least three distinct products
 
+````sql
 		WITH RelevantTransactions AS (
 			SELECT txn_id
 			FROM sales
@@ -350,13 +408,17 @@ C. Product Analysis
 		GROUP BY prod1, prod2, prod3
 		ORDER BY occurrence_count DESC
 		LIMIT 1;
+````
+
 		-- prod1	|	prod2	|	prod3	|	ocurrences
         -- 5d267b	|	9ec847	|	c8d436	|	352
 
 
-###D. Reporting Challenge
+### D. Reporting Challenge
 Write a single SQL script that combines all of the previous questions into a scheduled report that the Balanced Tree team can run at the beginning of each month to calculate the previous month’s values.
 Enable Event Scheduler
+
+````sql
 
 		SET GLOBAL event_scheduler = ON;
 		DROP EVENT IF EXISTS calculate_monthly_report;
@@ -580,8 +642,11 @@ Enable Event Scheduler
 				WHERE DATE(start_txn_time) BETWEEN start_date AND end_date
 				GROUP BY category_id, category
 			) AS subquery;
+````
 
-			-- Penetration for Each Product
+Penetration for Each Product
+
+````sql
 			SELECT 
 				'Penetration for Each Product' AS metric_name,
 				product_name AS product,
@@ -591,6 +656,4 @@ Enable Event Scheduler
 			WHERE DATE(start_txn_time) BETWEEN start_date AND end_date
 			GROUP BY product_name;
 			
-		END //
-		DELIMITER ;
-
+````
