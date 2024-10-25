@@ -1,34 +1,20 @@
-use balanced_tree;
 
--- Interactive SQL Instance
--- You can use the embedded DB Fiddle below to easily access these example datasets - this interactive session has everything you need to start solving these questions using SQL.
--- You can click on the Edit on DB Fiddle link on the top right hand corner of the embedded session below and it will take you to a fully functional SQL 
--- editor where you can write your own queries to analyse the data.
--- You can feel free to choose any SQL dialect you’d like to use, the existing Fiddle is using PostgreSQL 13 as default.
--- Serious SQL students will have access to the same relevant schema SQL and example solutions which they can use with their Docker setup from within the course player!
-
--- Case Study Questions
--- The following questions can be considered key business questions and metrics that the Balanced Tree team requires for their monthly reports.
--- Each question can be answered using a single query - but as you are writing the SQL to solve each individual problem, keep in mind how you would generate all of these 
--- metrics in a single SQL script which the Balanced Tree team can run each month.
-
-
--- High Level Sales Analysis
--- What was the total quantity sold for all products?
+## A. High Level Sales Analysis
+1. What was the total quantity sold for all products?
 		select sum(qty) as quantity from sales; -- 45216
         
--- What is the total generated revenue for all products before discounts?
+2. What is the total generated revenue for all products before discounts?
 		select sum(qty*price) as revenue from sales; -- 1.289.453
         
--- What was the total discount amount for all products?
+3. What was the total discount amount for all products?
 		select sum((qty*price)*discount/100) as discount from sales; -- 156.229
 
--- Transaction Analysis
--- How many unique transactions were there?
+##B. Transaction Analysis
+1. How many unique transactions were there?
 		select count(distinct(txn_id)) as transactions from sales; -- 2500
 
 
--- What is the average unique products purchased in each transaction?
+2. What is the average unique products purchased in each transaction?
 		select avg(unique_products) as avg_unique_prod 
 		from (
 			select txn_id as transaction, count(distinct(prod_id)) as unique_products
@@ -37,7 +23,7 @@ use balanced_tree;
 		) subquery; -- 6.04
 
 
--- What are the 25th, 50th and 75th percentile values for the revenue per transaction?
+3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?
 with RevenuePerTransaction as (
 	SELECT 
 	RANK() OVER (ORDER BY total_revenue asc) AS ranking,
@@ -72,7 +58,7 @@ with RevenuePerTransaction as (
     -- | 326.18			|	441.00			|	572.75
 
 
--- What is the average discount value per transaction?
+4. What is the average discount value per transaction?
 		select round(avg(total_discount),2) as avg_descount
 		from(
 			select txn_id, sum(discount) as total_discount 
@@ -89,7 +75,7 @@ with RevenuePerTransaction as (
 		) as discounts_per_transation; -- 62,49
 
 
--- What is the percentage split of all transactions for members vs non-members?
+5. What is the percentage split of all transactions for members vs non-members?
 		select 
 			case when members=1 then 'member' else 'non-member' end as client_type,
 			qty_member,
@@ -106,7 +92,7 @@ with RevenuePerTransaction as (
 		-- non-members	6034	15095	0.40
 
 
--- What is the average revenue for member transactions and non-member transactions?
+6. What is the average revenue for member transactions and non-member transactions?
 		select 
 			case when members=1 then 'member' else 'non-member' end as client_type,
             round(avg(revenue),2) as avg_revenue 
@@ -125,8 +111,8 @@ with RevenuePerTransaction as (
 		-- member		75.43
 
 
--- Product Analysis
--- What are the top 3 products by total revenue before discount?
+C. Product Analysis
+1. What are the top 3 products by total revenue before discount?
 		select 
 			s.prod_id,
 			p.product_name,
@@ -142,7 +128,7 @@ with RevenuePerTransaction as (
 			-- 5d267b	|	White Tee Shirt - Mens			|	152.000
 
 
--- What is the total quantity, revenue and discount for each segment?
+2. What is the total quantity, revenue and discount for each segment?
 		select 
 			p.segment_name as segment,
 			sum(qty) AS quantity,
@@ -158,7 +144,7 @@ with RevenuePerTransaction as (
 			-- Jacket	|	11385		|	322705.54	|	44277.46
 
 
--- What is the top selling product for each segment?
+3. What is the top selling product for each segment?
 		select 
 			p.product_id as product_id,
             p.product_name as product,
@@ -171,7 +157,7 @@ with RevenuePerTransaction as (
             -- Grey Fashion Jacket - Womens	3876
 
 
--- What is the total quantity, revenue and discount for each category?
+4. What is the total quantity, revenue and discount for each category?
 		select 
 			p.category_name as category,
 			sum(qty) AS quantity,
@@ -185,7 +171,7 @@ with RevenuePerTransaction as (
 			-- Mens		|	22482	|	627512.29	|	86607.71
 
 
--- What is the top selling product for each category?
+5. What is the top selling product for each category?
 		WITH RankedProducts AS (
 			SELECT 
 				p.product_name AS product,
@@ -210,7 +196,7 @@ with RevenuePerTransaction as (
 		-- Grey Fashion Jacket - Womens	| 	Womens	| 	3876
 
 
--- What is the percentage split of revenue by product for each segment?
+6. What is the percentage split of revenue by product for each segment?
 		WITH product_revenue AS (
 			SELECT 
 				p.segment_id,
@@ -258,7 +244,7 @@ with RevenuePerTransaction as (
 		-- Socks	|	b9a74d	|	White Striped Socks - Mens			54724.19	0.20
 
 
--- What is the percentage split of revenue by segment for each category?
+7. What is the percentage split of revenue by segment for each category?
 		WITH segment_revenue AS (
 			SELECT 
 				p.segment_id as segment_id,
@@ -293,7 +279,7 @@ with RevenuePerTransaction as (
 		-- Mens		|	Socks	|	270963.56	|	0.43
 
 
--- What is the percentage split of total revenue by category?
+8. What is the percentage split of total revenue by category?
 			select 
             category, 
             category_revenue, 
@@ -312,7 +298,7 @@ with RevenuePerTransaction as (
 			-- Mens		|	627512.29	|	0.553741
 
 
--- What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
 		SELECT
 			s.prod_id,
 			p.product_name AS product,
@@ -341,8 +327,9 @@ with RevenuePerTransaction as (
 		-- c8d436	Teal Button Up Shirt - Mens			1242	0.50
 
 
--- What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
--- Using a Common Table Expression (CTE) to filter transactions with at least three distinct products
+10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
+* Using a Common Table Expression (CTE) to filter transactions with at least three distinct products
+
 		WITH RelevantTransactions AS (
 			SELECT txn_id
 			FROM sales
@@ -367,9 +354,10 @@ with RevenuePerTransaction as (
         -- 5d267b	|	9ec847	|	c8d436	|	352
 
 
--- Reporting Challenge
--- Write a single SQL script that combines all of the previous questions into a scheduled report that the Balanced Tree team can run at the beginning of each month to calculate the previous month’s values.
--- Enable Event Scheduler
+###D. Reporting Challenge
+Write a single SQL script that combines all of the previous questions into a scheduled report that the Balanced Tree team can run at the beginning of each month to calculate the previous month’s values.
+Enable Event Scheduler
+
 		SET GLOBAL event_scheduler = ON;
 		DROP EVENT IF EXISTS calculate_monthly_report;
 		SHOW PROCEDURE STATUS WHERE Name = 'calculate_monthly_report';
@@ -606,13 +594,3 @@ with RevenuePerTransaction as (
 		END //
 		DELIMITER ;
 
--- Bonus Challenge
--- Use a single SQL query to transform the product_hierarchy and product_prices datasets to the product_details table.
--- Hint: you may want to consider using a recursive CTE to solve this problem!
-
-
--- Conclusion
--- Sales, transactions and product exposure is always going to be a main objective for many data analysts and data scientists when working within a company that sells some type of product - Spoiler alert: nearly all companies will sell products!
--- Being able to navigate your way around a product hierarchy and understand the different levels of the structures as well as being able to join these details to sales related datasets will be super valuable for anyone wanting to work within a financial, customer or exploratory analytics capacity.
--- Hopefully these questions helped provide some exposure to the type of analysis we perform daily in these sorts of roles!
--- Ready for the next 8 Week SQL challenge case study? Click on the banner below to get started with case study #8!
