@@ -200,7 +200,8 @@
 					GROUP BY product_id
 					order by sales desc
 					limit 3;
-````			
+````
+		
 | product_id		|	sales
 |-----------------------|----------------------
 | 7			|	754
@@ -247,7 +248,8 @@
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
                 		WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_id;
-	````
+````
+
 					
 				| product_id 		| views 	| added_to_cart		| purchased 	| abandoned
 				|-----------------------|---------------|-----------------------|---------------|----------
@@ -263,6 +265,7 @@
 
 
 Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
+
 ````sql
 		CREATE TABLE IF NOT EXISTS product_category_metrics (
 					product_category VARCHAR(9) PRIMARY KEY,
@@ -305,6 +308,7 @@ Additionally, create another table which further aggregates the data for the abo
 
  Use your 2 new output tables - answer the following questions:
 1. Which product had the most views, cart adds and purchases?
+
 ````sql
 				SELECT product_id, 
 					   views, 
@@ -322,6 +326,7 @@ Additionally, create another table which further aggregates the data for the abo
 
 
 2. Which product was most likely to be abandoned?
+
 ````sql
 				SELECT product_id, 
 					   abandoned, 
@@ -337,6 +342,7 @@ Additionally, create another table which further aggregates the data for the abo
 
 
 3. Which product had the highest view to purchase percentage?
+
 ````sql
 				SELECT product_id, 
 					   views, 
@@ -345,7 +351,8 @@ Additionally, create another table which further aggregates the data for the abo
 				FROM product_metrics
                 		order by probability_view_to_purchase desc
                 		limit 1;
-````						
+````
+					
 				| product_id	| views		| 	purchased 	| 	probability_view_to_purchase
     				|---------------|---------------|-----------------------|----------------------------------
 				| 4		| 1563		|	697		|	0.4874
