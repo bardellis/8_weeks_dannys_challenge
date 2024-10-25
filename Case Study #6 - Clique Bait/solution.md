@@ -397,80 +397,79 @@ Generate a table that has 1 single row for every unique visit_id record and has 
   
    ````sql 
 				WITH campaigns AS (
-				select visit_id, user_id, event_time, page_name, count(*) as visits 
-				from events as e 
-				join users as u on e.cookie_id=u.cookie_id
-				join page_hierarchy p on e.page_id=p.page_id
-				where sequence_number=1
-				group by visit_id, user_id, event_time, page_name
-				order by visits desc
-				),
-				cart_adds AS( 
-				select visit_id, event_name, count(*) cart_adds from events as e
-				join event_identifier i on e.event_type=i.event_type
-				where e.event_type=2
-				group by event_name, visit_id
-				),
-				page_visited AS(
-				select visit_id, count(e.page_id) as page_visited 
-				from events as e
-				join event_identifier i on e.event_type=i.event_type
-				join page_hierarchy p on e.page_id=p.page_id
-				where e.event_type=1 and e.page_id > 2
-				group by visit_id
-				),
-				purchases as (
-				select visit_id, count(*) as purchases
-				from events as e
-				join event_identifier i on e.event_type=i.event_type
-				join page_hierarchy p on e.page_id=p.page_id
-				where i.event_type = 3
-				group by visit_id
-				order by purchases
-				),
-				campname as (
-				SELECT
-				v.visit_id,
-				v.event_time,
-				c.campaign_name
-				FROM
-				events as v
-				LEFT JOIN
-				campaign_identifier as c
-				ON
-				v.event_time BETWEEN c.start_date AND c.end_date
-				where sequence_number=1
-				), 
-				clicks as(
-				 select visit_id, count(*) as clicks from events as e
-				join event_identifier i on e.event_type=i.event_type
-				join page_hierarchy as p on e.page_id=p.page_id
-				where page_name <> 'Home Page' and page_name <> 'All Products' and page_name <> 'Checkout'and event_name = 'Page View'
-				group by visit_id
-				)
-				SELECT 
-				c.visit_id, 
-				c.user_id, 
-				date(c.event_time) as event_time, 
-				n.campaign_name, 
-				MAX(CASE WHEN u.purchases IS NOT NULL THEN 1 ELSE 0 END) AS purchase,
-				sum(CASE WHEN a.cart_adds is not null then a.cart_adds else 0 end) AS cart_adds, 
-				SUM(CASE WHEN p.page_visited is not null then p.page_visited else 0 end) AS page_visited, 
-				SUM(case when k.clicks is not null then k.clicks else 0 end) AS clicks
-				FROM 
-					campaigns AS c
-				LEFT JOIN 
-					cart_adds AS a ON c.visit_id = a.visit_id
-				LEFT JOIN 
-					page_visited AS p ON c.visit_id = p.visit_id
-				LEFT JOIN 
-					purchases AS u ON c.visit_id = u.visit_id
-				LEFT JOIN 
-					campname AS n ON c.visit_id = n.visit_id
-				LEFT JOIN 
-					clicks AS k ON c.visit_id = k.visit_id
-				GROUP BY 
-					c.visit_id, c.user_id, c.event_time, n.campaign_name;
+    SELECT visit_id, user_id, event_time, page_name, COUNT(*) AS visits 
+    FROM events AS e 
+    JOIN users AS u ON e.cookie_id = u.cookie_id
+    JOIN page_hierarchy p ON e.page_id = p.page_id
+    WHERE sequence_number = 1
+    GROUP BY visit_id, user_id, event_time, page_name
+),
+cart_adds AS ( 
+    SELECT visit_id, event_name, COUNT(*) AS cart_adds 
+    FROM events AS e
+    JOIN event_identifier i ON e.event_type = i.event_type
+    WHERE e.event_type = 2
+    GROUP BY event_name, visit_id
+),
+page_visited AS (
+    SELECT visit_id, COUNT(e.page_id) AS page_visited 
+    FROM events AS e
+    JOIN event_identifier i ON e.event_type = i.event_type
+    JOIN page_hierarchy p ON e.page_id = p.page_id
+    WHERE e.event_type = 1 AND e.page_id > 2
+    GROUP BY visit_id
+),
+purchases AS (
+    SELECT visit_id, COUNT(*) AS purchases
+    FROM events AS e
+    JOIN event_identifier i ON e.event_type = i.event_type
+    JOIN page_hierarchy p ON e.page_id = p.page_id
+    WHERE i.event_type = 3
+    GROUP BY visit_id
+),
+campaign_details AS (
+    SELECT
+        v.visit_id,
+        v.event_time,
+        c.campaign_name
+    FROM
+        events AS v
+    LEFT JOIN
+        campaign_identifier AS c ON v.event_time BETWEEN c.start_date AND c.end_date
+    WHERE sequence_number = 1
+), 
+clicks AS (
+    SELECT visit_id, COUNT(*) AS clicks 
+    FROM events AS e
+    JOIN event_identifier i ON e.event_type = i.event_type
+    JOIN page_hierarchy AS p ON e.page_id = p.page_id
+    WHERE page_name NOT IN ('Home Page', 'All Products', 'Checkout') AND event_name = 'Page View'
+    GROUP BY visit_id
+)
+SELECT 
+    c.visit_id, 
+    c.user_id, 
+    DATE(c.event_time) AS event_time, 
+    n.campaign_name, 
+    MAX(CASE WHEN u.purchases IS NOT NULL THEN 1 ELSE 0 END) AS purchase,
+    SUM(COALESCE(a.cart_adds, 0)) AS cart_adds, 
+    SUM(COALESCE(p.page_visited, 0)) AS page_visited, 
+    SUM(COALESCE(k.clicks, 0)) AS clicks
+FROM 
+    campaigns AS c
+LEFT JOIN 
+    cart_adds AS a ON c.visit_id = a.visit_id
+LEFT JOIN 
+    page_visited AS p ON c.visit_id = p.visit_id
+LEFT JOIN 
+    purchases AS u ON c.visit_id = u.visit_id
+LEFT JOIN 
+    campaign_details AS n ON c.visit_id = n.visit_id
+LEFT JOIN 
+    clicks AS k ON c.visit_id = k.visit_id
+GROUP BY 
+    c.visit_id, c.user_id, c.event_time, n.campaign_name;
+
 ````				
 | visit_id 	|	user_id	|	event_date 	|	Campaign				|	purchases 	|	cart_adds 	|	page_visited 	|	clicks
 |---------------|---------------|-----------------------|-----------------------------------------------|-----------------------|-----------------------|-----------------------|-----------------			
