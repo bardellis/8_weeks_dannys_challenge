@@ -6,11 +6,13 @@
 ````
 45216
 
+
 3. What is the total generated revenue for all products before discounts?
 ````sql
 		select sum(qty*price) as revenue from sales;
 ````
 1.289.453
+
 
 4. What was the total discount amount for all products?
 ````sql
@@ -18,12 +20,14 @@
 ````
 156.229
 
+
 ### B. Transaction Analysis
 1. How many unique transactions were there?
 ````sql
 		select count(distinct(txn_id)) as transactions from sales;
 ````
 2500
+
 
 2. What is the average unique products purchased in each transaction?
 ````sql
@@ -35,6 +39,7 @@
 		) subquery;
 ````
 6.04
+
 
 3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?
 ````sql
@@ -93,6 +98,7 @@ with RevenuePerTransaction as (
 		) as discounts_per_transation;
 ````
 62,49
+
 
 6. What is the percentage split of all transactions for members vs non-members?
 ````sql
@@ -245,6 +251,7 @@ with RevenuePerTransaction as (
 		WHERE 
 			ranking = 1;
 ````
+
 |product			|category	|total_sales
 |-------------------------------|---------------|-----------------
 |Blue Polo Shirt - Mens		| 	Mens	| 	3819
@@ -334,11 +341,12 @@ with RevenuePerTransaction as (
 		order by segment, category_prc desc;
 ````
 
-		-- Category	|	Segment	|	revenue		|	pct
-		-- Womens	|	Jacket	|	322705.54	|	0.64
-		-- Womens	|	Jeans	|	183006.03	|	0.36
-		-- Mens		|	Shirt	|	356548.73	|	0.57
-		-- Mens		|	Socks	|	270963.56	|	0.43
+|Category	|	Segment	|	revenue		|	pct
+|------------|----------------|-------------------|----------------
+|Womens	|	Jacket	|	322705.54	|	0.64
+|Womens	|	Jeans	|	183006.03	|	0.36
+|Mens		|	Shirt	|	356548.73	|	0.57
+|Mens		|	Socks	|	270963.56	|	0.43
 
 
 9. What is the percentage split of total revenue by category?
@@ -359,9 +367,10 @@ with RevenuePerTransaction as (
 				GROUP BY category_id, category) 
 			subquery;
 ````
-			-- category	|	revenue		|	prc_total
-			-- Womens	|	505711.57	|	0.446259
-			-- Mens		|	627512.29	|	0.553741
+|category	|	revenue		|	prc_total
+|---------------|-------------------|--------------
+|Womens	|	505711.57	|	0.446259
+|Mens		|	627512.29	|	0.553741
 
 
 10. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
@@ -383,18 +392,20 @@ with RevenuePerTransaction as (
 		ORDER BY penetration DESC;
 ````
 
-		-- c4a632	Navy Oversized Jeans - Womens		1274	0.51
-		-- 5d267b	White Tee Shirt - Mens				1268	0.51
-		-- 2a2353	Blue Polo Shirt - Mens				1268	0.51
-		-- f084eb	Navy Solid Socks - Mens				1281	0.51
-		-- 9ec847	Grey Fashion Jacket - Womens		1275	0.51
-		-- b9a74d	White Striped Socks - Mens			1243	0.50
-		-- 2feb6b	Pink Fluro Polkadot Socks - Mens	1258	0.50
-		-- e31d39	Cream Relaxed Jeans - Womens		1243	0.50
-		-- 72f5d4	Indigo Rain Jacket - Womens			1250	0.50
-		-- e83aa3	Black Straight Jeans - Womens		1246	0.50
-		-- d5e9a6	Khaki Suit Jacket - Womens			1247	0.50
-		-- c8d436	Teal Button Up Shirt - Mens			1242	0.50
+|prod_id|product_name				|txn_count|pct
+|--------|--------------------------------------|---------|-------
+|c4a632	|Navy Oversized Jeans - Womens			|1274	|0.51
+|5d267b	|White Tee Shirt - Mens				|1268	|0.51
+|2a2353	|Blue Polo Shirt - Mens				|1268	|0.51
+|f084eb	|Navy Solid Socks - Mens				|1281	|0.51
+|9ec847	|Grey Fashion Jacket - Womens			|1275	|0.51
+|b9a74d	|White Striped Socks - Mens			|1243	|0.50
+|2feb6b|	Pink Fluro Polkadot Socks - Mens		|1258	|0.50
+|e31d39|	Cream Relaxed Jeans - Womens			|1243	|0.50
+|72f5d4|	Indigo Rain Jacket - Womens			|1250	|0.50
+|e83aa3|	Black Straight Jeans - Womens			|1246	|0.50
+|d5e9a6|	Khaki Suit Jacket - Womens			|1247	|0.50
+|c8d436	|Teal Button Up Shirt - Mens			|1242	|0.50
 
 
 11. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
@@ -423,8 +434,9 @@ with RevenuePerTransaction as (
 		LIMIT 1;
 ````
 
-		-- prod1	|	prod2	|	prod3	|	ocurrences
-        -- 5d267b	|	9ec847	|	c8d436	|	352
+|prod1	|	prod2	|	prod3	|	ocurrences
+|-----------|------------|--------------|--------------------
+|5d267b	|	9ec847	|	c8d436	|	352
 
 
 ### D. Reporting Challenge
