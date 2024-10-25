@@ -249,15 +249,6 @@
                 		WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_id;
 ````
-		
-| product_id		|	sales
-|-----------------------|----------------------
-| 7			|	754
-| 9			|	726
-| 8			|	719
-
-
-
 					
 | product_id 		| views 	| added_to_cart		| purchased 	| abandoned
 |-----------------------|---------------|-----------------------|---------------|----------
@@ -315,11 +306,11 @@ Additionally, create another table which further aggregates the data for the abo
 | 8			|	719
 
 				
-				| Category		|	views 	|	added_to_cart	| 	purchased 	| 	abandoned
-				|-----------------------|---------------|-----------------------|-----------------------|-------------------			
-    				| Fish			| 	4633	|	2789		| 	2115		| 	674
-				| Luxury		| 	3032	|	1870		| 	1404		| 	466
-				| Shellfish		| 	6204	|	3792		| 	2898		| 	894
+| Category		|	views 	|	added_to_cart	| 	purchased 	| 	abandoned
+|-----------------------|---------------|-----------------------|-----------------------|-------------------			
+| Fish			| 	4633	|	2789		| 	2115		| 	674
+| Luxury		| 	3032	|	1870		| 	1404		| 	466
+| Shellfish		| 	6204	|	3792		| 	2898		| 	894
 
 
  Use your 2 new output tables - answer the following questions:
