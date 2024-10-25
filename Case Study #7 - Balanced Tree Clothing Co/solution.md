@@ -2,24 +2,28 @@
 ### A. High Level Sales Analysis
 1. What was the total quantity sold for all products?
 ````sql
-		select sum(qty) as quantity from sales; -- 45216
+		select sum(qty) as quantity from sales;
 ````
- 
+45216
+
 3. What is the total generated revenue for all products before discounts?
 ````sql
-		select sum(qty*price) as revenue from sales; -- 1.289.453
+		select sum(qty*price) as revenue from sales;
 ````
- 
+1.289.453
+
 4. What was the total discount amount for all products?
 ````sql
-		select sum((qty*price)*discount/100) as discount from sales; -- 156.229
+		select sum((qty*price)*discount/100) as discount from sales;
 ````
+156.229
 
 ### B. Transaction Analysis
 1. How many unique transactions were there?
 ````sql
-		select count(distinct(txn_id)) as transactions from sales; -- 2500
+		select count(distinct(txn_id)) as transactions from sales;
 ````
+2500
 
 2. What is the average unique products purchased in each transaction?
 ````sql
@@ -28,8 +32,9 @@
 			select txn_id as transaction, count(distinct(prod_id)) as unique_products
 			from sales
 			group by txn_id
-		) subquery; -- 6.04
+		) subquery;
 ````
+6.04
 
 3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?
 ````sql
@@ -65,8 +70,9 @@ with RevenuePerTransaction as (
 	FROM RankedRevenue;
 ````
 
-    -- | Perc.25		|	Perc.50			|	Perc.75
-    -- | 326.18			|	441.00			|	572.75
+| Perc.25		|	Perc.50			|	Perc.75
+|------------------------|-----------------------------|--------------------
+| 326.18			|	441.00			|	572.75
 
 
 5. What is the average discount value per transaction?
@@ -84,9 +90,9 @@ with RevenuePerTransaction as (
 				order by txn_id asc
 			) as discount_per_product
 			group by txn_id
-		) as discounts_per_transation; -- 62,49
+		) as discounts_per_transation;
 ````
-
+62,49
 
 6. What is the percentage split of all transactions for members vs non-members?
 ````sql
@@ -103,12 +109,14 @@ with RevenuePerTransaction as (
 				group by members)
 		subquery;
 ````
-
-        -- members		9061	15095	0.60
-		-- non-members	6034	15095	0.40
+|client_type	| qty_member | qty_total | pct
+|---------------|---------------|--------|-----
+| members	|	9061	|15095	| 0.60
+| non-members	|6034		|15095	|0.40
 
 
 7. What is the average revenue for member transactions and non-member transactions?
+
 ````sql
 		select 
 			case when members=1 then 'member' else 'non-member' end as client_type,
@@ -124,10 +132,12 @@ with RevenuePerTransaction as (
 			order by txn_id, prod_id)
 		subquery
         group by client_type;
-   ````
-   
-		-- non-member	74.54
-		-- member		75.43
+````
+
+|client_type	| avg_revenue
+|---------------|---------------
+| non-member	|	74.54
+| member	|	75.43
 
 
 ### C. Product Analysis
@@ -145,10 +155,11 @@ with RevenuePerTransaction as (
 			limit 3;
 ````
 
-			-- Prod_id	| 	Product_name					|	Revenue before descount
-			-- 2a2353	|	Blue Polo Shirt - Mens			|	217.683
-			-- 9ec847	|	Grey Fashion Jacket - Womens	|	209.304
-			-- 5d267b	|	White Tee Shirt - Mens			|	152.000
+| Prod_id	| 	Product_name				|	Revenue before descount
+|---------------|-----------------------------------------------|----------------------------------  
+| 2a2353	|	Blue Polo Shirt - Mens			|	217.683
+| 9ec847	|	Grey Fashion Jacket - Womens		|	209.304
+| 5d267b	|	White Tee Shirt - Mens			|	152.000
 
 
 3. What is the total quantity, revenue and discount for each segment?
@@ -164,11 +175,12 @@ with RevenuePerTransaction as (
 			group by segment;
 ````
 
-			-- segment	|	quantity	|	revenue		|	discount
-			-- Jeans	|	11349		|	183006.03	|	25343.97
-			-- Shirt	|	11265		|	356548.73	|	49594.27
-			-- Socks	|	11217		|	270963.56	|	37013.44
-			-- Jacket	|	11385		|	322705.54	|	44277.46
+| segment	|	quantity	|	revenue		|	discount
+|---------------|----------------------	|----------------------	|--------------
+| Jeans		|	11349		|	183006.03	|	25343.97
+| Shirt		|	11265		|	356548.73	|	49594.27
+| Socks		|	11217		|	270963.56	|	37013.44
+| Jacket	|	11385		|	322705.54	|	44277.46
 
 
 4. What is the top selling product for each segment?
@@ -185,8 +197,9 @@ with RevenuePerTransaction as (
             order by sales desc
             limit 1;
 ````
-
-            -- Grey Fashion Jacket - Womens	3876
+|product_id			| sales
+|-------------------------------|------------
+|Grey Fashion Jacket - Womens	|3876
 
 
 5. What is the total quantity, revenue and discount for each category?
@@ -202,9 +215,10 @@ with RevenuePerTransaction as (
 			group by category;
 ````
 
-			-- category | quantity	|	revenue		|	discount
-			-- Womens	|	22734	|	505711.57	|	69621.43
-			-- Mens		|	22482	|	627512.29	|	86607.71
+|category | quantity	|	revenue		|	discount
+|---------|-------------|-----------------------|-------------------
+|Womens	|	22734	|	505711.57	|	69621.43
+|Mens	|	22482	|	627512.29	|	86607.71
 
 
 6. What is the top selling product for each category?
@@ -231,9 +245,10 @@ with RevenuePerTransaction as (
 		WHERE 
 			ranking = 1;
 ````
-
-		-- Blue Polo Shirt - Mens		| 	Mens	| 	3819
-		-- Grey Fashion Jacket - Womens	| 	Womens	| 	3876
+|product			|category	|total_sales
+|-------------------------------|---------------|-----------------
+|Blue Polo Shirt - Mens		| 	Mens	| 	3819
+|Grey Fashion Jacket - Womens	| 	Womens	| 	3876
 
 
 7. What is the percentage split of revenue by product for each segment?
@@ -270,22 +285,20 @@ with RevenuePerTransaction as (
 		order by segment, segment_prc desc;
 ````
 
-		-- Segment	|	prod_id	|	product								revenue		pct
-		-- Jacket	|	9ec847	|	Grey Fashion Jacket - Womens		183912.12	0.57
-		-- Jacket	|	d5e9a6	|	Khaki Suit Jacket - Womens			76052.95	0.24
-		-- Jacket	|	72f5d4	|	Indigo Rain Jacket - Womens			62740.47	0.19
-
-		-- Jeans	|	e83aa3	|	Black Straight Jeans - Womens		106407.04	0.58
-		-- Jeans	|	c4a632	|	Navy Oversized Jeans - Womens		43992.39	0.24
-		-- Jeans	|	e31d39	|	Cream Relaxed Jeans - Womens		32606.60	0.18
-
-		-- Shirt	|	2a2353	|	Blue Polo Shirt - Mens				190863.93	0.54
-		-- Shirt	|	5d267b	|	White Tee Shirt - Mens				133622.40	0.37
-		-- Shirt	|	c8d436	|	Teal Button Up Shirt - Mens			32062.40	0.09
-
-		-- Socks	|	f084eb	|	Navy Solid Socks - Mens				119861.64	0.44
-		-- Socks	|	2feb6b	|	Pink Fluro Polkadot Socks - Mens	96377.73	0.36
-		-- Socks	|	b9a74d	|	White Striped Socks - Mens			54724.19	0.20
+|Segment|	prod_id	|	product					|revenue	|pct
+|-------|---------------|-----------------------------------------------|---------------|pct
+|Jacket	|	9ec847	|	Grey Fashion Jacket - Womens		|183912.12	|0.57
+|Jacket	|	d5e9a6	|	Khaki Suit Jacket - Womens		|76052.95	|0.24
+|Jacket	|	72f5d4	|	Indigo Rain Jacket - Womens		|62740.47	|0.19
+|Jeans	|	e83aa3	|	Black Straight Jeans - Womens		|106407.04	|0.58
+|Jeans	|	c4a632	|	Navy Oversized Jeans - Womens		|43992.39	|0.24
+|Jeans	|	e31d39	|	Cream Relaxed Jeans - Womens		|32606.60	|0.18
+|Shirt	|	2a2353	|	Blue Polo Shirt - Mens			|190863.93	|0.54
+|Shirt	|	5d267b	|	White Tee Shirt - Mens			|133622.40	|0.37
+|Shirt	|	c8d436	|	Teal Button Up Shirt - Mens		|32062.40	|0.09
+|Socks	|	f084eb	|	Navy Solid Socks - Mens			|119861.64	|0.44
+|Socks	|	2feb6b	|	Pink Fluro Polkadot Socks - Mens	|96377.73	|0.36
+|Socks	|	b9a74d	|	White Striped Socks - Mens		|54724.19	|0.20
 
 
 8. What is the percentage split of revenue by segment for each category?
