@@ -286,7 +286,7 @@ with RevenuePerTransaction as (
 ````
 
 |Segment|	prod_id	|	product					|revenue	|pct
-|-------|---------------|-----------------------------------------------|---------------|pct
+|-------|---------------|-----------------------------------------------|---------------|-----
 |Jacket	|	9ec847	|	Grey Fashion Jacket - Womens		|183912.12	|0.57
 |Jacket	|	d5e9a6	|	Khaki Suit Jacket - Womens		|76052.95	|0.24
 |Jacket	|	72f5d4	|	Indigo Rain Jacket - Womens		|62740.47	|0.19
