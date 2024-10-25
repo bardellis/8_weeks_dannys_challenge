@@ -214,7 +214,8 @@
 3. How many times was each product added to cart?
 4. How many times was each product added to a cart but not purchased (abandoned)?
 5. How many times was each product purchased?
- ````sql  
+
+````sql  
 				CREATE TABLE IF NOT EXISTS product_metrics (
 					product_id INT PRIMARY KEY,
 					views INT DEFAULT 0,
@@ -246,7 +247,8 @@
 				LEFT JOIN purchases p ON a.visit_id = p.visit_id
                 		WHERE a.product_id IS NOT NULL
 				GROUP BY a.product_id;
-	````					
+	````
+					
 				| product_id 		| views 	| added_to_cart		| purchased 	| abandoned
 				|-----------------------|---------------|-----------------------|---------------|----------
 				| 4			| 1563		| 946			| 697		| 249
