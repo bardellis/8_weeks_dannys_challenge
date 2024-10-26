@@ -163,6 +163,7 @@ SELECT SUM(total_months) AS data_points
 	) AS subquery2;
 ````
 **Answer**
+
 6359 data points
 
 
@@ -188,9 +189,11 @@ think about what it means to have less months present from a segment perspective
 		);
 ````
 **Answer**
+
 6359 redords removed
         
-ANSWER: From a business perspective, removing interests with incomplete data (e.g., those missing months) makes sense if the goal is to ensure data quality for comprehensive analysis. 
+**Answer**
+From a business perspective, removing interests with incomplete data (e.g., those missing months) makes sense if the goal is to ensure data quality for comprehensive analysis. 
 However, it should be considered that when data is removed it may become inconsistent, e.g. the index value column will become inaccurate since interest rates that are not 14 months old will be missing.
 In addition, if emerging trends or segment-specific behavior are important, retaining incomplete data may be beneficial despite the challenges, 
 If emerging trends or segment-specific behavior are important, however, retaining incomplete data may be beneficial despite the challenges. 
