@@ -18,8 +18,7 @@ select new_month_year, count(*) as records
 	group by new_month_year
 	order by new_month_year asc;
 ````
-    
-original table
+
 ````sql
 	select month_year, count(*) as records 
 	from fresh_segments.interest_metrics_0
