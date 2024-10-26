@@ -57,8 +57,9 @@ Considering the importance of the missing values, I suggest removing them...
 		group by interest_id, id
 		order by interest_id, id
         ) subquery
-		where id <> interest_id; -- 0 
+		where id <> interest_id;
 ````
+0
 
 5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table
 
@@ -160,12 +161,13 @@ and all columns from fresh_segments.interest_map except from the id column.
 			)
 		) AS subquery2;
 ````
-   6359 data points
+6359 data points
 
 
 4. Does this decision make sense to remove these data points from a business perspective?
 Use an example where there are all 14 months present to a removed interest example for your arguments 
 think about what it means to have less months present from a segment perspective.
+
 ````sql
 		DELETE FROM fresh_segments.interest_metrics
 		WHERE interest_id IN (
@@ -193,7 +195,8 @@ The decision should balance the need for reliable, long-term insights with the p
 Remove interests with incomplete data for more accurate and consistent analysis.
 Keep interests with partial data for exploratory insights and to capture emerging trends, with the understanding that conclusions might be less reliable.
 
-After removing these interests - how many unique interests are there for each month? 
+5. After removing these interests - how many unique interests are there for each month?
+
 ````sql		
   		select new_month_year, count(distinct(interest_id)) as records from fresh_segments.interest_metrics me
 		join fresh_segments.interest_map as ma on ma.id=me.interest_id
