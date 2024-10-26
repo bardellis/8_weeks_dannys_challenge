@@ -46,6 +46,7 @@ Considering the importance of the missing values, I suggest removing them...
         ) subquery
 		where interest_id <> id;
 ````
+**Answer**
 0
 
 ````sql 
