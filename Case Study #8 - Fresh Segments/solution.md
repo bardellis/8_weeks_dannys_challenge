@@ -192,6 +192,7 @@ think about what it means to have less months present from a segment perspective
 6359 redords removed
         
 **Answer**
+
 From a business perspective, removing interests with incomplete data (e.g., those missing months) makes sense if the goal is to ensure data quality for comprehensive analysis. 
 However, it should be considered that when data is removed it may become inconsistent, e.g. the index value column will become inaccurate since interest rates that are not 14 months old will be missing.
 In addition, if emerging trends or segment-specific behavior are important, retaining incomplete data may be beneficial despite the challenges, 
@@ -203,9 +204,10 @@ Keep interests with partial data for exploratory insights and to capture emergin
 5. After removing these interests - how many unique interests are there for each month?
 
 ````sql		
-  		select new_month_year, count(distinct(interest_id)) as records from fresh_segments.interest_metrics me
-		join fresh_segments.interest_map as ma on ma.id=me.interest_id
-		group by new_month_year; 
+select new_month_year, count(distinct(interest_id)) as records from fresh_segments.interest_metrics me
+join fresh_segments.interest_map as ma on ma.id=me.interest_id
+group by new_month_year; 
 ````        
 **Answer**
+
 480 interest_ids
