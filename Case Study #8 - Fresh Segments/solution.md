@@ -4,27 +4,24 @@ Most questions can be answered using a single query however some questions are m
 
 ## Data Exploration and Cleansing
 1. Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month
-	ALTER TABLE fresh_segments.interest_metrics
-	ADD COLUMN new_month_year DATE;
-	UPDATE fresh_segments.interest_metrics
-	SET new_month_year = STR_TO_DATE(CONCAT('01-', month_year), '%d-%m-%Y');
+ ````sql
+ALTER TABLE fresh_segments.interest_metrics
+ADD COLUMN new_month_year DATE;
+
+UPDATE fresh_segments.interest_metrics
+SET new_month_year = STR_TO_DATE(CONCAT('01-', month_year), '%d-%m-%Y');
+````
 
 
 2. What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?
 
  ````sql
-select new_month_year, count(*) as records 
-	from fresh_segments.interest_metrics
-	group by new_month_year
-	order by new_month_year asc;
+SELECT new_month_year, COUNT(*) AS records 
+FROM fresh_segments.interest_metrics
+GROUP BY new_month_year
+ORDER BY new_month_year ASC;
 ````
 
-````sql
-	select month_year, count(*) as records 
-	from fresh_segments.interest_metrics_0
-	group by month_year
-	order by month_year asc;
-````
 
 3. What do you think we should do with these null values in fresh_segments.interest_metrics?
 Considering the importance of the missing values, I suggest removing them...
