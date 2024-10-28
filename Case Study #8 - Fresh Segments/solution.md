@@ -22,6 +22,7 @@ FROM fresh_segments.interest_metrics
 GROUP BY new_month_year
 ORDER BY new_month_year ASC;
 ````
+
 **Answer**
 
 |new_month_year|records
@@ -80,7 +81,6 @@ WHERE
 ````
 
 **Answer**
-
 0
 
 
@@ -109,7 +109,6 @@ WHERE
 ````
 
 **Answer**
-
 0
 
 
