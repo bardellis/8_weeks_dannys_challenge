@@ -21,8 +21,9 @@ FROM fresh_segments.interest_metrics
 GROUP BY new_month_year
 ORDER BY new_month_year ASC;
 ````
-|NULL|	1194
+|new_month_year|records
 |-----|---------
+|NULL|	1194
 |12-2018|	995
 |11-2018|	928
 |10-2018|	857
