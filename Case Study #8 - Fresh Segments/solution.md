@@ -128,13 +128,29 @@ and all columns from fresh_segments.interest_map except from the id column.
 188 records/ids belonging to this happens because the value of month_year is month/year, so we do not know what day the metric was entered
 
 ````sql
-select count(distinct(interest_id)) as id 
-from (select 
-	i._month, i._year, i.month_year, i.interest_id, i.composition, i.index_value, i.ranking, i.percentile_ranking, i.new_month_year,
-	m.interest_name, m.interest_summary, m.created_at, m.last_modified
-	from fresh_segments.interest_metrics as i
-	left join fresh_segments.interest_map as m on m.id = i.interest_id
-	where i.new_month_year < m.created_at) subquery;
+SELECT COUNT(DISTINCT(interest_id)) AS id
+FROM (
+    SELECT 
+        i._month, 
+        i._year, 
+        i.month_year, 
+        i.interest_id, 
+        i.composition, 
+        i.index_value, 
+        i.ranking, 
+        i.percentile_ranking, 
+        i.new_month_year,
+        m.interest_name, 
+        m.interest_summary, 
+        m.created_at, 
+        m.last_modified
+    FROM 
+        fresh_segments.interest_metrics AS i
+    LEFT JOIN 
+        fresh_segments.interest_map AS m ON m.id = i.interest_id
+    WHERE 
+        i.new_month_year < m.created_at
+) AS subquery;
 ````
 
 ## Interest Analysis
