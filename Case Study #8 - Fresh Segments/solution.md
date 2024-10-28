@@ -13,6 +13,7 @@ SET new_month_year = STR_TO_DATE(CONCAT('01-', month_year), '%d-%m-%Y');
 ````
 
 
+
 2. What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?
 
  ````sql
@@ -41,6 +42,8 @@ ORDER BY new_month_year ASC;
 |02-2019|	1121
 |01-2019|	973
 
+
+
 3. What do you think we should do with these null values in fresh_segments.interest_metrics?
 Considering the importance of the missing values, I suggest removing them...
 
@@ -48,6 +51,8 @@ Considering the importance of the missing values, I suggest removing them...
 DELETE FROM fresh_segments.interest_metrics
 WHERE month_year IS NULL;
 ````
+
+
 
 4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
 ````sql
@@ -75,21 +80,38 @@ WHERE
 ````
 
 **Answer**
+
 0
 
+
 ````sql 
-select count(*) from
-	(select interest_id, m.id, count(*) 
-	from fresh_segments.interest_map as m
-	left join fresh_segments.interest_metrics as i on i.interest_id = m.id
-	where month_year IS not NULL
-	group by interest_id, id
-	order by interest_id, id
-        ) subquery
-where id <> interest_id;
+SELECT COUNT(*) 
+FROM (
+    SELECT 
+        interest_id, 
+        m.id, 
+        COUNT(*) 
+    FROM 
+        fresh_segments.interest_map AS m
+    LEFT JOIN 
+        fresh_segments.interest_metrics AS i ON i.interest_id = m.id
+    WHERE 
+        month_year IS NOT NULL
+    GROUP BY 
+        interest_id, 
+        m.id
+    ORDER BY 
+        interest_id, 
+        m.id
+) AS subquery
+WHERE 
+    m.id <> interest_id;
 ````
+
 **Answer**
+
 0
+
 
 5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table
 
