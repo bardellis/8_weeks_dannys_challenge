@@ -45,21 +45,35 @@ ORDER BY new_month_year ASC;
 Considering the importance of the missing values, I suggest removing them...
 
 ````sql
-	DELETE FROM fresh_segments.interest_metrics
-	WHERE month_year IS NULL;
+DELETE FROM fresh_segments.interest_metrics
+WHERE month_year IS NULL;
 ````
 
 4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
 ````sql
- select count(*) from 
-	(select interest_id, m.id, count(*) from fresh_segments.interest_metrics as i
-	left join fresh_segments.interest_map as m on m.id = i.interest_id
-	where month_year IS not NULL
-	group by interest_id, m.id
-	order by interest_id, m.id
-	) subquery
-where interest_id <> id;
+SELECT COUNT(*)
+FROM (
+    SELECT 
+        interest_id, 
+        m.id, 
+        COUNT(*) AS total_count
+    FROM 
+        fresh_segments.interest_metrics AS i
+    LEFT JOIN 
+        fresh_segments.interest_map AS m ON m.id = i.interest_id
+    WHERE 
+        month_year IS NOT NULL
+    GROUP BY 
+        interest_id, 
+        m.id
+    ORDER BY 
+        interest_id, 
+        m.id
+) AS subquery
+WHERE 
+    interest_id <> id;
 ````
+
 **Answer**
 0
 
