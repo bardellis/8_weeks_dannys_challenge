@@ -21,7 +21,22 @@ FROM fresh_segments.interest_metrics
 GROUP BY new_month_year
 ORDER BY new_month_year ASC;
 ````
-
+|NULL|	1194
+|-----|---------
+|12-2018|	995
+|11-2018|	928
+|10-2018|	857
+|09-2018|	780
+|08-2019|	1149
+|08-2018|	767
+|07-2019|	864
+|07-2018|	729
+|06-2019|	824
+|05-2019|	857
+|04-2019|	1099
+|03-2019|	1136
+|02-2019|	1121
+|01-2019|	973
 
 3. What do you think we should do with these null values in fresh_segments.interest_metrics?
 Considering the importance of the missing values, I suggest removing them...
