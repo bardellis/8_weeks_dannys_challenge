@@ -25,7 +25,7 @@
 	);
 	  
 	-- update NULL values
-	-- Update to handle 'NULL' as NULL values and cast to integers where necessary
+	-- Update to handle 'NULL' as NULL values and cast to integers where necessary.
 
 	UPDATE fresh_segments.interest_metrics
 	SET _month = CASE 
