@@ -9,7 +9,7 @@ Danny’s Diner is in need of your assistance to help the restaurant stay afloat
 ### Relationship diagram
 ![image](https://user-images.githubusercontent.com/120476961/225849612-fb41d27f-1544-4f2b-8381-4e234fdbe663.png)
 
-### Source data
+### Source data 
 [Click here](https://8weeksqlchallenge.com/case-study-1/)
 
 ## Task questions
