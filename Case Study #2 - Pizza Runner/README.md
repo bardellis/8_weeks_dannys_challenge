@@ -13,7 +13,7 @@ Danny started by recruiting “runners” to deliver fresh pizza from Pizza Runn
 ![image](https://user-images.githubusercontent.com/120476961/225865271-ae9e8750-df58-4c8a-a920-efcb2dcb82c3.png)
 ### Source data
 [Click here](https://8weeksqlchallenge.com/case-study-2/)
-## Task questions
+## Task questions  
 This case study has LOTS of questions - they are broken up by area of focus including:
 ### A. Pizza Metrics 
 1. How many pizzas were ordered?
