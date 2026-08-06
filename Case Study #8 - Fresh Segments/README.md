@@ -18,7 +18,7 @@ For this case study there is a total of 2 datasets which you will need to use to
 ## Interest Metrics
 This table contains information about aggregated interest metrics for a specific major client of Fresh Segments which makes up a large proportion of their customer base.
 
-Each record in this table represents the performance of a specific interest_id based on the client’s customer base interest measured through clicks and interactions with specific targeted advertising content.
+Each record in this table represents the performance of a specific interest_id based on the client’s customer base interest measured through clicks and interactions with specific targeted advertising content. 
 
 | _month	|_year	|month_year	|interest_id	|composition	|index_value	|ranking	|percentile_ranking
 | ------- |------ |---------- |------------ |------------ |------------ |-------- |-------------------- 
