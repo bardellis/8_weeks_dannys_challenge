@@ -7,7 +7,7 @@
 	  created_at TIMESTAMP,
 	  last_modified TIMESTAMP
 	);
-	  
+  
 	-- update the null values
 	UPDATE fresh_segments.interest_map
 	SET interest_summary = NULL
