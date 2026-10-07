@@ -8,7 +8,7 @@ https://8weeksqlchallenge.com/case-study-1/
 
 
 ## Case Study #2 | Pizza Runner - Completed    
-https://8weeksqlchallenge.com/case-study-2/
+https://8weeksqlchallenge.com/case-study-2/ 
 
 
 ## Case Study #3 | Foodie-Fi - Completed  
