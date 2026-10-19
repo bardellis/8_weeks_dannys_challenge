@@ -11,7 +11,7 @@
 	-- update the null values
 	UPDATE fresh_segments.interest_map
 	SET interest_summary = NULL
-	WHERE interest_summary = '';
+	WHERE interest_summary = ''; 
 
 	CREATE TABLE fresh_segments.interest_metrics (
 	  _month VARCHAR(4),
