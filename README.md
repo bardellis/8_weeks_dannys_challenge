@@ -1,6 +1,6 @@
 # 8 Week SQL Challenge 
 Data With Danny - Case Studies Getting Started Resources About  
-https://8weeksqlchallenge.com/
+https://8weeksqlchallenge.com/ 
 
 
 ## Case Study #1 | Danny's Diner - Completed  
